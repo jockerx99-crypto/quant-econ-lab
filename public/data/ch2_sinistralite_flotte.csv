@@ -1,0 +1,801 @@
+sinistre_id,police_id,categorie_flotte,region,nature_sinistre,cout_sinistre,prime_police,responsabilite_pct
+50001,10511,Véhicule Léger,Bretagne,Vol,7970.78,1256.19,0.0
+50002,10366,Poids Lourd,Grand Est,Collision,1298.52,3124.36,100.0
+50003,10383,Poids Lourd,IDF,Collision,767.73,3194.99,0.0
+50004,10323,Deux-Roues,PACA,Bris de Glace,-1500.0,602.64,100.0
+50005,10099,Deux-Roues,Occitanie,Bris de Glace,556.6,671.29,0.0
+50006,10018,Véhicule Léger,IDF,Collision,241.94,1161.31,50.0
+50007,10596,Véhicule Léger,IDF,Vol,18618.61,1134.74,50.0
+50008,10107,Véhicule Léger,IDF,Bris de Glace,506.95,1168.2,0.0
+50009,10124,Poids Lourd,IDF,Collision,94.01,3099.03,0.0
+50010,10570,Deux-Roues,IDF,Collision,2705.14,668.94,50.0
+50011,10215,Poids Lourd,IDF,Bris de Glace,529.66,3385.54,100.0
+50012,10097,Véhicule Léger,Grand Est,Vol,13351.07,1142.29,100.0
+50013,10114,Véhicule Léger,IDF,Collision,2449.14,1301.43,0.0
+50014,10048,Poids Lourd,Grand Est,Bris de Glace,489.76,3160.17,100.0
+50015,10074,Véhicule Léger,Grand Est,Collision,1070.16,1227.99,0.0
+50016,10545,Deux-Roues,Grand Est,Bris de Glace,476.24,601.18,0.0
+50017,10225,Poids Lourd,IDF,Collision,2245.11,3242.38,0.0
+50018,10112,Véhicule Léger,PACA,Vol,6402.96,1263.56,0.0
+50019,10410,Deux-Roues,IDF,Collision,6563.42,737.67,100.0
+50020,10340,Véhicule Léger,IDF,Bris de Glace,505.23,1201.09,0.0
+50021,10254,Véhicule Léger,Grand Est,Collision,4440.95,1365.52,0.0
+50022,10421,Véhicule Léger,Grand Est,Bris de Glace,495.55,1203.12,100.0
+50023,10209,Engin Chantier,IDF,Collision,2097.1,1182.75,100.0
+50024,10069,Poids Lourd,IDF,Collision,1851.56,3242.22,100.0
+50025,10452,Véhicule Léger,IDF,Bris de Glace,470.14,1192.6,100.0
+50026,10003,Deux-Roues,PACA,Vol,7384.02,732.15,100.0
+50027,10341,Véhicule Léger,IDF,Responsabilité Civile,4147.75,1166.09,0.0
+50028,10040,Poids Lourd,Bretagne,Bris de Glace,418.72,3126.95,100.0
+50029,10323,Deux-Roues,IDF,Vol,12047.49,675.04,50.0
+50030,10597,Véhicule Léger,IDF,Collision,1697.42,983.27,0.0
+50031,10560,Véhicule Léger,IDF,Vol,14791.21,1147.76,100.0
+50032,10505,Véhicule Léger,PACA,Collision,3156.52,1156.51,50.0
+50033,10177,Engin Chantier,Bretagne,Bris de Glace,531.41,1253.89,100.0
+50034,10136,Véhicule Léger,Occitanie,Collision,2339.48,1166.47,0.0
+50035,10100,Véhicule Léger,Grand Est,Collision,4757.76,1207.61,100.0
+50036,10381,Véhicule Léger,Bretagne,Collision,1233.43,1126.52,0.0
+50037,10181,Deux-Roues,Grand Est,Collision,3047.24,594.56,100.0
+50038,10359,,IDF,Bris de Glace,457.93,3002.83,100.0
+50039,10214,Véhicule Léger,Bretagne,Collision,1378.25,1137.73,100.0
+50040,10412,Véhicule Léger,Bretagne,Responsabilité Civile,5769.93,1140.06,0.0
+50041,10291,Véhicule Léger,Grand Est,Bris de Glace,468.62,1293.94,0.0
+50042,10589,Véhicule Léger,IDF,Bris de Glace,421.38,1115.22,100.0
+50043,10107,Poids Lourd,Occitanie,Vol,3949.12,3069.48,100.0
+50044,10577,Engin Chantier,Bretagne,Vol,7116.28,1120.8,100.0
+50045,10419,Engin Chantier,PACA,Incendie,8818.2,1172.19,0.0
+50046,10395,Deux-Roues,Bretagne,Collision,450000.0,675.95,100.0
+50047,10147,Véhicule Léger,PACA,Bris de Glace,398.11,1129.43,100.0
+50048,10485,Véhicule Léger,Bretagne,Bris de Glace,632.08,1434.46,100.0
+50049,10272,Véhicule Léger,Bretagne,Bris de Glace,510.88,1178.61,0.0
+50050,10412,Poids Lourd,Bretagne,Collision,825.65,3266.0,100.0
+50051,10159,Véhicule Léger,IDF,Collision,3375.42,1115.0,100.0
+50052,10181,Deux-Roues,IDF,Collision,878.95,907.16,0.0
+50053,10583,Deux-Roues,Occitanie,Responsabilité Civile,929.36,683.97,100.0
+50054,10366,Poids Lourd,Bretagne,Responsabilité Civile,5683.88,3279.25,100.0
+50055,10372,Véhicule Léger,Bretagne,Collision,1950.64,1243.82,0.0
+50056,10155,Véhicule Léger,IDF,Incendie,10353.73,1174.21,0.0
+50057,10391,Véhicule Léger,IDF,Bris de Glace,405.04,1372.5,50.0
+50058,10256,Deux-Roues,Occitanie,Vol,28919.65,653.51,50.0
+50059,10245,Engin Chantier,IDF,Vol,10687.47,975.42,100.0
+50060,10360,Poids Lourd,Grand Est,Responsabilité Civile,5809.85,3142.33,100.0
+50061,10130,Véhicule Léger,IDF,Collision,10245.49,1134.62,0.0
+50062,10556,Véhicule Léger,PACA,Responsabilité Civile,14741.59,1234.05,0.0
+50063,10187,Véhicule Léger,Occitanie,Incendie,15605.43,1415.3,0.0
+50064,10358,Deux-Roues,PACA,Responsabilité Civile,13364.5,679.03,100.0
+50065,10538,Engin Chantier,Bretagne,Responsabilité Civile,6240.89,1285.21,100.0
+50066,10435,Véhicule Léger,IDF,Responsabilité Civile,2978.38,1196.26,100.0
+50067,10306,Engin Chantier,PACA,Bris de Glace,495.11,1150.94,100.0
+50068,10531,Poids Lourd,IDF,Bris de Glace,412.63,3226.6,50.0
+50069,10466,Véhicule Léger,Bretagne,Bris de Glace,415.31,1203.94,100.0
+50070,10514,Véhicule Léger,Bretagne,Collision,3786.39,1312.3,0.0
+50071,10052,Deux-Roues,IDF,Collision,947.24,750.04,0.0
+50072,10305,Engin Chantier,PACA,Collision,1205.88,1286.04,100.0
+50073,10057,Poids Lourd,IDF,Vol,4984.3,3230.37,0.0
+50074,10343,Poids Lourd,Grand Est,Collision,4604.66,3199.42,100.0
+50075,10516,Véhicule Léger,Occitanie,Bris de Glace,319.37,1390.4,100.0
+50076,10068,Véhicule Léger,Occitanie,Collision,2207.92,1184.19,100.0
+50077,10140,Véhicule Léger,PACA,Collision,2937.51,1146.51,0.0
+50078,10474,Véhicule Léger,Bretagne,Collision,1680.1,1266.17,100.0
+50079,10490,Deux-Roues,Bretagne,Collision,1471.57,698.51,100.0
+50080,10355,Poids Lourd,IDF,Bris de Glace,412.49,3401.9,0.0
+50081,10004,Véhicule Léger,IDF,Vol,15862.66,1190.1,0.0
+50082,10260,Véhicule Léger,IDF,Incendie,17134.84,1333.13,100.0
+50083,10223,Poids Lourd,IDF,Incendie,11984.07,3139.87,100.0
+50084,10263,Véhicule Léger,IDF,Bris de Glace,624.94,1261.44,50.0
+50085,10266,Véhicule Léger,IDF,Vol,7315.35,1106.54,100.0
+50086,10088,Deux-Roues,PACA,Collision,739.37,661.16,100.0
+50087,10015,Poids Lourd,Occitanie,Collision,2254.07,3144.78,0.0
+50088,10468,Véhicule Léger,PACA,Collision,2334.64,1157.97,100.0
+50089,10199,Deux-Roues,IDF,Responsabilité Civile,2098.14,698.48,0.0
+50090,10141,Engin Chantier,PACA,Responsabilité Civile,19720.91,1336.49,50.0
+50091,10439,Véhicule Léger,PACA,Vol,6709.43,1289.08,100.0
+50092,10540,Poids Lourd,IDF,Bris de Glace,467.82,3286.49,50.0
+50093,10402,Engin Chantier,Grand Est,Collision,2023.42,1274.24,100.0
+50094,10100,Véhicule Léger,IDF,Vol,11617.6,1047.8,100.0
+50095,10194,Véhicule Léger,IDF,Collision,589.72,1160.6,100.0
+50096,10494,Véhicule Léger,Bretagne,Bris de Glace,387.86,1477.14,50.0
+50097,10017,Véhicule Léger,PACA,Collision,2053.49,1181.2,0.0
+50098,10361,Deux-Roues,PACA,Bris de Glace,505.16,622.1,0.0
+50099,10110,Poids Lourd,Grand Est,Collision,2686.58,3103.13,50.0
+50100,10087,Véhicule Léger,Grand Est,Collision,2386.71,1252.02,100.0
+50101,10047,Poids Lourd,Grand Est,Collision,862.72,3184.95,100.0
+50102,10272,Véhicule Léger,Bretagne,Collision,1020.73,1146.11,0.0
+50103,10316,Engin Chantier,IDF,Collision,3155.62,1251.59,0.0
+50104,10297,Véhicule Léger,Bretagne,Bris de Glace,295.89,1276.55,100.0
+50105,10410,Deux-Roues,PACA,Vol,7381.38,758.67,100.0
+50106,10302,Poids Lourd,Occitanie,Vol,2816.0,3163.1,100.0
+50107,10434,Engin Chantier,Occitanie,Responsabilité Civile,751.57,1190.92,100.0
+50108,10420,Véhicule Léger,IDF,Responsabilité Civile,6920.67,1175.35,0.0
+50109,10386,Véhicule Léger,PACA,Incendie,18778.56,1241.97,0.0
+50110,10487,Poids Lourd,Occitanie,Incendie,16761.36,3145.82,0.0
+50111,10061,Poids Lourd,PACA,Bris de Glace,555.6,3232.16,0.0
+50112,10322,Deux-Roues,Occitanie,Bris de Glace,,767.14,0.0
+50113,10324,Poids Lourd,IDF,Bris de Glace,445.61,3127.01,100.0
+50114,10089,Véhicule Léger,PACA,Bris de Glace,402.72,1307.72,50.0
+50115,10142,Véhicule Léger,IDF,Vol,11955.44,925.82,100.0
+50116,10413,Deux-Roues,IDF,Responsabilité Civile,6093.71,620.69,100.0
+50117,10365,Deux-Roues,PACA,Collision,1275.25,728.9,0.0
+50118,10320,Poids Lourd,Occitanie,Collision,9128.19,3160.19,100.0
+50119,10341,Engin Chantier,IDF,Collision,1553.93,1147.48,100.0
+50120,10497,Poids Lourd,Bretagne,Collision,1005.89,3204.37,0.0
+50121,10481,Engin Chantier,IDF,Bris de Glace,457.9,1138.76,100.0
+50122,10378,Poids Lourd,Bretagne,Vol,5050.33,3162.39,100.0
+50123,10425,Poids Lourd,IDF,Collision,1794.94,3231.58,100.0
+50124,10473,Véhicule Léger,IDF,Collision,979.71,1091.51,100.0
+50125,10059,Véhicule Léger,Occitanie,Bris de Glace,398.73,1156.7,0.0
+50126,10494,Véhicule Léger,PACA,Responsabilité Civile,541.88,1274.04,100.0
+50127,10078,Véhicule Léger,Occitanie,Collision,1346.86,1296.53,100.0
+50128,10009,Engin Chantier,Grand Est,Collision,885.26,1308.55,100.0
+50129,10207,Véhicule Léger,IDF,Collision,1022.71,1314.68,100.0
+50130,10391,Véhicule Léger,Grand Est,Vol,13620.68,958.39,100.0
+50131,10066,Deux-Roues,Bretagne,Collision,6942.38,582.67,100.0
+50132,10223,Véhicule Léger,Bretagne,Incendie,8850.15,1173.66,0.0
+50133,10199,Véhicule Léger,Bretagne,Collision,974.9,1242.94,100.0
+50134,10553,Véhicule Léger,Grand Est,Responsabilité Civile,5631.57,1295.59,0.0
+50135,10077,Deux-Roues,IDF,Bris de Glace,444.39,726.87,0.0
+50136,10461,Poids Lourd,IDF,Responsabilité Civile,9491.34,3107.44,100.0
+50137,10491,Poids Lourd,IDF,Collision,1913.32,3219.1,100.0
+50138,10498,Véhicule Léger,IDF,Bris de Glace,447.58,1171.11,100.0
+50139,10136,Deux-Roues,PACA,Collision,2949.67,635.73,100.0
+50140,10429,Poids Lourd,PACA,Vol,9108.71,3178.78,100.0
+50141,10258,Poids Lourd,IDF,Collision,1646.94,3257.86,100.0
+50142,10207,Véhicule Léger,Grand Est,Collision,478.02,1261.25,0.0
+50143,10441,Engin Chantier,IDF,Collision,3099.9,1147.54,0.0
+50144,10472,Véhicule Léger,Bretagne,Vol,25114.09,1295.07,100.0
+50145,10576,Deux-Roues,Bretagne,Responsabilité Civile,1347.44,633.3,50.0
+50146,10482,Véhicule Léger,Bretagne,Bris de Glace,471.79,1294.57,0.0
+50147,10516,Véhicule Léger,IDF,Incendie,16056.07,1062.2,100.0
+50148,10018,Véhicule Léger,Bretagne,Collision,1141.83,1066.63,50.0
+50149,10089,Poids Lourd,Bretagne,Collision,305.3,3079.32,0.0
+50150,10216,Deux-Roues,PACA,Responsabilité Civile,3573.05,802.3,100.0
+50151,10198,Véhicule Léger,Grand Est,Vol,8515.05,1135.83,0.0
+50152,10563,,Bretagne,Vol,18108.25,1026.0,0.0
+50153,10358,Véhicule Léger,IDF,Responsabilité Civile,388.3,1057.68,0.0
+50154,10131,Véhicule Léger,PACA,Collision,621.13,1240.77,0.0
+50155,10558,Véhicule Léger,IDF,Collision,12208.33,1281.82,50.0
+50156,10531,Deux-Roues,PACA,Bris de Glace,377.78,499.0,100.0
+50157,10476,Deux-Roues,IDF,Collision,2221.57,564.43,50.0
+50158,10504,Engin Chantier,Grand Est,Collision,1668.43,1285.08,100.0
+50159,10074,Poids Lourd,Occitanie,Bris de Glace,466.14,3126.33,100.0
+50160,10575,Engin Chantier,IDF,Responsabilité Civile,623.29,1210.72,0.0
+50161,10411,Poids Lourd,Occitanie,Collision,1823.98,3158.69,50.0
+50162,10093,Engin Chantier,IDF,Collision,1059.96,1266.94,100.0
+50163,10460,Véhicule Léger,IDF,Bris de Glace,444.14,1226.78,0.0
+50164,10558,Véhicule Léger,PACA,Collision,1120.8,1182.07,50.0
+50165,10443,Véhicule Léger,IDF,Incendie,22000.58,1010.82,100.0
+50166,10188,Poids Lourd,Grand Est,Vol,4618.36,3179.56,100.0
+50167,10408,Engin Chantier,PACA,Vol,6130.8,1205.29,100.0
+50168,10282,Poids Lourd,Occitanie,Bris de Glace,403.36,3178.93,50.0
+50169,10442,Véhicule Léger,IDF,Vol,5358.83,1236.06,0.0
+50170,10508,Véhicule Léger,PACA,Collision,5698.61,1286.26,0.0
+50171,10260,Véhicule Léger,Bretagne,Vol,11404.79,1378.24,0.0
+50172,10342,Véhicule Léger,IDF,Bris de Glace,489.81,1134.43,0.0
+50173,10503,Véhicule Léger,PACA,Bris de Glace,524.94,1099.1,0.0
+50174,10433,Véhicule Léger,Bretagne,Bris de Glace,550.14,1193.64,0.0
+50175,10313,Engin Chantier,PACA,Collision,15213.36,1055.46,100.0
+50176,10326,Engin Chantier,Occitanie,Responsabilité Civile,412.29,1138.23,50.0
+50177,10113,Poids Lourd,PACA,Collision,3452.77,3327.23,100.0
+50178,10313,Deux-Roues,IDF,Collision,583.75,638.4,0.0
+50179,10573,Véhicule Léger,IDF,Bris de Glace,333.56,1049.8,100.0
+50180,10195,Engin Chantier,Bretagne,Incendie,16296.21,1205.18,100.0
+50181,10070,Véhicule Léger,Bretagne,Bris de Glace,353.17,1421.19,0.0
+50182,10394,Deux-Roues,Grand Est,Responsabilité Civile,207.04,911.52,100.0
+50183,10208,Poids Lourd,IDF,Collision,438.94,2972.4,100.0
+50184,10252,Engin Chantier,PACA,Incendie,2950.25,1175.42,50.0
+50185,10541,Véhicule Léger,Bretagne,Collision,1258.17,1076.3,100.0
+50186,10323,Véhicule Léger,IDF,Responsabilité Civile,9171.33,1230.82,100.0
+50187,10011,Engin Chantier,PACA,Vol,18866.54,1117.54,100.0
+50188,10291,Engin Chantier,Occitanie,Vol,7527.99,1212.67,100.0
+50189,10294,Véhicule Léger,IDF,Bris de Glace,515.18,1120.43,0.0
+50190,10306,Véhicule Léger,PACA,Bris de Glace,549.02,1240.2,100.0
+50191,10402,Deux-Roues,IDF,Collision,1074.93,566.33,50.0
+50192,10187,Véhicule Léger,Bretagne,Collision,2765.07,1179.38,100.0
+50193,10195,Véhicule Léger,IDF,Collision,4902.67,1197.69,100.0
+50194,10302,Véhicule Léger,IDF,Incendie,7085.97,1276.52,100.0
+50195,10011,Véhicule Léger,IDF,Collision,1100.55,896.67,100.0
+50196,10137,Véhicule Léger,PACA,Collision,948.87,1237.53,0.0
+50197,10282,Poids Lourd,Occitanie,Incendie,7337.67,3196.55,50.0
+50198,10356,Véhicule Léger,IDF,Collision,1174.78,1262.55,100.0
+50199,10580,Deux-Roues,Occitanie,Bris de Glace,639.32,673.17,100.0
+50200,10322,Deux-Roues,Occitanie,Bris de Glace,333.95,696.14,100.0
+50201,10520,Véhicule Léger,IDF,Incendie,12944.43,1206.33,100.0
+50202,10455,Engin Chantier,Occitanie,Vol,10739.51,1128.98,100.0
+50203,10226,Poids Lourd,Occitanie,Incendie,24173.48,3061.19,100.0
+50204,10221,Poids Lourd,Occitanie,Collision,2887.7,3187.64,100.0
+50205,10423,Engin Chantier,PACA,Collision,608.42,1148.67,100.0
+50206,10138,Véhicule Léger,Grand Est,Collision,1326.61,1146.99,0.0
+50207,10169,Engin Chantier,IDF,Collision,3821.37,1179.11,50.0
+50208,10490,Véhicule Léger,Grand Est,Collision,950.23,1125.49,100.0
+50209,10325,Poids Lourd,IDF,Collision,4583.49,3115.59,100.0
+50210,10507,Véhicule Léger,IDF,Incendie,21431.41,1008.75,100.0
+50211,10216,Véhicule Léger,IDF,Collision,2541.26,1219.02,50.0
+50212,10406,Véhicule Léger,PACA,Bris de Glace,430.57,1433.97,0.0
+50213,10045,Véhicule Léger,IDF,Responsabilité Civile,1034.5,1315.64,0.0
+50214,10340,Engin Chantier,Grand Est,Responsabilité Civile,1525.62,1193.7,0.0
+50215,10338,Poids Lourd,IDF,Vol,6482.24,3128.32,50.0
+50216,10384,Engin Chantier,IDF,Bris de Glace,600.84,1089.44,0.0
+50217,10109,Véhicule Léger,PACA,Responsabilité Civile,3827.97,1118.9,100.0
+50218,10574,Engin Chantier,Grand Est,Vol,20952.06,1228.2,0.0
+50219,10248,Poids Lourd,PACA,Responsabilité Civile,1197.14,3252.67,100.0
+50220,10015,Véhicule Léger,PACA,Collision,2050.33,1251.26,0.0
+50221,10536,Engin Chantier,PACA,Collision,9015.93,1102.83,50.0
+50222,10593,Véhicule Léger,Bretagne,Incendie,19013.05,1108.76,0.0
+50223,10239,Véhicule Léger,IDF,Collision,1842.87,1134.6,100.0
+50224,10153,Engin Chantier,Occitanie,Collision,577.02,1096.9,50.0
+50225,10127,Poids Lourd,IDF,Bris de Glace,555.4,3111.07,0.0
+50226,10144,Engin Chantier,Occitanie,Responsabilité Civile,22923.43,1418.85,100.0
+50227,10465,Engin Chantier,IDF,Bris de Glace,444.99,1036.62,0.0
+50228,10495,Véhicule Léger,Bretagne,Responsabilité Civile,15627.55,1114.38,100.0
+50229,10597,Engin Chantier,IDF,Collision,,1211.66,100.0
+50230,10219,Véhicule Léger,Occitanie,Collision,495.31,1221.76,100.0
+50231,10517,Poids Lourd,Occitanie,Bris de Glace,614.69,3158.94,50.0
+50232,10150,Engin Chantier,IDF,Incendie,11113.43,1337.55,50.0
+50233,10545,Deux-Roues,Bretagne,Vol,18074.93,650.28,50.0
+50234,10424,Engin Chantier,IDF,Bris de Glace,416.54,1130.79,100.0
+50235,10386,Poids Lourd,Grand Est,Collision,829.26,3336.5,100.0
+50236,10107,Poids Lourd,Occitanie,Collision,1864.29,3342.97,100.0
+50237,10467,Véhicule Léger,Occitanie,Responsabilité Civile,472.33,1255.74,0.0
+50238,10360,Véhicule Léger,IDF,Bris de Glace,459.52,1127.53,100.0
+50239,10420,Véhicule Léger,IDF,Responsabilité Civile,18966.7,1343.13,0.0
+50240,10571,Poids Lourd,Grand Est,Bris de Glace,420.32,3133.91,0.0
+50241,10489,Véhicule Léger,Grand Est,Collision,2430.29,1135.27,0.0
+50242,10437,Poids Lourd,IDF,Responsabilité Civile,7119.44,3220.5,50.0
+50243,10174,Poids Lourd,Occitanie,Collision,3689.05,3247.57,50.0
+50244,10511,Engin Chantier,IDF,Collision,1480.27,1132.79,0.0
+50245,10054,Véhicule Léger,IDF,Collision,4754.82,1187.03,100.0
+50246,10331,Véhicule Léger,PACA,Vol,6968.99,1182.87,0.0
+50247,10496,Deux-Roues,Grand Est,Bris de Glace,478.16,616.67,0.0
+50248,10084,Engin Chantier,Bretagne,Collision,2941.91,1136.0,100.0
+50249,10351,Poids Lourd,Occitanie,Bris de Glace,,3069.62,0.0
+50250,10584,Poids Lourd,IDF,Vol,14163.04,3191.55,0.0
+50251,10040,Véhicule Léger,Occitanie,Bris de Glace,520.77,1340.13,100.0
+50252,10502,Poids Lourd,IDF,Collision,763.05,3270.65,50.0
+50253,10335,Deux-Roues,IDF,Bris de Glace,485.23,719.32,100.0
+50254,10030,Engin Chantier,IDF,Bris de Glace,483.52,1225.34,100.0
+50255,10020,Véhicule Léger,Occitanie,Bris de Glace,457.83,1373.71,100.0
+50256,10294,Véhicule Léger,IDF,Collision,6055.19,1280.97,100.0
+50257,10002,Véhicule Léger,IDF,Collision,3157.89,1253.79,100.0
+50258,10134,Poids Lourd,Grand Est,Collision,728.58,3029.83,100.0
+50259,10362,Véhicule Léger,Grand Est,Responsabilité Civile,692.67,1127.19,50.0
+50260,10082,Poids Lourd,PACA,Bris de Glace,476.31,3310.27,100.0
+50261,10590,Véhicule Léger,Occitanie,Bris de Glace,577.79,1311.86,100.0
+50262,10026,Deux-Roues,Occitanie,Collision,1385.09,604.31,0.0
+50263,10478,Engin Chantier,Bretagne,Bris de Glace,404.45,1154.77,50.0
+50264,10455,Véhicule Léger,Bretagne,Collision,2051.23,1167.17,50.0
+50265,10443,Deux-Roues,IDF,Responsabilité Civile,11543.06,715.64,100.0
+50266,10414,Poids Lourd,IDF,Collision,2556.89,3340.48,0.0
+50267,10594,Véhicule Léger,Occitanie,Incendie,8162.56,952.84,0.0
+50268,10406,Engin Chantier,IDF,Bris de Glace,294.21,920.2,100.0
+50269,10145,Engin Chantier,Bretagne,Bris de Glace,362.1,1204.01,0.0
+50270,10287,Deux-Roues,IDF,Responsabilité Civile,4190.85,643.63,100.0
+50271,10440,Deux-Roues,IDF,Vol,5541.74,660.28,100.0
+50272,10465,Véhicule Léger,PACA,Incendie,18207.09,1354.58,100.0
+50273,10159,Engin Chantier,Occitanie,Collision,2976.68,1198.57,100.0
+50274,10013,Poids Lourd,PACA,Collision,3464.65,3174.23,0.0
+50275,10468,Véhicule Léger,IDF,Responsabilité Civile,4889.92,1084.21,100.0
+50276,10401,Véhicule Léger,IDF,Collision,4317.52,1256.96,100.0
+50277,10093,Deux-Roues,Grand Est,Collision,788.98,740.38,0.0
+50278,10551,Véhicule Léger,Occitanie,Collision,3979.51,1194.52,0.0
+50279,10355,Véhicule Léger,IDF,Collision,3780.5,1244.87,100.0
+50280,10520,Engin Chantier,Bretagne,Collision,2430.57,919.92,100.0
+50281,10166,Véhicule Léger,PACA,Collision,458.62,1360.46,100.0
+50282,10015,Véhicule Léger,IDF,Vol,10821.91,1203.58,100.0
+50283,10481,Poids Lourd,Grand Est,Bris de Glace,439.38,3217.12,50.0
+50284,10038,Deux-Roues,Grand Est,Collision,4459.68,587.64,0.0
+50285,10063,Véhicule Léger,Grand Est,Bris de Glace,401.32,1176.31,100.0
+50286,10446,Deux-Roues,Occitanie,Collision,1923.96,767.88,0.0
+50287,10527,Véhicule Léger,Grand Est,Vol,10946.26,1410.79,0.0
+50288,10062,Engin Chantier,PACA,Bris de Glace,444.65,1139.33,100.0
+50289,10362,Poids Lourd,IDF,Bris de Glace,466.5,3094.63,50.0
+50290,10082,Véhicule Léger,PACA,Bris de Glace,485.74,1286.56,100.0
+50291,10550,Véhicule Léger,IDF,Bris de Glace,342.1,1082.45,100.0
+50292,10223,Engin Chantier,PACA,Incendie,20643.64,1107.0,50.0
+50293,10404,Véhicule Léger,PACA,Bris de Glace,405.82,1232.42,50.0
+50294,10443,Engin Chantier,PACA,Collision,831.6,1267.98,0.0
+50295,10007,Véhicule Léger,IDF,Collision,914.59,1138.54,100.0
+50296,10584,Poids Lourd,Occitanie,Collision,6252.21,3168.5,50.0
+50297,10242,Véhicule Léger,Bretagne,Vol,16209.11,1147.08,100.0
+50298,10225,Deux-Roues,Grand Est,Incendie,12668.87,636.2,100.0
+50299,10564,Véhicule Léger,Occitanie,Vol,27557.08,1084.26,100.0
+50300,10260,Véhicule Léger,PACA,Collision,702.6,1264.0,100.0
+50301,10129,Engin Chantier,Bretagne,Responsabilité Civile,4543.87,1355.03,0.0
+50302,10105,Poids Lourd,IDF,Collision,5709.11,3304.6,100.0
+50303,10127,Véhicule Léger,Occitanie,Incendie,11243.97,1205.44,0.0
+50304,10334,Véhicule Léger,PACA,Responsabilité Civile,481.39,1311.09,0.0
+50305,10166,Engin Chantier,Grand Est,Bris de Glace,482.3,1159.31,100.0
+50306,10565,Poids Lourd,IDF,Vol,9793.01,3188.54,100.0
+50307,10494,Véhicule Léger,Grand Est,Bris de Glace,414.55,1208.31,0.0
+50308,10225,Poids Lourd,IDF,Vol,6197.35,3239.79,100.0
+50309,10527,Deux-Roues,Bretagne,Bris de Glace,570.05,835.85,100.0
+50310,10515,Deux-Roues,Occitanie,Collision,2945.36,505.99,0.0
+50311,10367,Véhicule Léger,IDF,Vol,,1149.7,0.0
+50312,10239,Véhicule Léger,PACA,Collision,2208.5,1186.54,100.0
+50313,10378,Véhicule Léger,Bretagne,Collision,2671.75,1158.67,0.0
+50314,10289,Véhicule Léger,IDF,Vol,6107.57,1235.8,0.0
+50315,10415,Véhicule Léger,PACA,Collision,750.56,1129.6,0.0
+50316,10234,Véhicule Léger,IDF,Responsabilité Civile,5116.99,1215.27,100.0
+50317,10220,Véhicule Léger,IDF,Responsabilité Civile,7810.71,1075.09,0.0
+50318,10248,Deux-Roues,PACA,Vol,6683.55,753.01,100.0
+50319,10107,Engin Chantier,Bretagne,Collision,832.98,1230.07,100.0
+50320,10112,Engin Chantier,IDF,Collision,12714.56,1223.41,50.0
+50321,10534,Véhicule Léger,Bretagne,Collision,1697.32,1257.64,0.0
+50322,10159,Véhicule Léger,IDF,Vol,7067.83,1004.27,100.0
+50323,10071,Véhicule Léger,Bretagne,Bris de Glace,556.59,1165.94,100.0
+50324,10392,Véhicule Léger,IDF,Bris de Glace,294.97,1328.62,100.0
+50325,10590,Deux-Roues,Grand Est,Bris de Glace,374.69,793.05,100.0
+50326,10190,Engin Chantier,Occitanie,Bris de Glace,431.56,1333.34,100.0
+50327,10249,Deux-Roues,IDF,Responsabilité Civile,3691.92,721.16,100.0
+50328,10217,Deux-Roues,Grand Est,Collision,5926.3,575.97,100.0
+50329,10224,Véhicule Léger,PACA,Bris de Glace,337.68,1082.25,100.0
+50330,10028,Poids Lourd,PACA,Collision,1403.42,3212.27,50.0
+50331,10322,Deux-Roues,Grand Est,Bris de Glace,336.01,665.7,100.0
+50332,10017,Véhicule Léger,Grand Est,Bris de Glace,389.63,1053.79,100.0
+50333,10475,Véhicule Léger,IDF,Collision,7583.82,1360.97,100.0
+50334,10136,Véhicule Léger,PACA,Collision,4534.15,1278.85,0.0
+50335,10294,Véhicule Léger,Bretagne,Collision,1279.61,1167.66,50.0
+50336,10404,Poids Lourd,Bretagne,Vol,13495.62,3136.39,100.0
+50337,10192,Poids Lourd,Occitanie,Collision,,3184.79,50.0
+50338,10405,Poids Lourd,Occitanie,Bris de Glace,672.0,3245.68,0.0
+50339,10090,Véhicule Léger,Occitanie,Responsabilité Civile,2083.61,1292.03,100.0
+50340,10287,Deux-Roues,Occitanie,Collision,748.9,708.44,100.0
+50341,10212,Deux-Roues,Bretagne,Vol,23055.51,787.21,0.0
+50342,10114,Engin Chantier,Grand Est,Responsabilité Civile,1907.01,1408.89,100.0
+50343,10399,Véhicule Léger,IDF,Bris de Glace,557.85,1133.91,50.0
+50344,10257,Véhicule Léger,IDF,Collision,5065.47,1251.56,0.0
+50345,10090,Véhicule Léger,Occitanie,Bris de Glace,,1253.0,0.0
+50346,10578,Poids Lourd,Occitanie,Collision,1228.01,3248.44,0.0
+50347,10278,Véhicule Léger,Bretagne,Vol,16130.82,1150.81,50.0
+50348,10541,Véhicule Léger,IDF,Bris de Glace,475.36,1079.5,100.0
+50349,10009,Poids Lourd,Bretagne,Vol,10190.79,3078.66,100.0
+50350,10021,Véhicule Léger,IDF,Incendie,25713.81,1166.53,0.0
+50351,10439,Engin Chantier,Bretagne,Bris de Glace,394.69,1113.33,0.0
+50352,10552,Deux-Roues,IDF,Collision,2435.64,621.89,0.0
+50353,10282,Véhicule Léger,IDF,Vol,9423.44,1189.47,100.0
+50354,10126,Deux-Roues,IDF,Collision,2758.84,833.44,100.0
+50355,10224,Véhicule Léger,IDF,Collision,698.99,1271.22,100.0
+50356,10545,Véhicule Léger,Occitanie,Bris de Glace,374.49,1243.17,100.0
+50357,10298,Véhicule Léger,PACA,Bris de Glace,486.05,1255.84,100.0
+50358,10234,Deux-Roues,PACA,Collision,315.59,686.88,0.0
+50359,10077,Deux-Roues,IDF,Collision,288.89,820.44,100.0
+50360,10516,Deux-Roues,PACA,Collision,1168.78,588.74,0.0
+50361,10198,Véhicule Léger,Bretagne,Collision,2007.36,1448.46,0.0
+50362,10435,Deux-Roues,IDF,Vol,2194.8,633.38,50.0
+50363,10451,Véhicule Léger,PACA,Collision,760.71,1292.88,100.0
+50364,10232,Véhicule Léger,PACA,Vol,,1349.83,0.0
+50365,10468,Engin Chantier,Bretagne,Collision,3095.32,1260.74,100.0
+50366,10402,Poids Lourd,IDF,Collision,1996.42,3379.32,50.0
+50367,10202,,IDF,Responsabilité Civile,1576.56,1021.26,0.0
+50368,10180,Engin Chantier,PACA,Collision,1325.64,1161.52,0.0
+50369,10303,Deux-Roues,IDF,Collision,6083.39,550.79,50.0
+50370,10387,Véhicule Léger,IDF,Bris de Glace,396.3,1340.16,50.0
+50371,10050,Véhicule Léger,Grand Est,Responsabilité Civile,2159.99,1260.26,0.0
+50372,10378,Poids Lourd,Grand Est,Bris de Glace,291.12,3283.11,50.0
+50373,10510,Véhicule Léger,IDF,Collision,1192.01,1223.61,50.0
+50374,10521,Poids Lourd,PACA,Bris de Glace,447.99,2984.36,100.0
+50375,10497,Véhicule Léger,PACA,Collision,2011.08,1247.38,50.0
+50376,10403,Véhicule Léger,Occitanie,Collision,981.25,1177.27,50.0
+50377,10420,Véhicule Léger,Grand Est,Responsabilité Civile,18022.76,1265.86,50.0
+50378,10348,Deux-Roues,Grand Est,Vol,3843.36,896.43,0.0
+50379,10235,Véhicule Léger,IDF,Collision,8790.65,1234.27,50.0
+50380,10072,Véhicule Léger,IDF,Bris de Glace,307.61,1240.39,0.0
+50381,10106,Véhicule Léger,Occitanie,Incendie,8358.72,1177.52,0.0
+50382,10496,Engin Chantier,IDF,Bris de Glace,336.35,1155.98,100.0
+50383,10584,Deux-Roues,Occitanie,Responsabilité Civile,1512.9,534.36,100.0
+50384,10594,Poids Lourd,IDF,Collision,6815.83,3232.73,0.0
+50385,10494,Véhicule Léger,Bretagne,Collision,1454.39,1250.91,50.0
+50386,10574,Véhicule Léger,Grand Est,Vol,20679.84,1254.98,0.0
+50387,10296,Véhicule Léger,Occitanie,Incendie,5506.67,1256.22,0.0
+50388,10296,Véhicule Léger,IDF,Bris de Glace,500.4,1177.61,100.0
+50389,10127,Véhicule Léger,IDF,Bris de Glace,482.94,1081.89,100.0
+50390,10265,Poids Lourd,Occitanie,Responsabilité Civile,320.01,3294.28,50.0
+50391,10411,Véhicule Léger,PACA,Vol,10812.47,1106.62,50.0
+50392,10259,Véhicule Léger,PACA,Collision,1955.21,1385.74,100.0
+50393,10181,Engin Chantier,PACA,Bris de Glace,605.05,1173.74,0.0
+50394,10296,Poids Lourd,PACA,Collision,937.04,3163.52,50.0
+50395,10180,Véhicule Léger,PACA,Vol,5272.1,1287.49,100.0
+50396,10206,Véhicule Léger,Occitanie,Vol,2371.61,1299.18,50.0
+50397,10200,Véhicule Léger,IDF,Incendie,21318.65,1198.34,100.0
+50398,10030,Poids Lourd,Grand Est,Bris de Glace,402.71,3192.7,100.0
+50399,10025,Poids Lourd,PACA,Vol,17464.28,3016.73,0.0
+50400,10039,Engin Chantier,Bretagne,Bris de Glace,544.29,1097.3,100.0
+50401,10331,Deux-Roues,Bretagne,Vol,21142.3,511.97,50.0
+50402,10153,Véhicule Léger,IDF,Collision,3427.46,1338.95,100.0
+50403,10033,Véhicule Léger,Bretagne,Collision,1232.86,1133.89,100.0
+50404,10509,Véhicule Léger,IDF,Collision,601.31,1206.01,100.0
+50405,10116,Véhicule Léger,PACA,Bris de Glace,532.32,1302.04,0.0
+50406,10435,Engin Chantier,Occitanie,Collision,2414.18,1170.8,0.0
+50407,10180,Véhicule Léger,IDF,Collision,2822.18,1379.7,50.0
+50408,10436,Véhicule Léger,Bretagne,Collision,4855.5,1221.18,100.0
+50409,10585,Engin Chantier,Occitanie,Collision,417.36,1318.68,100.0
+50410,10001,Deux-Roues,IDF,Bris de Glace,376.0,898.0,50.0
+50411,10226,Poids Lourd,Bretagne,Bris de Glace,457.42,3271.51,100.0
+50412,10031,Véhicule Léger,PACA,Collision,896.51,1318.62,100.0
+50413,10024,Engin Chantier,IDF,Vol,6328.43,1252.95,100.0
+50414,10531,Véhicule Léger,Occitanie,Incendie,12047.65,1249.92,0.0
+50415,10061,Deux-Roues,Bretagne,Bris de Glace,493.65,802.34,100.0
+50416,10112,Engin Chantier,IDF,Collision,3203.72,1321.02,0.0
+50417,10444,Poids Lourd,Occitanie,Collision,1646.71,3191.83,0.0
+50418,10469,Engin Chantier,PACA,Vol,17723.87,1105.87,100.0
+50419,10532,Véhicule Léger,IDF,Responsabilité Civile,18030.42,1168.66,100.0
+50420,10117,Véhicule Léger,Grand Est,Responsabilité Civile,768.56,1297.03,0.0
+50421,10154,Véhicule Léger,IDF,Collision,2812.88,1081.98,100.0
+50422,10127,Deux-Roues,PACA,Vol,3567.32,648.96,100.0
+50423,10519,Poids Lourd,IDF,Collision,1326.91,3171.35,100.0
+50424,10451,Deux-Roues,PACA,Collision,5516.78,595.71,100.0
+50425,10312,Véhicule Léger,Grand Est,Vol,3301.37,1127.22,100.0
+50426,10072,Engin Chantier,PACA,Collision,2198.14,1220.16,100.0
+50427,10501,Véhicule Léger,IDF,Bris de Glace,455.53,1258.79,100.0
+50428,10094,Véhicule Léger,Bretagne,Bris de Glace,485.26,1096.0,50.0
+50429,10523,Deux-Roues,PACA,Vol,4454.89,749.23,50.0
+50430,10456,Véhicule Léger,PACA,Collision,1227.51,1226.9,0.0
+50431,10249,Véhicule Léger,Bretagne,Bris de Glace,454.52,1246.45,100.0
+50432,10485,Véhicule Léger,PACA,Responsabilité Civile,1616.01,1117.53,100.0
+50433,10401,Deux-Roues,IDF,Bris de Glace,622.47,701.85,100.0
+50434,10584,Poids Lourd,IDF,Bris de Glace,357.32,3272.65,0.0
+50435,10175,Véhicule Léger,Grand Est,Bris de Glace,530.77,1089.25,0.0
+50436,10192,Engin Chantier,IDF,Bris de Glace,496.59,1230.2,0.0
+50437,10414,Deux-Roues,PACA,Collision,828.71,716.08,0.0
+50438,10555,Véhicule Léger,IDF,Collision,977.32,1057.18,0.0
+50439,10235,Deux-Roues,IDF,Collision,1159.5,859.4,0.0
+50440,10528,Véhicule Léger,PACA,Vol,15016.64,1107.83,50.0
+50441,10119,Véhicule Léger,Grand Est,Bris de Glace,413.8,1345.25,100.0
+50442,10260,Véhicule Léger,Bretagne,Collision,3610.77,1178.93,0.0
+50443,10341,Engin Chantier,PACA,Collision,636.49,1339.95,0.0
+50444,10050,Engin Chantier,Occitanie,Vol,14638.09,1364.67,50.0
+50445,10546,Engin Chantier,Grand Est,Collision,1025.69,1292.18,100.0
+50446,10291,Deux-Roues,Occitanie,Collision,7185.22,595.7,100.0
+50447,10064,Engin Chantier,IDF,Collision,7885.85,1243.31,100.0
+50448,10269,Poids Lourd,IDF,Responsabilité Civile,6329.61,3179.94,100.0
+50449,10539,Véhicule Léger,IDF,Responsabilité Civile,698.57,1304.27,100.0
+50450,10456,Véhicule Léger,Occitanie,Incendie,15299.26,1230.6,50.0
+50451,10254,Poids Lourd,IDF,Vol,17973.81,3347.17,100.0
+50452,10235,Deux-Roues,Bretagne,Collision,5518.73,783.33,0.0
+50453,10181,Poids Lourd,Occitanie,Bris de Glace,445.39,3104.24,0.0
+50454,10558,Véhicule Léger,Grand Est,Incendie,27562.42,1167.87,0.0
+50455,10360,Véhicule Léger,PACA,Collision,368.17,1247.46,0.0
+50456,10490,Poids Lourd,Bretagne,Bris de Glace,453.13,3198.14,0.0
+50457,10143,Véhicule Léger,PACA,Collision,4154.77,1237.5,0.0
+50458,10009,Véhicule Léger,IDF,Incendie,11891.47,1209.99,0.0
+50459,10402,Deux-Roues,Occitanie,Responsabilité Civile,1504.67,514.33,100.0
+50460,10289,Véhicule Léger,IDF,Vol,17471.69,1121.44,0.0
+50461,10431,Engin Chantier,IDF,Collision,726.8,1196.09,0.0
+50462,10095,Poids Lourd,PACA,Bris de Glace,337.6,3069.5,100.0
+50463,10208,Poids Lourd,IDF,Responsabilité Civile,814.93,3291.8,100.0
+50464,10061,Poids Lourd,Grand Est,Collision,4949.68,3302.14,0.0
+50465,10447,Poids Lourd,IDF,Collision,1081.99,3156.51,100.0
+50466,10102,Poids Lourd,Grand Est,Responsabilité Civile,2878.53,3195.13,50.0
+50467,10448,Deux-Roues,PACA,Collision,5873.69,743.88,50.0
+50468,10431,Véhicule Léger,IDF,Bris de Glace,488.63,1274.17,0.0
+50469,10332,Véhicule Léger,IDF,Vol,18977.15,1324.98,100.0
+50470,10387,Véhicule Léger,Occitanie,Bris de Glace,434.82,1131.87,100.0
+50471,10406,Engin Chantier,Grand Est,Collision,1649.36,1283.12,100.0
+50472,10597,Engin Chantier,Bretagne,Responsabilité Civile,2117.58,1314.38,100.0
+50473,10285,Poids Lourd,PACA,Incendie,6351.57,3115.16,100.0
+50474,10404,Véhicule Léger,PACA,Bris de Glace,505.17,1209.93,50.0
+50475,10579,Engin Chantier,Grand Est,Bris de Glace,663.54,1158.05,100.0
+50476,10475,Poids Lourd,IDF,Collision,2155.37,3100.68,100.0
+50477,10417,Poids Lourd,Grand Est,Collision,1991.01,3322.22,100.0
+50478,10560,Engin Chantier,PACA,Vol,10125.48,1420.54,0.0
+50479,10359,Véhicule Léger,IDF,Responsabilité Civile,5291.46,1116.27,0.0
+50480,10123,Deux-Roues,Grand Est,Collision,3322.15,796.28,0.0
+50481,10486,Véhicule Léger,PACA,Bris de Glace,404.97,1328.93,100.0
+50482,10215,Véhicule Léger,IDF,Responsabilité Civile,1980.7,1077.65,100.0
+50483,10182,Deux-Roues,IDF,Collision,2257.05,689.34,100.0
+50484,10535,Poids Lourd,Occitanie,Incendie,10505.61,3086.0,0.0
+50485,10193,Deux-Roues,IDF,Collision,430.66,495.96,50.0
+50486,10416,Véhicule Léger,Grand Est,Incendie,22007.89,1102.86,100.0
+50487,10365,Véhicule Léger,Occitanie,Bris de Glace,509.32,1021.09,0.0
+50488,10033,Véhicule Léger,IDF,Collision,715.79,1214.5,100.0
+50489,10188,Poids Lourd,PACA,Collision,2802.74,3176.13,0.0
+50490,10081,Véhicule Léger,PACA,Vol,32061.62,1034.96,0.0
+50491,10582,Véhicule Léger,IDF,Collision,654.01,1239.73,50.0
+50492,10007,Véhicule Léger,Grand Est,Bris de Glace,433.11,984.92,100.0
+50493,10128,Poids Lourd,IDF,Vol,9698.92,3321.01,100.0
+50494,10007,Véhicule Léger,Bretagne,Bris de Glace,387.65,1116.06,50.0
+50495,10161,Deux-Roues,Grand Est,Bris de Glace,518.33,560.16,100.0
+50496,10114,Véhicule Léger,Occitanie,Collision,952.77,1306.42,50.0
+50497,10138,Deux-Roues,IDF,Collision,1086.77,582.77,100.0
+50498,10534,Engin Chantier,Grand Est,Incendie,15133.71,1232.47,0.0
+50499,10533,Poids Lourd,Occitanie,Bris de Glace,528.64,3086.01,100.0
+50500,10367,Véhicule Léger,PACA,Vol,19936.64,1263.02,100.0
+50501,10184,Véhicule Léger,Grand Est,Responsabilité Civile,2631.42,1328.97,50.0
+50502,10288,Poids Lourd,PACA,Bris de Glace,461.7,3249.08,100.0
+50503,10160,Poids Lourd,IDF,Collision,5761.27,3208.24,100.0
+50504,10371,Véhicule Léger,Bretagne,Collision,3134.25,979.01,50.0
+50505,10415,Véhicule Léger,Bretagne,Bris de Glace,418.81,1297.04,0.0
+50506,10277,Poids Lourd,Bretagne,Collision,1803.99,3264.68,0.0
+50507,10035,Poids Lourd,PACA,Collision,1637.45,3283.42,50.0
+50508,10023,Engin Chantier,IDF,Incendie,29720.04,1187.8,100.0
+50509,10254,Poids Lourd,PACA,Incendie,7985.53,3203.36,0.0
+50510,10536,Véhicule Léger,Occitanie,Collision,2948.44,1206.96,100.0
+50511,10350,Véhicule Léger,Grand Est,Responsabilité Civile,296.52,1216.11,0.0
+50512,10330,Véhicule Léger,IDF,Responsabilité Civile,1023.81,1111.99,0.0
+50513,10383,Poids Lourd,IDF,Collision,504.72,3177.2,0.0
+50514,10426,Deux-Roues,PACA,Incendie,8425.91,601.5,100.0
+50515,10390,,Bretagne,Vol,3949.68,1268.04,0.0
+50516,10200,Véhicule Léger,IDF,Bris de Glace,520.42,1290.35,0.0
+50517,10218,Deux-Roues,IDF,Collision,323.59,776.55,100.0
+50518,10507,Véhicule Léger,Grand Est,Collision,9771.46,1214.5,0.0
+50519,10484,Poids Lourd,Bretagne,Responsabilité Civile,30924.72,3392.08,50.0
+50520,10356,Véhicule Léger,PACA,Bris de Glace,467.35,1110.1,0.0
+50521,10553,Véhicule Léger,Grand Est,Responsabilité Civile,5945.04,1235.19,0.0
+50522,10452,Véhicule Léger,Grand Est,Collision,1018.78,1184.41,100.0
+50523,10375,Engin Chantier,Bretagne,Incendie,21756.34,1183.95,100.0
+50524,10127,Véhicule Léger,IDF,Incendie,15910.59,1067.06,0.0
+50525,10214,Véhicule Léger,IDF,Collision,523.9,1103.54,0.0
+50526,10424,Engin Chantier,PACA,Bris de Glace,494.73,1200.61,100.0
+50527,10466,Deux-Roues,Occitanie,Collision,1554.36,745.85,0.0
+50528,10471,Véhicule Léger,IDF,Bris de Glace,296.14,1256.8,100.0
+50529,10039,Poids Lourd,PACA,Collision,3510.91,3091.07,0.0
+50530,10485,Véhicule Léger,Occitanie,Bris de Glace,473.24,1258.44,50.0
+50531,10122,Véhicule Léger,PACA,Collision,1781.47,1062.88,50.0
+50532,10239,Véhicule Léger,Occitanie,Collision,1453.6,1323.07,100.0
+50533,10379,Poids Lourd,Bretagne,Collision,752.87,3144.96,100.0
+50534,10532,Engin Chantier,Occitanie,Responsabilité Civile,1704.26,1118.3,100.0
+50535,10134,Poids Lourd,PACA,Collision,,3145.44,100.0
+50536,10116,Véhicule Léger,IDF,Vol,6394.1,1270.63,0.0
+50537,10094,Véhicule Léger,PACA,Collision,2335.34,1063.87,100.0
+50538,10468,Deux-Roues,PACA,Vol,20765.41,772.14,0.0
+50539,10466,Engin Chantier,IDF,Bris de Glace,487.71,1144.55,0.0
+50540,10065,Véhicule Léger,Grand Est,Incendie,4254.39,1353.92,100.0
+50541,10083,Engin Chantier,Bretagne,Vol,10383.77,1174.27,50.0
+50542,10294,Véhicule Léger,Bretagne,Bris de Glace,545.73,1202.28,100.0
+50543,10284,Véhicule Léger,Bretagne,Vol,11643.84,1207.01,100.0
+50544,10047,Poids Lourd,Grand Est,Collision,994.57,3083.25,0.0
+50545,10255,Poids Lourd,IDF,Responsabilité Civile,12749.02,3048.78,100.0
+50546,10522,Poids Lourd,IDF,Vol,24420.58,3148.82,100.0
+50547,10344,Poids Lourd,Grand Est,Collision,2783.83,3321.07,0.0
+50548,10474,Deux-Roues,IDF,Vol,21762.9,717.32,50.0
+50549,10133,Deux-Roues,PACA,Collision,1133.93,698.28,0.0
+50550,10342,Poids Lourd,IDF,Responsabilité Civile,12175.35,3242.6,50.0
+50551,10546,Véhicule Léger,IDF,Collision,2392.72,1168.6,0.0
+50552,10233,Poids Lourd,Occitanie,Collision,1965.32,2999.9,100.0
+50553,10341,Véhicule Léger,Grand Est,Collision,3395.44,1145.03,0.0
+50554,10242,Poids Lourd,Grand Est,Responsabilité Civile,38341.23,3121.73,100.0
+50555,10231,Deux-Roues,IDF,Collision,7695.6,575.12,100.0
+50556,10203,Véhicule Léger,PACA,Collision,966.89,1307.56,100.0
+50557,10433,Engin Chantier,Grand Est,Collision,1400.38,1275.87,50.0
+50558,10336,Deux-Roues,IDF,Collision,5028.32,702.61,50.0
+50559,10540,Véhicule Léger,IDF,Bris de Glace,448.2,1230.49,100.0
+50560,10285,Véhicule Léger,Bretagne,Collision,2215.1,1243.01,100.0
+50561,10221,Engin Chantier,IDF,Collision,3193.31,1142.45,100.0
+50562,10497,Véhicule Léger,IDF,Collision,513.44,1133.01,100.0
+50563,10510,Véhicule Léger,IDF,Collision,4194.27,1097.3,100.0
+50564,10431,,IDF,Collision,1083.15,3266.03,100.0
+50565,10516,Véhicule Léger,PACA,Vol,12841.43,1123.52,0.0
+50566,10472,Véhicule Léger,IDF,Collision,697.67,1426.52,0.0
+50567,10366,,Grand Est,Collision,5384.13,1046.59,100.0
+50568,10064,Poids Lourd,Occitanie,Bris de Glace,441.42,3127.88,100.0
+50569,10285,Véhicule Léger,IDF,Bris de Glace,468.25,1280.46,100.0
+50570,10095,Engin Chantier,Grand Est,Vol,5519.93,1148.53,0.0
+50571,10238,Véhicule Léger,IDF,Incendie,21705.19,1245.98,0.0
+50572,10527,Véhicule Léger,PACA,Responsabilité Civile,2273.16,1167.95,100.0
+50573,10166,,PACA,Collision,4417.18,781.03,50.0
+50574,10242,Véhicule Léger,Occitanie,Bris de Glace,360.23,1005.31,0.0
+50575,10200,Engin Chantier,PACA,Bris de Glace,510.95,1120.85,100.0
+50576,10552,Poids Lourd,IDF,Collision,951.05,3247.35,0.0
+50577,10102,Véhicule Léger,IDF,Bris de Glace,447.56,1245.38,100.0
+50578,10364,Véhicule Léger,IDF,Bris de Glace,482.02,1222.29,0.0
+50579,10359,Deux-Roues,IDF,Bris de Glace,425.09,738.45,0.0
+50580,10488,Véhicule Léger,IDF,Collision,3430.96,1102.62,0.0
+50581,10149,Véhicule Léger,Grand Est,Incendie,9444.08,1281.1,50.0
+50582,10355,Véhicule Léger,Grand Est,Vol,8421.6,1021.08,50.0
+50583,10239,Véhicule Léger,Grand Est,Responsabilité Civile,3085.25,934.19,100.0
+50584,10483,Poids Lourd,PACA,Incendie,21087.12,3120.23,100.0
+50585,10514,Engin Chantier,IDF,Vol,6409.55,1132.43,100.0
+50586,10282,Véhicule Léger,IDF,Responsabilité Civile,2605.77,1286.82,0.0
+50587,10480,Véhicule Léger,PACA,Collision,1540.51,1254.46,0.0
+50588,10018,,Occitanie,Bris de Glace,417.85,3305.11,100.0
+50589,10354,Poids Lourd,Bretagne,Bris de Glace,506.14,3200.38,100.0
+50590,10030,Poids Lourd,Grand Est,Collision,2504.76,3175.52,100.0
+50591,10023,Poids Lourd,Grand Est,Bris de Glace,543.0,3073.26,100.0
+50592,10048,Engin Chantier,IDF,Responsabilité Civile,1941.05,1171.33,100.0
+50593,10439,Véhicule Léger,Occitanie,Vol,6965.96,1085.5,50.0
+50594,10212,Véhicule Léger,IDF,Responsabilité Civile,22813.38,1229.2,100.0
+50595,10494,Poids Lourd,IDF,Collision,2566.0,3369.5,100.0
+50596,10506,Deux-Roues,IDF,Collision,1395.4,805.76,100.0
+50597,10023,Poids Lourd,Bretagne,Bris de Glace,429.36,3244.04,100.0
+50598,10552,Poids Lourd,IDF,Bris de Glace,449.52,3172.11,0.0
+50599,10576,Poids Lourd,Occitanie,Collision,1530.75,3195.56,100.0
+50600,10072,Deux-Roues,Bretagne,Responsabilité Civile,2401.04,829.83,100.0
+50601,10398,Poids Lourd,Grand Est,Vol,11686.02,3150.17,50.0
+50602,10380,Véhicule Léger,Bretagne,Bris de Glace,490.06,1261.75,50.0
+50603,10471,Véhicule Léger,PACA,Bris de Glace,290.39,1122.34,0.0
+50604,10078,Poids Lourd,IDF,Responsabilité Civile,1380.86,3223.15,100.0
+50605,10002,Véhicule Léger,PACA,Collision,4960.88,986.86,0.0
+50606,10378,Engin Chantier,Grand Est,Collision,4037.66,1219.36,100.0
+50607,10004,Véhicule Léger,IDF,Collision,1415.48,1300.03,0.0
+50608,10243,Véhicule Léger,Bretagne,Bris de Glace,553.84,1099.58,0.0
+50609,10265,Deux-Roues,IDF,Collision,2378.31,552.1,100.0
+50610,10528,Engin Chantier,Occitanie,Collision,2235.51,1213.35,100.0
+50611,10160,Véhicule Léger,Grand Est,Collision,1707.91,1208.65,100.0
+50612,10027,Poids Lourd,Occitanie,Collision,2006.17,3339.07,0.0
+50613,10015,Véhicule Léger,IDF,Vol,7808.76,1274.51,100.0
+50614,10324,Véhicule Léger,PACA,Bris de Glace,449.53,1244.76,50.0
+50615,10228,Engin Chantier,PACA,Collision,1298.19,1174.19,100.0
+50616,10015,Poids Lourd,IDF,Vol,2863.76,3186.73,100.0
+50617,10012,Véhicule Léger,PACA,Bris de Glace,408.93,1267.08,100.0
+50618,10071,Véhicule Léger,Bretagne,Vol,9095.95,1102.45,100.0
+50619,10408,Véhicule Léger,PACA,Bris de Glace,537.01,1024.29,50.0
+50620,10582,Deux-Roues,Occitanie,Responsabilité Civile,7944.71,681.16,100.0
+50621,10112,Poids Lourd,IDF,Collision,1860.43,3134.17,0.0
+50622,10169,Deux-Roues,Bretagne,Bris de Glace,502.3,783.33,100.0
+50623,10572,Véhicule Léger,PACA,Bris de Glace,420.47,1206.6,50.0
+50624,10493,Deux-Roues,Bretagne,Vol,13370.96,716.76,100.0
+50625,10287,Véhicule Léger,IDF,Collision,6108.48,1196.63,100.0
+50626,10405,Poids Lourd,PACA,Collision,836.08,3043.61,0.0
+50627,10060,Poids Lourd,PACA,Collision,4672.92,3203.86,100.0
+50628,10075,Véhicule Léger,Grand Est,Responsabilité Civile,11009.67,1166.44,0.0
+50629,10462,Poids Lourd,Grand Est,Incendie,6313.98,3236.39,50.0
+50630,10270,Véhicule Léger,IDF,Bris de Glace,393.19,1263.72,100.0
+50631,10358,Véhicule Léger,IDF,Collision,2287.53,1206.01,50.0
+50632,10338,Poids Lourd,Bretagne,Collision,1975.31,3235.82,0.0
+50633,10270,Engin Chantier,Bretagne,Vol,17917.95,1401.59,0.0
+50634,10408,Poids Lourd,Occitanie,Responsabilité Civile,19964.35,3264.38,50.0
+50635,10499,Poids Lourd,IDF,Vol,23959.39,3238.73,100.0
+50636,10237,Véhicule Léger,PACA,Collision,1910.06,1114.26,100.0
+50637,10537,Véhicule Léger,IDF,Responsabilité Civile,4554.46,1220.2,0.0
+50638,10108,Véhicule Léger,PACA,Vol,24069.5,1120.51,100.0
+50639,10088,Deux-Roues,IDF,Bris de Glace,446.78,535.19,0.0
+50640,10018,Engin Chantier,Bretagne,Collision,884.49,1213.55,100.0
+50641,10057,Poids Lourd,Grand Est,Vol,6107.29,3180.25,0.0
+50642,10140,Véhicule Léger,Occitanie,Collision,1534.66,1280.4,0.0
+50643,10420,Véhicule Léger,Occitanie,Collision,2096.4,1307.59,0.0
+50644,10325,Poids Lourd,IDF,Collision,1511.8,3248.5,0.0
+50645,10083,Deux-Roues,Bretagne,Incendie,25445.41,721.81,0.0
+50646,10076,Véhicule Léger,IDF,Responsabilité Civile,12924.26,1391.3,100.0
+50647,10273,Véhicule Léger,Bretagne,Collision,1994.75,1186.45,100.0
+50648,10171,Véhicule Léger,IDF,Bris de Glace,488.56,1235.34,0.0
+50649,10092,Poids Lourd,IDF,Collision,1348.89,3221.92,0.0
+50650,10040,Deux-Roues,IDF,Incendie,24809.84,655.13,100.0
+50651,10278,Poids Lourd,PACA,Bris de Glace,485.58,3235.59,100.0
+50652,10394,Engin Chantier,PACA,Bris de Glace,364.01,1204.27,100.0
+50653,10361,Deux-Roues,IDF,Bris de Glace,416.89,868.84,100.0
+50654,10017,Deux-Roues,Grand Est,Collision,2411.05,731.55,100.0
+50655,10332,Engin Chantier,IDF,Vol,5369.45,1197.58,50.0
+50656,10447,Véhicule Léger,Grand Est,Collision,659.8,1197.58,100.0
+50657,10491,Poids Lourd,Grand Est,Incendie,10258.03,3042.58,0.0
+50658,10470,Poids Lourd,Occitanie,Collision,3846.1,3154.31,100.0
+50659,10080,Poids Lourd,IDF,Collision,2187.37,3190.61,100.0
+50660,10196,Véhicule Léger,IDF,Incendie,6736.26,1258.7,0.0
+50661,10033,Deux-Roues,Grand Est,Collision,4079.29,804.63,0.0
+50662,10001,Véhicule Léger,Bretagne,Responsabilité Civile,1253.84,1381.43,0.0
+50663,10591,Engin Chantier,IDF,Incendie,10673.83,1225.69,0.0
+50664,10128,Véhicule Léger,IDF,Collision,4914.33,1062.58,100.0
+50665,10145,Deux-Roues,Bretagne,Incendie,9652.32,662.58,0.0
+50666,10427,Deux-Roues,IDF,Collision,3835.3,537.35,0.0
+50667,10442,Deux-Roues,Grand Est,Responsabilité Civile,13761.23,717.36,0.0
+50668,10147,Véhicule Léger,PACA,Bris de Glace,438.95,1069.3,50.0
+50669,10566,Engin Chantier,PACA,Collision,991.89,1162.37,0.0
+50670,10370,Véhicule Léger,PACA,Vol,7808.33,1234.94,50.0
+50671,10339,Véhicule Léger,Occitanie,Collision,1574.37,1229.76,100.0
+50672,10596,Poids Lourd,Bretagne,Vol,8858.05,3215.75,50.0
+50673,10215,Véhicule Léger,IDF,Collision,3252.07,1088.87,100.0
+50674,10192,Poids Lourd,Grand Est,Collision,251.8,3190.96,100.0
+50675,10101,Véhicule Léger,Grand Est,Bris de Glace,402.38,1147.95,100.0
+50676,10169,Poids Lourd,IDF,Collision,2491.91,3214.55,0.0
+50677,10161,Poids Lourd,Bretagne,Vol,6178.11,3229.99,100.0
+50678,10224,Véhicule Léger,Grand Est,Collision,4203.46,1220.31,100.0
+50679,10442,Véhicule Léger,Occitanie,Bris de Glace,388.84,1150.28,100.0
+50680,10396,Poids Lourd,Occitanie,Collision,735.04,3273.16,0.0
+50681,10163,Véhicule Léger,Bretagne,Responsabilité Civile,2659.96,1286.55,100.0
+50682,10549,Engin Chantier,Grand Est,Responsabilité Civile,21465.61,1199.06,100.0
+50683,10240,Deux-Roues,PACA,Vol,8453.91,736.58,100.0
+50684,10542,Deux-Roues,Occitanie,Bris de Glace,508.13,748.1,0.0
+50685,10011,Véhicule Léger,IDF,Incendie,8142.09,1200.82,100.0
+50686,10394,Véhicule Léger,Grand Est,Bris de Glace,484.55,1298.23,100.0
+50687,10124,Véhicule Léger,Occitanie,Responsabilité Civile,2279.3,1146.4,0.0
+50688,10174,Véhicule Léger,Occitanie,Collision,1752.6,1245.56,0.0
+50689,10534,Véhicule Léger,IDF,Vol,12539.03,1398.38,50.0
+50690,10118,Véhicule Léger,Bretagne,Collision,3056.31,1183.47,0.0
+50691,10055,Véhicule Léger,Grand Est,Collision,2900.17,1196.75,0.0
+50692,10443,Véhicule Léger,Grand Est,Collision,5620.84,1117.22,100.0
+50693,10286,Engin Chantier,IDF,Responsabilité Civile,4252.76,1209.16,100.0
+50694,10232,Engin Chantier,Bretagne,Responsabilité Civile,8511.08,1212.84,0.0
+50695,10464,Poids Lourd,Grand Est,Collision,2030.77,3003.54,0.0
+50696,10369,Véhicule Léger,IDF,Bris de Glace,490.27,1097.57,100.0
+50697,10167,Véhicule Léger,Grand Est,Collision,2923.5,1165.12,50.0
+50698,10541,Poids Lourd,Bretagne,Bris de Glace,302.68,3041.53,100.0
+50699,10366,Véhicule Léger,IDF,Collision,1529.95,1172.82,0.0
+50700,10568,Véhicule Léger,Bretagne,Collision,385.34,1282.52,0.0
+50701,10372,Deux-Roues,Bretagne,Collision,1867.34,684.38,50.0
+50702,10176,Véhicule Léger,Grand Est,Collision,1243.14,1362.07,100.0
+50703,10579,Poids Lourd,Bretagne,Bris de Glace,575.47,3112.78,0.0
+50704,10288,Poids Lourd,Grand Est,Bris de Glace,472.74,2988.43,100.0
+50705,10334,Véhicule Léger,Grand Est,Collision,1337.89,1114.87,0.0
+50706,10218,Poids Lourd,Occitanie,Incendie,20068.71,3169.36,100.0
+50707,10325,Véhicule Léger,Grand Est,Bris de Glace,571.0,1315.29,0.0
+50708,10028,Véhicule Léger,PACA,Vol,9213.73,1184.67,0.0
+50709,10481,Poids Lourd,PACA,Responsabilité Civile,9979.53,3159.82,0.0
+50710,10468,Véhicule Léger,PACA,Collision,2603.71,1253.12,100.0
+50711,10274,Engin Chantier,Grand Est,Responsabilité Civile,,1248.7,0.0
+50712,10050,Engin Chantier,Bretagne,Collision,3822.45,1122.25,0.0
+50713,10299,Véhicule Léger,IDF,Collision,7031.1,1187.16,100.0
+50714,10302,Deux-Roues,IDF,Responsabilité Civile,1374.81,786.02,0.0
+50715,10024,Véhicule Léger,Occitanie,Vol,8364.39,1185.84,0.0
+50716,10005,Véhicule Léger,Bretagne,Responsabilité Civile,958.7,1306.17,100.0
+50717,10299,Poids Lourd,Grand Est,Collision,1200.74,3147.75,100.0
+50718,10398,Véhicule Léger,IDF,Bris de Glace,578.04,1359.51,0.0
+50719,10420,Véhicule Léger,IDF,Collision,2930.83,1427.32,100.0
+50720,10154,Engin Chantier,PACA,Collision,1364.06,1280.55,100.0
+50721,10232,Véhicule Léger,IDF,Bris de Glace,440.44,1216.95,100.0
+50722,10346,Engin Chantier,Occitanie,Incendie,28344.43,1307.19,0.0
+50723,10354,Engin Chantier,IDF,Collision,556.05,1203.54,0.0
+50724,10552,Véhicule Léger,Grand Est,Bris de Glace,414.38,1129.56,100.0
+50725,10206,Poids Lourd,Grand Est,Collision,5921.19,3171.69,100.0
+50726,10571,Deux-Roues,Grand Est,Collision,7443.24,756.49,100.0
+50727,10561,Deux-Roues,IDF,Bris de Glace,541.7,802.11,0.0
+50728,10175,Poids Lourd,PACA,Bris de Glace,334.35,3020.38,0.0
+50729,10147,Véhicule Léger,Grand Est,Vol,10145.43,1247.24,100.0
+50730,10292,Deux-Roues,PACA,Collision,9848.56,653.73,100.0
+50731,10378,Véhicule Léger,IDF,Bris de Glace,469.82,1230.74,100.0
+50732,10033,Véhicule Léger,Bretagne,Collision,2350.73,1154.09,100.0
+50733,10383,Poids Lourd,PACA,Vol,9518.23,3198.49,50.0
+50734,10343,Engin Chantier,IDF,Bris de Glace,390.96,1057.37,0.0
+50735,10461,,IDF,Collision,2163.63,801.94,100.0
+50736,10220,Poids Lourd,IDF,Responsabilité Civile,522.56,3135.58,0.0
+50737,10220,Véhicule Léger,Occitanie,Vol,11714.95,978.9,100.0
+50738,10101,Poids Lourd,IDF,Collision,1533.07,3098.95,50.0
+50739,10543,Deux-Roues,PACA,Incendie,35067.38,660.77,100.0
+50740,10562,Deux-Roues,PACA,Collision,563.31,652.41,0.0
+50741,10017,Deux-Roues,Bretagne,Bris de Glace,500.86,605.16,100.0
+50742,10316,Poids Lourd,PACA,Vol,4065.72,3049.62,100.0
+50743,10215,Poids Lourd,PACA,Bris de Glace,490.18,3234.99,50.0
+50744,10552,Véhicule Léger,Grand Est,Bris de Glace,408.82,1274.83,0.0
+50745,10380,Véhicule Léger,IDF,Incendie,34698.54,1272.85,0.0
+50746,10042,Deux-Roues,Bretagne,Collision,4389.59,634.27,100.0
+50747,10152,Véhicule Léger,IDF,Responsabilité Civile,1226.69,1247.69,100.0
+50748,10053,Deux-Roues,Grand Est,Collision,1188.74,700.09,100.0
+50749,10334,Deux-Roues,IDF,Vol,15421.79,732.35,0.0
+50750,10152,,IDF,Vol,8556.41,616.42,100.0
+50751,10145,Poids Lourd,IDF,Collision,1051.54,3045.94,100.0
+50752,10123,Véhicule Léger,Bretagne,Collision,3150.83,1052.82,0.0
+50753,10115,Véhicule Léger,Bretagne,Bris de Glace,426.79,1190.91,100.0
+50754,10209,Véhicule Léger,Occitanie,Collision,3077.25,1290.99,100.0
+50755,10568,Véhicule Léger,Grand Est,Collision,828.06,1187.77,50.0
+50756,10284,Poids Lourd,IDF,Collision,15196.89,3252.43,0.0
+50757,10546,Engin Chantier,IDF,Collision,3899.64,1232.85,0.0
+50758,10065,Véhicule Léger,IDF,Vol,10467.38,1304.89,100.0
+50759,10443,Engin Chantier,Grand Est,Vol,14051.23,1090.86,100.0
+50760,10022,Engin Chantier,IDF,Collision,398.98,1088.36,0.0
+50761,10426,Véhicule Léger,Bretagne,Bris de Glace,630.19,1227.52,50.0
+50762,10388,Poids Lourd,Occitanie,Responsabilité Civile,2109.98,3250.83,100.0
+50763,10463,Engin Chantier,IDF,Vol,,1311.67,100.0
+50764,10100,Véhicule Léger,PACA,Vol,16981.49,1080.01,100.0
+50765,10293,Engin Chantier,Bretagne,Collision,672.29,1251.35,0.0
+50766,10553,Deux-Roues,Bretagne,Vol,8249.77,672.1,0.0
+50767,10058,Véhicule Léger,IDF,Responsabilité Civile,2754.71,1233.66,100.0
+50768,10063,Véhicule Léger,IDF,Collision,1544.44,1213.58,0.0
+50769,10327,Deux-Roues,Bretagne,Collision,1454.1,629.79,0.0
+50770,10479,Véhicule Léger,PACA,Collision,2532.95,1305.82,100.0
+50771,10091,Véhicule Léger,Occitanie,Bris de Glace,344.1,1121.76,50.0
+50772,10345,Véhicule Léger,Grand Est,Collision,1437.67,1156.83,50.0
+50773,10529,Poids Lourd,Grand Est,Collision,2181.21,3255.41,50.0
+50774,10437,Véhicule Léger,Occitanie,Collision,2177.24,1197.65,100.0
+50775,10093,Véhicule Léger,IDF,Collision,841.8,1430.53,100.0
+50776,10316,Poids Lourd,PACA,Vol,10763.97,3112.82,100.0
+50777,10539,Véhicule Léger,Occitanie,Bris de Glace,415.34,1196.52,100.0
+50778,10593,Poids Lourd,IDF,Responsabilité Civile,12287.4,3246.86,50.0
+50779,10038,Poids Lourd,Occitanie,Vol,6305.32,3075.46,100.0
+50780,10336,Poids Lourd,IDF,Collision,3887.38,3025.17,50.0
+50781,10521,Véhicule Léger,PACA,Collision,1719.98,1177.5,100.0
+50782,10306,Engin Chantier,Bretagne,Collision,3713.19,1215.42,100.0
+50783,10455,Véhicule Léger,PACA,Collision,1417.15,1166.6,0.0
+50784,10508,Véhicule Léger,PACA,Bris de Glace,556.16,1365.85,0.0
+50785,10511,Véhicule Léger,Bretagne,Bris de Glace,493.08,1157.82,0.0
+50786,10134,Véhicule Léger,Grand Est,Bris de Glace,744.37,1145.37,0.0
+50787,10165,Véhicule Léger,PACA,Bris de Glace,439.55,1261.34,100.0
+50788,10126,Deux-Roues,Grand Est,Vol,4533.36,671.63,100.0
+50789,10421,Véhicule Léger,Bretagne,Collision,3748.55,1199.53,0.0
+50790,10202,Engin Chantier,IDF,Bris de Glace,444.36,1248.76,100.0
+50791,10113,Poids Lourd,IDF,Responsabilité Civile,10429.64,3289.74,100.0
+50792,10520,Poids Lourd,Occitanie,Collision,6095.63,3290.06,100.0
+50793,10535,Véhicule Léger,Grand Est,Bris de Glace,526.7,1207.55,0.0
+50794,10113,Véhicule Léger,IDF,Bris de Glace,581.9,1178.11,0.0
+50795,10244,Poids Lourd,PACA,Responsabilité Civile,1966.64,3392.03,100.0
+50796,10373,Véhicule Léger,IDF,Incendie,12981.92,1415.87,100.0
+50797,10191,Poids Lourd,PACA,Incendie,15150.02,3168.07,0.0
+50798,10578,Poids Lourd,IDF,Bris de Glace,456.47,3143.72,100.0
+50799,10294,Véhicule Léger,Occitanie,Collision,3460.03,1072.9,100.0
+50800,10176,Deux-Roues,Occitanie,Vol,6044.5,705.61,100.0

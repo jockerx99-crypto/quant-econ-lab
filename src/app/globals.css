@@ -3,25 +3,80 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #fafaf9; /* stone-50 */
+  --foreground: #1c1917; /* stone-900 */
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Subtle, clean scrollbars (Notion style) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f4; /* stone-100 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1; /* stone-300 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e; /* stone-400 */
+}
+
+/* KaTeX custom light styling */
+.katex-display {
+  margin: 0.85em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.4rem 0;
+}
+
+.katex {
+  font-size: 1.05em;
+  color: #0369a1; /* sky-700 for mathematical formulas */
+}
+
+/* Code block highlight & prose styling for light mode */
+pre {
+  background-color: #f5f5f4 !important; /* stone-100 */
+  border: 1px solid #e7e5e4; /* stone-200 */
+  color: #1c1917 !important;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Callout & Blockquote styling for theoretical reminders */
+blockquote {
+  border-left: 3.5px solid #0284c7 !important; /* sky-600 */
+  background: #f0f9ff !important; /* sky-50/80 */
+  border: 1px solid #bae6fd;
+  border-left-width: 4px;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.75rem !important;
+  margin: 0.85rem 0 !important;
+  color: #0c4a6e !important; /* sky-950 */
+  font-size: 0.825rem;
+  line-height: 1.5;
+}
+
+blockquote p {
+  margin: 0.35rem 0 !important;
+}
+
+blockquote code {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  font-weight: 600;
 }
