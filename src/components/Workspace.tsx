@@ -93,6 +93,12 @@ export function Workspace() {
   // Curriculum Version (V1 = Fondations Actuariat, V2 = Quantitative Finance & Monte Carlo)
   const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2">(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const exParam = params.get("ex");
+      if (exParam) {
+        if (COURSE_MODULES_V1.some((m) => m.exercises.some((e) => e.id === exParam))) return "v1";
+        if (COURSE_MODULES_V2.some((m) => m.exercises.some((e) => e.id === exParam))) return "v2";
+      }
       const saved = localStorage.getItem("quantecon_version");
       if (saved === "v1" || saved === "v2") return saved;
     }
@@ -102,6 +108,13 @@ export function Workspace() {
   // Track state independently for V1 and V2
   const [moduleIndexV1, setModuleIndexV1] = useState<number>(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const exParam = params.get("ex");
+      if (exParam) {
+        for (let i = 0; i < COURSE_MODULES_V1.length; i++) {
+          if (COURSE_MODULES_V1[i].exercises.some((e) => e.id === exParam)) return i;
+        }
+      }
       const saved = localStorage.getItem("quantecon_v1_module_idx") || localStorage.getItem("quantecon_module_idx");
       if (saved !== null) {
         const parsed = Number(saved);
@@ -113,6 +126,14 @@ export function Workspace() {
 
   const [exerciseIndexV1, setExerciseIndexV1] = useState<number>(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const exParam = params.get("ex");
+      if (exParam) {
+        for (const m of COURSE_MODULES_V1) {
+          const idx = m.exercises.findIndex((e) => e.id === exParam);
+          if (idx !== -1) return idx;
+        }
+      }
       const saved = localStorage.getItem("quantecon_v1_exercise_idx") || localStorage.getItem("quantecon_exercise_idx");
       if (saved !== null) {
         const parsed = Number(saved);
@@ -124,6 +145,13 @@ export function Workspace() {
 
   const [moduleIndexV2, setModuleIndexV2] = useState<number>(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const exParam = params.get("ex");
+      if (exParam) {
+        for (let i = 0; i < COURSE_MODULES_V2.length; i++) {
+          if (COURSE_MODULES_V2[i].exercises.some((e) => e.id === exParam)) return i;
+        }
+      }
       const saved = localStorage.getItem("quantecon_v2_module_idx");
       if (saved !== null) {
         const parsed = Number(saved);
@@ -135,6 +163,14 @@ export function Workspace() {
 
   const [exerciseIndexV2, setExerciseIndexV2] = useState<number>(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const exParam = params.get("ex");
+      if (exParam) {
+        for (const m of COURSE_MODULES_V2) {
+          const idx = m.exercises.findIndex((e) => e.id === exParam);
+          if (idx !== -1) return idx;
+        }
+      }
       const saved = localStorage.getItem("quantecon_v2_exercise_idx");
       if (saved !== null) {
         const parsed = Number(saved);
@@ -243,6 +279,44 @@ export function Workspace() {
       }
     }
   }, [currentExerciseIndex, currentModuleIndex, curriculumVersion]);
+
+  // Handle direct URL navigation via ?ex=py-12 on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const exId = params.get("ex");
+    if (exId) {
+      for (let mIdx = 0; mIdx < COURSE_MODULES_V1.length; mIdx++) {
+        const eIdx = COURSE_MODULES_V1[mIdx].exercises.findIndex((e) => e.id === exId);
+        if (eIdx !== -1) {
+          setCurriculumVersion("v1");
+          setModuleIndexV1(mIdx);
+          setExerciseIndexV1(eIdx);
+          return;
+        }
+      }
+      for (let mIdx = 0; mIdx < COURSE_MODULES_V2.length; mIdx++) {
+        const eIdx = COURSE_MODULES_V2[mIdx].exercises.findIndex((e) => e.id === exId);
+        if (eIdx !== -1) {
+          setCurriculumVersion("v2");
+          setModuleIndexV2(mIdx);
+          setExerciseIndexV2(eIdx);
+          return;
+        }
+      }
+    }
+  }, []);
+
+  // Synchronize URL with active exercise (?ex=...)
+  useEffect(() => {
+    if (typeof window !== "undefined" && currentExercise?.id) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("ex") !== currentExercise.id) {
+        url.searchParams.set("ex", currentExercise.id);
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+  }, [currentExercise?.id]);
 
   // Persist completed exercise IDs to LocalStorage
   useEffect(() => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quantecon-v2';
+const CACHE_NAME = 'quantecon-v4';
 const ASSETS_TO_CACHE = [
   '/manifest.json',
   '/icons/icon-192.png',
@@ -34,9 +34,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // 1. Navigation (HTML pages) : Network-First strategy
-  // Always fetch fresh HTML from network so deploys and fixes are instant, fallback to cache if offline
-  if (event.request.mode === 'navigate') {
+  // 1. Navigation & Next.js chunks : Network-First strategy
+  // Always fetch latest code and courses from network, fallback to cache when offline
+  if (event.request.mode === 'navigate' || event.request.url.includes('/_next/')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -51,7 +51,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Static Assets & Others : Stale-While-Revalidate / Cache-First
+  // 2. Static Assets (images, icons) : Cache-First
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

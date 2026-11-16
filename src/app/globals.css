@@ -40,6 +40,10 @@ body {
    ========================================================================== */
 
 /* 1. Neutralize Tailwind Preflight light-gray border color on math lines & preserve currentColor */
+.katex-mathml {
+  display: none !important;
+}
+
 .katex,
 .katex *,
 .katex ::after,

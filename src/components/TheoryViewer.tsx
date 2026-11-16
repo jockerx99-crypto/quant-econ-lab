@@ -151,7 +151,10 @@ export function TheoryViewer({
       <div className="flex-1 overflow-y-auto p-3 sm:p-3.5 md:p-4 lg:p-5 space-y-4 text-stone-700 leading-relaxed text-sm min-w-0">
         {activeTab === "theory" && (
           <div className="prose prose-stone prose-sm w-full max-w-full break-words min-w-0 prose-headings:text-stone-900 prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-stone-700 prose-code:text-sky-800 prose-code:bg-stone-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
-            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[[rehypeKatex, { output: "html", throwOnError: false }]]}
+            >
               {exercise.theoryMarkdown}
             </ReactMarkdown>
           </div>
@@ -167,7 +170,10 @@ export function TheoryViewer({
             </div>
 
             <div className="prose prose-stone prose-sm w-full max-w-full break-words min-w-0 prose-headings:text-stone-900 prose-p:text-stone-700 prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+              <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[[rehypeKatex, { output: "html", throwOnError: false }]]}
+              >
                 {exercise.taskMarkdown}
               </ReactMarkdown>
             </div>
