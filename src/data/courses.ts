@@ -1291,13 +1291,19 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > - Somme des carrés totale : $\\text{SCT} = 100.0$
 > - Somme des carrés résiduelle : $\\text{SCR} = 15.0$
 >
-> 1. **Calcul du $R^2$ brut** :
->    $$R^2 = 1 - \\frac{15.0}{100.0} = 1 - 0.15 = \\mathbf{0.850} \\text{ (85.0% de variance expliquée)}$$
-> 2. **Pénalisation des degrés de liberté ($N - K - 1 = 20 - 2 - 1 = 17$ et $N-1 = 19$)** :
->    $$\\frac{\\text{SCR} / 17}{\\text{SCT} / 19} = \\frac{15.0 / 17}{100.0 / 19} = \\frac{0.8824}{5.2632} \\approx 0.1676$$
+> 1. **Calcul du $R^2$ brut (variance expliquée)** :
+>    $$R^2 = 1 - \\frac{\\text{SCR}}{\\text{SCT}} = 1 - \\frac{15.0}{100.0} = 1 - 0.15 = \\mathbf{0.850}$$
+>    Soit **85.0%** de la variance de la variable cible expliquée par le modèle.
+>
+> 2. **Pénalisation des degrés de liberté ($N - K - 1 = 17$ et $N - 1 = 19$)** :
+>    - Variance résiduelle non biaisée : $\\frac{\\text{SCR}}{N - K - 1} = \\frac{15.0}{17} \\approx 0.8824$
+>    - Variance totale non biaisée : $\\frac{\\text{SCT}}{N - 1} = \\frac{100.0}{19} \\approx 5.2632$
+>    - Ratio des variances pénalisées : $\\frac{0.8824}{5.2632} \\approx 0.1676$
+>
 > 3. **Calcul du $R^2$ ajusté $\\bar{R}^2$** :
->    $$\\bar{R}^2 = 1 - 0.1676 = \\mathbf{0.8324} \\text{ (83.24%)}$$
->    *(Remarquez que $\\bar{R}^2 < R^2$ : la pénalisation évite le sur-apprentissage).*
+>    $$\\bar{R}^2 = 1 - 0.1676 = \\mathbf{0.8324}$$
+>    Soit **83.24%** de variance expliquée corrigée des degrés de liberté.
+>    *(Remarquez que $\\bar{R}^2 < R^2$ : cette pénalité empêche d'améliorer artificiellement le score en ajoutant des régresseurs inutiles).*
 >
 > 💻 **Le Pont vers Statsmodels :**
 > \`model.rsquared\` et \`model.rsquared_adj\` extraient instantanément ces deux grandeurs.
@@ -1910,7 +1916,8 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > 2. **Variation relative en pourcentage** :
 >    $$\\frac{\\Delta V}{V_0} = -7.0 \\times (+0.02) = -0.14 = \\mathbf{-14.0\\%}$$
 > 3. **Perte absolue en capital** :
->    $$\\Delta V = -14.0\\% \\times 100\\ 000\\ 000\\text{ EUR} = \\mathbf{-14\\ 000\\ 000\\text{ EUR}} \\text{ (-14 M€)}$$
+>    $$\\Delta V = -14.0\\% \\times 100\\ 000\\ 000\\text{ EUR} = \\mathbf{-14\\ 000\\ 000\\text{ EUR}}$$
+>    Soit une perte nette de **-14 M€** sur le bilan institutionnel.
 >
 > 💻 **Le Pont vers le Code :**
 > \`perte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille\` calcule directement cette perte bilancielle en une ligne.
