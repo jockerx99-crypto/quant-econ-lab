@@ -87,6 +87,16 @@ MODULE_2 = {
 > 
 > Pour qu'une matrice soit une vraie matrice de covariance admissible, elle doit être **semi-définie positive** :
 > $$\\lambda_i \\ge 0 \\quad (\\forall i \\in \\{1, \\dots, K\\})$$
+
+![Décomposition Spectrale et Ellipsoïde de Covariance](/images/theory/fig_spectral_covariance.png)
+
+> 🔍 **Comprendre ce graphique : Géométrie de la matrice de covariance**
+> 
+> - **Nuage de points bivarié** : Représente la dispersion conjointe des rendements de deux actifs corrélés positivement.
+> - **Ellipsoïde de dispersion (ellipse bleue)** : Délimite la zone de confiance à 95% de probabilité. L'inclinaison de l'ellipse reflète la corrélation positive entre les actifs.
+> - **Vecteurs propres orthogonaux ($\\\\mathbf{v}_1, \\\\mathbf{v}_2$)** :
+>   - Le grand axe $\\mathbf{v}_1$ (en rouge) s'aligne sur la plus grande dispersion : c'est la **première composante principale**, dont la longueur est proportionnelle à $\\sqrt{\\lambda_1}$.
+>   - Le petit axe $\\mathbf{v}_2$ (en vert) est strictement orthogonal ($90^\\circ$) : il capture le risque résiduel décorrélé, avec une variance $\\lambda_2$.
 """,
             "taskMarkdown": "À partir de la matrice `Sigma`, calculez les valeurs propres `valeurs_propres` et vecteurs propres `vecteurs_propres` avec `np.linalg.eigh(Sigma)`. Vérifiez ensuite la reconstruction `Sigma_reconstruite = vecteurs_propres @ np.diag(valeurs_propres) @ vecteurs_propres.T`. Affichez les valeurs propres.",
             "initialCode": "import numpy as np\n\nSigma = np.array([\n    [0.05, 0.02, 0.01],\n    [0.02, 0.08, 0.03],\n    [0.01, 0.03, 0.04]\n])\n\n# Calculez valeurs_propres, vecteurs_propres et Sigma_reconstruite :\n",
@@ -138,6 +148,14 @@ MODULE_2 = {
 > 1. **PC1 - Facteur Niveau (Level) [~80-90% de la variance]** : translation parallèle de la courbe (les vecteurs propres ont des poids quasi-constants et de même signe).
 > 2. **PC2 - Facteur Pente (Slope) [~8-12% de la variance]** : rotation de la courbe (aplatissement ou pentification, poids monotones du court terme vers le long terme).
 > 3. **PC3 - Facteur Courbure (Curvature) [~2-5% de la variance]** : torsion des maturités intermédiaires (forme en papillon / butterfly).
+
+![Les 3 Composantes Principales de la Courbe des Taux](/images/theory/fig_pca_yield_curve.png)
+
+> 🔍 **Comprendre ce graphique : Décomposition factorielle de Litterman & Scheinkman**
+> 
+> - **PC1 (Niveau en bleu)** : Les chargements factoriels sont strictement positifs et uniformes sur toutes les maturités (1Y à 30Y). Une hausse de PC1 décale l'ensemble de la courbe vers le haut sans la déformer.
+> - **PC2 (Pente en vert)** : Les poids traversent 0 (fortement négatifs sur le 1Y-2Y, fortement positifs sur le 20Y-30Y). Une variation de PC2 fait pivoter la courbe, modélisant la pentification (*steepening*) ou l'inversion de courbe (*flattening*).
+> - **PC3 (Courbure en orange)** : Forme concave en papillon (*butterfly*). Les taux moyens (5Y-10Y) bougent en opposition avec les extrémités courtes (1Y) et longues (30Y).
 """,
             "taskMarkdown": "À partir des variations mensuelles des taux souverains `dX` (matrice $12 \\times 6$), calculez la matrice de covariance `cov_mat = np.cov(dX, rowvar=False)`. Extrayez les valeurs propres avec `np.linalg.eigh(cov_mat)` et triez-les par ordre décroissant. Calculez le vecteur de ratio de variance expliquée `ratio_explique = valeurs_triees / valeurs_triees.sum()` et la part cumulée des 3 premiers facteurs `pct_top3 = float(ratio_explique[:3].sum() * 100)`. Affichez `pct_top3`.",
             "initialCode": "import numpy as np\n\nnp.random.seed(123)\n# Simulation des variations mensuelles de 6 maturités (1Y, 2Y, 5Y, 10Y, 20Y, 30Y)\n# Facteur niveau dominant + facteur pente + bruit résiduel\nlevel = np.random.randn(24, 1) * 0.25\nslope = np.random.randn(24, 1) * np.linspace(-0.15, 0.15, 6)\ndX = level + slope + np.random.randn(24, 6) * 0.03\n\n# Calculez cov_mat, valeurs_triees, ratio_explique et pct_top3 :\n",
@@ -242,6 +260,15 @@ MODULE_2 = {
 > En combinant deux contraintes linéaires (budget $\\mathbf{w}'\\mathbf{1} = 1$ et rendement cible $\\mathbf{w}'\\boldsymbol{\\mu} = \\mu_p$), l'ensemble des portefeuilles de variance minimale décrit une hyperbole dans le plan $(\\sigma_p, \\mu_p)$ et une parabole exacte dans le plan $(\\sigma_p^2, \\mu_p)$ :
 > $$\\sigma_p^2 = \\frac{A \\mu_p^2 - 2B \\mu_p + C}{AC - B^2}$$
 > où $A = \\mathbf{1}'\\Sigma^{-1}\\mathbf{1}$, $B = \\mathbf{1}'\\Sigma^{-1}\\boldsymbol{\\mu}$, $C = \\boldsymbol{\\mu}'\\Sigma^{-1}\\boldsymbol{\\mu}$.
+
+![Frontière Efficiente de Markowitz et GMVP](/images/theory/fig_markowitz_efficient_frontier.png)
+
+> 🔍 **Comprendre ce graphique : L'univers risque-rendement de Markowitz**
+> 
+> - **L'hyperbole (Markowitz Bullet)** : Délimite la frontière de tous les portefeuilles réalisables avec les actifs risqués. Tout portefeuille à l'intérieur de la zone grise offre un rendement sous-optimal pour son niveau de risque.
+> - **Le point rouge (GMVP)** : Le portefeuille de variance minimale globale (*Global Minimum Variance Portfolio*). C'est le point d'inflexion extrême gauche, où le risque $\\sigma$ est minimal absolu ($1 / \\sqrt{A}$).
+> - **La frontière efficiente (branche bleue supérieure)** : La demi-hyperbole située au-dessus du GMVP. C'est le lieu géométrique des portefeuilles dominants : impossible d'obtenir un meilleur rendement $\\mathbb{E}[R]$ sans accepter une volatilité $\\sigma$ plus élevée.
+> - **La Capital Market Line (CML en pointillés)** : Tangente à la frontière passant par le taux sans risque $r_f$, identifiant le portefeuille de ratio de Sharpe maximal.
 """,
             "taskMarkdown": "Calculez les constantes scalaires $A, B, C$. Pour une grille de 50 rendements cibles `mu_targets = np.linspace(0.05, 0.12, 50)`, calculez les variances minimales associées `var_targets = (A * mu_targets**2 - 2*B * mu_targets + C) / (A*C - B**2)`. Tracez la frontière efficiente avec `plt.plot(np.sqrt(var_targets), mu_targets)`. Affichez le déterminant $AC - B^2$.",
             "initialCode": "import numpy as np\nimport matplotlib.pyplot as plt\n\nmu = np.array([0.06, 0.09, 0.11])\nSigma = np.array([\n    [0.02, 0.005, 0.002],\n    [0.005, 0.04, 0.01],\n    [0.002, 0.01, 0.05]\n])\n\n# Calculez A, B, C, var_targets et générez le tracé Matplotlib :\n",
@@ -401,6 +428,15 @@ MODULE_2 = {
 > **Statistique de Test de Jarque-Bera :**
 > $$JB = \\frac{T}{6} \\left( S^2 + \\frac{(K - 3)^2}{4} \\right) \\xrightarrow{\\mathcal{L}} \\chi^2(2)$$
 > Si la p-valeur $< 0.05$, on rejette formellement l'hypothèse de normalité gaussienne.
+
+![Distribution Leptokurtique et Queues Épaisses](/images/theory/fig_fat_tails_jarque_bera.png)
+
+> 🔍 **Comprendre ce graphique : Le leurre de l'hypothèse gaussienne en finance**
+> 
+> - **Courbe grise en pointillés** : Loi normale théorique $\\mathcal{N}(0, 1)$ postulée par les modèles traditionnels (Black-Scholes, CAPM standard).
+> - **Courbe rouge (Loi empirique / Student-t)** : Densité réelle des rendements d'actifs financiers.
+> - **Pic central acéré** : Davantage d'observations très concentrées autour de zéro que sous la loi normale.
+> - **Zone hachurée rouge (Queues Épaisses)** : Au-delà de $-3\\sigma$, la probabilité d'un effondrement violent est considérablement sous-estimée par la gaussienne (par un facteur de 10 à 100). C'est ce risque extrême qui fait exploser le Kurtosis ($K > 3$).
 """,
             "taskMarkdown": "À partir de la série `r`, calculez la moyenne `m`, l'écart-type `s`, puis le `skewness = float(np.mean(((r - m)/s)**3))` et le `kurtosis = float(np.mean(((r - m)/s)**4))`. Calculez la statistique de test `jb_stat = float(len(r) / 6.0 * (skewness**2 + ((kurtosis - 3.0)**2) / 4.0))`. Affichez `skewness`, `kurtosis` et `jb_stat`.",
             "initialCode": "import numpy as np\n\nnp.random.seed(7)\n# Rendements financiers simulés avec sauts (loi de Student df=5)\nr = np.random.standard_t(df=5, size=500) * 0.012\n\n# Calculez skewness, kurtosis et jb_stat :\n",

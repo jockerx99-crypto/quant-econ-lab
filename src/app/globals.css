@@ -35,17 +35,99 @@ body {
   background: #a8a29e; /* stone-400 */
 }
 
-/* KaTeX custom light styling */
-.katex-display {
-  margin: 0.85em 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.4rem 0;
+/* ==========================================================================
+   KaTeX & Math Rendering Rigorous Fixes (Tailwind / Prose Conflict Resolution)
+   ========================================================================== */
+
+/* 1. Neutralize Tailwind Preflight light-gray border color on math lines & reset leading */
+.katex,
+.katex *,
+.katex ::after,
+.katex ::before {
+  border-color: currentColor;
 }
 
 .katex {
-  font-size: 1.05em;
+  font-size: 1.08em;
+  text-indent: 0;
   color: #0369a1; /* sky-700 for mathematical formulas */
+  line-height: normal;
+}
+
+/* 2. KaTeX inline table layout stabilization */
+.katex .vlist-t,
+.katex .vlist-t2 {
+  display: inline-table !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+}
+
+.katex .vlist-r {
+  display: table-row !important;
+}
+
+.katex .vlist {
+  display: table-cell !important;
+  vertical-align: bottom !important;
+  position: relative !important;
+  line-height: 0 !important;
+}
+
+/* 3. Neutralize inherited line-height from .prose / blockquote that pushes terms onto the fraction bar */
+.katex .vlist > span {
+  display: block !important;
+  height: 0 !important;
+  position: relative !important;
+  line-height: 0 !important;
+}
+
+.katex .vlist > span > span {
+  display: inline-block !important;
+  line-height: 1.15 !important; /* Prevents tall lineboxes from making subscripts touch the fraction line */
+}
+
+.katex .vlist > span > .pstrut {
+  overflow: hidden !important;
+  width: 0 !important;
+  line-height: 0 !important;
+  box-sizing: content-box !important;
+}
+
+/* 4. Fraction bar styling & separation */
+.katex .mfrac .frac-line {
+  display: inline-block !important;
+  width: 100% !important;
+  border-bottom-style: solid !important;
+  border-bottom-color: #0284c7 !important; /* sky-600 */
+  border-bottom-width: 0.08em !important;
+  min-height: 1.5px !important;
+  box-sizing: content-box !important;
+  vertical-align: middle !important;
+}
+
+/* 5. Display block equations */
+.katex-display {
+  margin: 1.15em 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0.6rem 0.2rem !important;
+  text-align: center;
+}
+
+.katex-display > .katex {
+  display: inline-block !important;
+  text-align: center !important;
+  padding: 0.15em 0 !important;
+}
+
+/* Inside blockquotes, maintain clean KaTeX font scaling and padding */
+blockquote .katex {
+  font-size: 1.05em !important;
+}
+
+blockquote .katex-display {
+  margin: 0.85em 0 !important;
+  padding: 0.35rem 0 !important;
 }
 
 /* Code block highlight & prose styling for light mode */
@@ -80,3 +162,16 @@ blockquote code {
   color: #0369a1 !important;
   font-weight: 600;
 }
+
+/* Explanatory Figures styling */
+.prose img {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  margin: 1.25rem auto;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background-color: #ffffff;
+}
+

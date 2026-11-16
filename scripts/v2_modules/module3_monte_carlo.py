@@ -329,6 +329,13 @@ MODULE_3 = {
 > - $N_t$ : processus de Poisson d'intensité $\\lambda$ (nombre moyen de sauts par an).
 > - $\\ln(Y) \\sim \\mathcal{N}(\\mu_J, \\sigma_J^2)$ : amplitude aléatoire du saut multiplicateur $Y$.
 > - $\\kappa = \\mathbb{E}[Y - 1] = e^{\\mu_J + \\frac{1}{2}\\sigma_J^2} - 1$ : compensation de dérive pour préserver la martingale.
+
+![Mouvement Brownien Géométrique vs Modèle de Saut de Merton](/images/theory/fig_gbm_vs_merton_jump.png)
+
+> 🔍 **Comprendre ce graphique : Trajectoire continue vs discontinuités de marché**
+> 
+> - **Courbe bleue (GBM continu)** : Les cours fluctuent selon une trajectoire continue partout. Même en cas de baisse, le cours ne peut pas « sauter » un niveau de prix sans franchir tous les prix intermédiaires.
+> - **Courbe rouge (Merton Jump-Diffusion)** : Deux discontinuités brutales surviennent (chutes quasi-verticales). Ces chocs de Poisson modélisent fidèlement les krachs éclairs (*flash crashes*) et annonces de bénéfices surprises, générant les queues épaisses observées en pratique.
 """,
             "taskMarkdown": "Pour $N = 20\\,000$, simulez le nombre de sauts sur 1 an $k_i \\sim \\text{Poisson}(\\lambda = 0.75)$. Pour chaque saut, tirez $\\ln(Y) \\sim \\mathcal{N}(\\mu_J = -0.15, \\sigma_J^2 = 0.10^2)$. Calculez la composante de saut cumulée et déterminez les prix finaux `S_T_merton`. Calculez le Kurtosis `kurtosis_merton = float(np.mean(((S_T_merton - np.mean(S_T_merton))/np.std(S_T_merton))**4))`. Affichez le Kurtosis.",
             "initialCode": "import numpy as np\n\nnp.random.seed(42)\nN = 20000\nS0, r, sigma, T = 100.0, 0.05, 0.15, 1.0\nlambda_jump = 0.75\nmu_J = -0.15\nsigma_J = 0.10\n\n# Simulez S_T_merton et calculez son Kurtosis :\n",
@@ -383,6 +390,14 @@ MODULE_3 = {
 > 
 > **Schéma de Discrétisation d'Euler-Maruyama :**
 > $$r_{t+\\Delta t} = r_t + \\kappa (\\theta - r_t) \\Delta t + \\sigma \\sqrt{\\Delta t} Z_t$$
+
+![Processus de Vasicek et Retour à la Moyenne](/images/theory/fig_vasicek_mean_reversion.png)
+
+> 🔍 **Comprendre ce graphique : La force de rappel vers l'équilibre long terme**
+> 
+> - **Ligne rouge pointillée ($\\theta = 3.5\\%$)** : Le taux d'équilibre macroéconomique vers lequel le système converge.
+> - **Point de départ ($r_0 = 1.0\\%$)** : Les taux courts débutent en territoire historiquement bas.
+> - **Convergence progressive des scénarios** : Même si le bruit stochastique $\\sigma dW_t$ génère des fluctuations erratiques, le drift $\\kappa(\\theta - r_t)$ tire continuellement les trajectoires vers le haut. À l'horizon 5 ans, la distribution se stabilise dans une bande stationnaire autour de $\\theta$.
 """,
             "taskMarkdown": "Pour $r_0 = 0.01$, $\\theta = 0.035$, $\\kappa = 0.50$, $\\sigma = 0.015$, horizon $T = 5.0$ ans et $N = 500$ pas de temps, simulez $M = 100$ trajectoires de taux courts. Calculez la moyenne finale de tous les scénarios `moyenne_finale_taux = float(np.mean(r_paths[:, -1]))`. Tracez les 5 premières trajectoires et la ligne horizontale $\\theta$. Affichez `moyenne_finale_taux`.",
             "initialCode": "import numpy as np\nimport matplotlib.pyplot as plt\n\nnp.random.seed(42)\nr0 = 0.01\ntheta = 0.035\nkappa = 0.50\nsigma = 0.015\nT = 5.0\nN = 500\ndt = T / N\nM = 100\n\n# Simulez r_paths de dimension (M, N+1) avec Euler-Maruyama :\n",

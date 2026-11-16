@@ -27,6 +27,17 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 2. **Rendement logarithmique (continu)** :
 >    $$r_t = \\ln\\left(\\frac{P_t}{P_{t-1}}\\right) = \\ln(P_t) - \\ln(P_{t-1})$$
 
+![Asymétrie des Rendements](/images/theory/fig_log_vs_arithmetic_returns.png)
+
+> 🔍 **Comprendre ce graphique : L'illusion de l'addition arithmétique**
+> 
+> - **L'expérience mentale** : Imaginons un portefeuille partant de **100 €**. S'il subit une baisse de **-50%**, il tombe à **50 €**. S'il rebondit ensuite de **+50%**, $+50\\%$ de 50 € font 25 €, portant la valeur finale à **75 €** (et non 100 € !).
+> - **Le piège de la somme simple (pointillés orange)** : Faire la somme arithmétique $-50\\% + 50\\% = 0\\%$ suggère à tort qu'aucune perte n'a eu lieu. C'est faux : l'investisseur a perdu 25% de son capital initial.
+> - **L'exactitude du log-rendement (courbe bleue)** : En sommant les log-rendements :
+>   $$r_1 = \\ln(50/100) = -0.6931, \\quad r_2 = \\ln(75/50) = +0.4055$$
+>   $$r_{\\text{total}} = -0.6931 + 0.4055 = -0.2877 = \\ln(75/100)$$
+>   La somme logarithmique donne rigoureusement le ratio de capital final $\\ln(P_T / P_0)$, sans distorsion.
+
 > 📊 **Pourquoi les Quants et Économètres privilégient le Log-Rendement ?**
 > - **Propriété d'additivité temporelle** : Le rendement composé sur $T$ périodes est la somme exacte des rendements journaliers :
 >   $$\\sum_{t=1}^T r_t = \\ln(P_T) - \\ln(P_0) = r_{0 \\to T}$$
@@ -95,11 +106,18 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 💡 **Rappel : Croisement de Moyennes Mobiles (Moving Average Crossover)**
 > 
 > En trading algorithmique et gestion quantitative de tendance (*Trend Following*), la comparaison de deux moyennes mobiles d'horizons distincts constitue un signal classique :
-> - **Moyenne rapide (ex: 2 séances)** : capture la dynamique immédiate des cours.
-> - **Moyenne lente (ex: 4 séances)** : filtre le bruit micro-structurel de marché.
+> - **Moyenne rapide (ex: 5 séances)** : capture la dynamique immédiate des cours.
+> - **Moyenne lente (ex: 20 séances)** : filtre le bruit micro-structurel de marché.
 > 
 > - **Golden Cross (Signal d'achat)** : La moyenne rapide passe au-dessus de la moyenne lente ($SMA_{\\text{rapide}} > SMA_{\\text{lente}}$).
 > - **Death Cross (Signal de vente)** : La moyenne rapide passe en-dessous ($SMA_{\\text{rapide}} < SMA_{\\text{lente}}$).
+
+![Signal Golden Cross](/images/theory/fig_golden_cross.png)
+
+> 🔍 **Comprendre ce graphique : L'inertie vs l'impulsion de court terme**
+> - **La courbe grise** : Cours quotidien brut, très agité par les micro-fluctuations et le bruit de carnet d'ordres.
+> - **La courbe orange (SMA 20)** : Elle représente l'inertie lourde du marché sur 20 séances.
+> - **Le point vert (Golden Cross)** : Lorsque la courbe bleue (SMA 5) perce à la hausse la courbe orange, cela prouve statistiquement que l'accélération récente est plus forte que la tendance historique. C'est le déclencheur d'achat des modèles de *Momentum*.
         `,
         taskMarkdown: "Pour le ticker `'MC'` (LVMH), calculez `sma_2` (moyenne sur 2 séances : `ROWS BETWEEN 1 PRECEDING AND CURRENT ROW`) et `sma_4` (moyenne sur 4 séances : `ROWS BETWEEN 3 PRECEDING AND CURRENT ROW`) de `prix_cloture`. Ajoutez une colonne `signal` valant `'ACHAT'` si `sma_2 >= sma_4` sinon `'ATTENTE'`. Triez par `date`.",
         initialCode: "-- Écrivez la requête du signal de croisement :\n",
@@ -126,6 +144,13 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > $$DD_t = \\frac{P_t - M_t}{M_t} \\le 0$$
 > Le **Maximum Drawdown ($MDD$)** est la pire perte historique enregistrée :
 > $$MDD = \\min_{t \\in [0, T]} DD_t$$
+
+![Maximum Drawdown](/images/theory/fig_maximum_drawdown.png)
+
+> 🔍 **Comprendre ce graphique : L'immersion sous l'eau (Underwater Chart)**
+> - **La ligne rouge en pointillés** : Le *High Watermark*, c'est-à-dire le plus haut niveau jamais atteint par votre portefeuille. Elle ne peut que monter ou stagner.
+> - **La zone rouge ombrée** : Tant que le cours bleu est sous la ligne rouge, vous êtes "sous l'eau". La profondeur maximale atteinte correspond au **Maximum Drawdown**.
+> - **Pourquoi la volatilité ne suffit pas** : La volatilité standard traite les hausses soudaines et les krachs de la même manière. Le Drawdown, lui, mesure la douleur asymétrique : combien d'argent avez-vous réellement perdu au pire moment, et combien de temps faut-il pour récupérer ?
 
 > 📊 **Sens Métier en Gestion d'Actifs & Hedge Funds :**
 > - Les investisseurs institutionnels imposent souvent des contraintes strictes de *Drawdown Stop* (ex: sortie obligatoire si $DD_t < -15\\%$).
@@ -519,6 +544,16 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 
 > Pour qu'une matrice soit une vraie matrice de covariance admissible, elle doit être **semi-définie positive** :
 > $$\\lambda_i \\ge 0 \\quad (\\forall i \\in \\{1, \\dots, K\\})$$
+
+![Décomposition Spectrale et Ellipsoïde de Covariance](/images/theory/fig_spectral_covariance.png)
+
+> 🔍 **Comprendre ce graphique : Géométrie de la matrice de covariance**
+> 
+> - **Nuage de points bivarié** : Représente la dispersion conjointe des rendements de deux actifs corrélés positivement.
+> - **Ellipsoïde de dispersion (ellipse bleue)** : Délimite la zone de confiance à 95% de probabilité. L'inclinaison de l'ellipse reflète la corrélation positive entre les actifs.
+> - **Vecteurs propres orthogonaux ($\\\\mathbf{v}_1, \\\\mathbf{v}_2$)** :
+>   - Le grand axe $\\mathbf{v}_1$ (en rouge) s'aligne sur la plus grande dispersion : c'est la **première composante principale**, dont la longueur est proportionnelle à $\\sqrt{\\lambda_1}$.
+>   - Le petit axe $\\mathbf{v}_2$ (en vert) est strictement orthogonal ($90^\\circ$) : il capture le risque résiduel décorrélé, avec une variance $\\lambda_2$.
         `,
         taskMarkdown: "À partir de la matrice `Sigma`, calculez les valeurs propres `valeurs_propres` et vecteurs propres `vecteurs_propres` avec `np.linalg.eigh(Sigma)`. Vérifiez ensuite la reconstruction `Sigma_reconstruite = vecteurs_propres @ np.diag(valeurs_propres) @ vecteurs_propres.T`. Affichez les valeurs propres.",
         initialCode: "import numpy as np\n\nSigma = np.array([\n    [0.05, 0.02, 0.01],\n    [0.02, 0.08, 0.03],\n    [0.01, 0.03, 0.04]\n])\n\n# Calculez valeurs_propres, vecteurs_propres et Sigma_reconstruite :\n",
@@ -572,6 +607,14 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 1. **PC1 - Facteur Niveau (Level) [~80-90% de la variance]** : translation parallèle de la courbe (les vecteurs propres ont des poids quasi-constants et de même signe).
 > 2. **PC2 - Facteur Pente (Slope) [~8-12% de la variance]** : rotation de la courbe (aplatissement ou pentification, poids monotones du court terme vers le long terme).
 > 3. **PC3 - Facteur Courbure (Curvature) [~2-5% de la variance]** : torsion des maturités intermédiaires (forme en papillon / butterfly).
+
+![Les 3 Composantes Principales de la Courbe des Taux](/images/theory/fig_pca_yield_curve.png)
+
+> 🔍 **Comprendre ce graphique : Décomposition factorielle de Litterman & Scheinkman**
+> 
+> - **PC1 (Niveau en bleu)** : Les chargements factoriels sont strictement positifs et uniformes sur toutes les maturités (1Y à 30Y). Une hausse de PC1 décale l'ensemble de la courbe vers le haut sans la déformer.
+> - **PC2 (Pente en vert)** : Les poids traversent 0 (fortement négatifs sur le 1Y-2Y, fortement positifs sur le 20Y-30Y). Une variation de PC2 fait pivoter la courbe, modélisant la pentification (*steepening*) ou l'inversion de courbe (*flattening*).
+> - **PC3 (Courbure en orange)** : Forme concave en papillon (*butterfly*). Les taux moyens (5Y-10Y) bougent en opposition avec les extrémités courtes (1Y) et longues (30Y).
         `,
         taskMarkdown: "À partir des variations mensuelles des taux souverains `dX` (matrice $12 \\times 6$), calculez la matrice de covariance `cov_mat = np.cov(dX, rowvar=False)`. Extrayez les valeurs propres avec `np.linalg.eigh(cov_mat)` et triez-les par ordre décroissant. Calculez le vecteur de ratio de variance expliquée `ratio_explique = valeurs_triees / valeurs_triees.sum()` et la part cumulée des 3 premiers facteurs `pct_top3 = float(ratio_explique[:3].sum() * 100)`. Affichez `pct_top3`.",
         initialCode: "import numpy as np\n\nnp.random.seed(123)\n# Simulation des variations mensuelles de 6 maturités (1Y, 2Y, 5Y, 10Y, 20Y, 30Y)\n# Facteur niveau dominant + facteur pente + bruit résiduel\nlevel = np.random.randn(24, 1) * 0.25\nslope = np.random.randn(24, 1) * np.linspace(-0.15, 0.15, 6)\ndX = level + slope + np.random.randn(24, 6) * 0.03\n\n# Calculez cov_mat, valeurs_triees, ratio_explique et pct_top3 :\n",
@@ -680,6 +723,15 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > En combinant deux contraintes linéaires (budget $\\mathbf{w}'\\mathbf{1} = 1$ et rendement cible $\\mathbf{w}'\\boldsymbol{\\mu} = \\mu_p$), l'ensemble des portefeuilles de variance minimale décrit une hyperbole dans le plan $(\\sigma_p, \\mu_p)$ et une parabole exacte dans le plan $(\\sigma_p^2, \\mu_p)$ :
 > $$\\sigma_p^2 = \\frac{A \\mu_p^2 - 2B \\mu_p + C}{AC - B^2}$$
 > où $A = \\mathbf{1}'\\Sigma^{-1}\\mathbf{1}$, $B = \\mathbf{1}'\\Sigma^{-1}\\boldsymbol{\\mu}$, $C = \\boldsymbol{\\mu}'\\Sigma^{-1}\\boldsymbol{\\mu}$.
+
+![Frontière Efficiente de Markowitz et GMVP](/images/theory/fig_markowitz_efficient_frontier.png)
+
+> 🔍 **Comprendre ce graphique : L'univers risque-rendement de Markowitz**
+> 
+> - **L'hyperbole (Markowitz Bullet)** : Délimite la frontière de tous les portefeuilles réalisables avec les actifs risqués. Tout portefeuille à l'intérieur de la zone grise offre un rendement sous-optimal pour son niveau de risque.
+> - **Le point rouge (GMVP)** : Le portefeuille de variance minimale globale (*Global Minimum Variance Portfolio*). C'est le point d'inflexion extrême gauche, où le risque $\\sigma$ est minimal absolu ($1 / \\sqrt{A}$).
+> - **La frontière efficiente (branche bleue supérieure)** : La demi-hyperbole située au-dessus du GMVP. C'est le lieu géométrique des portefeuilles dominants : impossible d'obtenir un meilleur rendement $\\mathbb{E}[R]$ sans accepter une volatilité $\\sigma$ plus élevée.
+> - **La Capital Market Line (CML en pointillés)** : Tangente à la frontière passant par le taux sans risque $r_f$, identifiant le portefeuille de ratio de Sharpe maximal.
         `,
         taskMarkdown: "Calculez les constantes scalaires $A, B, C$. Pour une grille de 50 rendements cibles `mu_targets = np.linspace(0.05, 0.12, 50)`, calculez les variances minimales associées `var_targets = (A * mu_targets**2 - 2*B * mu_targets + C) / (A*C - B**2)`. Tracez la frontière efficiente avec `plt.plot(np.sqrt(var_targets), mu_targets)`. Affichez le déterminant $AC - B^2$.",
         initialCode: "import numpy as np\nimport matplotlib.pyplot as plt\n\nmu = np.array([0.06, 0.09, 0.11])\nSigma = np.array([\n    [0.02, 0.005, 0.002],\n    [0.005, 0.04, 0.01],\n    [0.002, 0.01, 0.05]\n])\n\n# Calculez A, B, C, var_targets et générez le tracé Matplotlib :\n",
@@ -845,6 +897,15 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > **Statistique de Test de Jarque-Bera :**
 > $$JB = \\frac{T}{6} \\left( S^2 + \\frac{(K - 3)^2}{4} \\right) \\xrightarrow{\\mathcal{L}} \\chi^2(2)$$
 > Si la p-valeur $< 0.05$, on rejette formellement l'hypothèse de normalité gaussienne.
+
+![Distribution Leptokurtique et Queues Épaisses](/images/theory/fig_fat_tails_jarque_bera.png)
+
+> 🔍 **Comprendre ce graphique : Le leurre de l'hypothèse gaussienne en finance**
+> 
+> - **Courbe grise en pointillés** : Loi normale théorique $\\mathcal{N}(0, 1)$ postulée par les modèles traditionnels (Black-Scholes, CAPM standard).
+> - **Courbe rouge (Loi empirique / Student-t)** : Densité réelle des rendements d'actifs financiers.
+> - **Pic central acéré** : Davantage d'observations très concentrées autour de zéro que sous la loi normale.
+> - **Zone hachurée rouge (Queues Épaisses)** : Au-delà de $-3\\sigma$, la probabilité d'un effondrement violent est considérablement sous-estimée par la gaussienne (par un facteur de 10 à 100). C'est ce risque extrême qui fait exploser le Kurtosis ($K > 3$).
         `,
         taskMarkdown: "À partir de la série `r`, calculez la moyenne `m`, l'écart-type `s`, puis le `skewness = float(np.mean(((r - m)/s)**3))` et le `kurtosis = float(np.mean(((r - m)/s)**4))`. Calculez la statistique de test `jb_stat = float(len(r) / 6.0 * (skewness**2 + ((kurtosis - 3.0)**2) / 4.0))`. Affichez `skewness`, `kurtosis` et `jb_stat`.",
         initialCode: "import numpy as np\n\nnp.random.seed(7)\n# Rendements financiers simulés avec sauts (loi de Student df=5)\nr = np.random.standard_t(df=5, size=500) * 0.012\n\n# Calculez skewness, kurtosis et jb_stat :\n",
@@ -1194,6 +1255,13 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > - $N_t$ : processus de Poisson d'intensité $\\lambda$ (nombre moyen de sauts par an).
 > - $\\ln(Y) \\sim \\mathcal{N}(\\mu_J, \\sigma_J^2)$ : amplitude aléatoire du saut multiplicateur $Y$.
 > - $\\kappa = \\mathbb{E}[Y - 1] = e^{\\mu_J + \\frac{1}{2}\\sigma_J^2} - 1$ : compensation de dérive pour préserver la martingale.
+
+![Mouvement Brownien Géométrique vs Modèle de Saut de Merton](/images/theory/fig_gbm_vs_merton_jump.png)
+
+> 🔍 **Comprendre ce graphique : Trajectoire continue vs discontinuités de marché**
+> 
+> - **Courbe bleue (GBM continu)** : Les cours fluctuent selon une trajectoire continue partout. Même en cas de baisse, le cours ne peut pas « sauter » un niveau de prix sans franchir tous les prix intermédiaires.
+> - **Courbe rouge (Merton Jump-Diffusion)** : Deux discontinuités brutales surviennent (chutes quasi-verticales). Ces chocs de Poisson modélisent fidèlement les krachs éclairs (*flash crashes*) et annonces de bénéfices surprises, générant les queues épaisses observées en pratique.
         `,
         taskMarkdown: "Pour $N = 20\\,000$, simulez le nombre de sauts sur 1 an $k_i \\sim \\text{Poisson}(\\lambda = 0.75)$. Pour chaque saut, tirez $\\ln(Y) \\sim \\mathcal{N}(\\mu_J = -0.15, \\sigma_J^2 = 0.10^2)$. Calculez la composante de saut cumulée et déterminez les prix finaux `S_T_merton`. Calculez le Kurtosis `kurtosis_merton = float(np.mean(((S_T_merton - np.mean(S_T_merton))/np.std(S_T_merton))**4))`. Affichez le Kurtosis.",
         initialCode: "import numpy as np\n\nnp.random.seed(42)\nN = 20000\nS0, r, sigma, T = 100.0, 0.05, 0.15, 1.0\nlambda_jump = 0.75\nmu_J = -0.15\nsigma_J = 0.10\n\n# Simulez S_T_merton et calculez son Kurtosis :\n",
@@ -1250,6 +1318,14 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 
 > **Schéma de Discrétisation d'Euler-Maruyama :**
 > $$r_{t+\\Delta t} = r_t + \\kappa (\\theta - r_t) \\Delta t + \\sigma \\sqrt{\\Delta t} Z_t$$
+
+![Processus de Vasicek et Retour à la Moyenne](/images/theory/fig_vasicek_mean_reversion.png)
+
+> 🔍 **Comprendre ce graphique : La force de rappel vers l'équilibre long terme**
+> 
+> - **Ligne rouge pointillée ($\\theta = 3.5\\%$)** : Le taux d'équilibre macroéconomique vers lequel le système converge.
+> - **Point de départ ($r_0 = 1.0\\%$)** : Les taux courts débutent en territoire historiquement bas.
+> - **Convergence progressive des scénarios** : Même si le bruit stochastique $\\sigma dW_t$ génère des fluctuations erratiques, le drift $\\kappa(\\theta - r_t)$ tire continuellement les trajectoires vers le haut. À l'horizon 5 ans, la distribution se stabilise dans une bande stationnaire autour de $\\theta$.
         `,
         taskMarkdown: "Pour $r_0 = 0.01$, $\\theta = 0.035$, $\\kappa = 0.50$, $\\sigma = 0.015$, horizon $T = 5.0$ ans et $N = 500$ pas de temps, simulez $M = 100$ trajectoires de taux courts. Calculez la moyenne finale de tous les scénarios `moyenne_finale_taux = float(np.mean(r_paths[:, -1]))`. Tracez les 5 premières trajectoires et la ligne horizontale $\\theta$. Affichez `moyenne_finale_taux`.",
         initialCode: "import numpy as np\nimport matplotlib.pyplot as plt\n\nnp.random.seed(42)\nr0 = 0.01\ntheta = 0.035\nkappa = 0.50\nsigma = 0.015\nT = 5.0\nN = 500\ndt = T / N\nM = 100\n\n# Simulez r_paths de dimension (M, N+1) avec Euler-Maruyama :\n",

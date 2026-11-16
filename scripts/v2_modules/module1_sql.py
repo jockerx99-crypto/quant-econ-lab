@@ -27,6 +27,17 @@ MODULE_1 = {
 > 2. **Rendement logarithmique (continu)** :
 >    $$r_t = \\ln\\left(\\frac{P_t}{P_{t-1}}\\right) = \\ln(P_t) - \\ln(P_{t-1})$$
 
+![Asymétrie des Rendements](/images/theory/fig_log_vs_arithmetic_returns.png)
+
+> 🔍 **Comprendre ce graphique : L'illusion de l'addition arithmétique**
+> 
+> - **L'expérience mentale** : Imaginons un portefeuille partant de **100 €**. S'il subit une baisse de **-50%**, il tombe à **50 €**. S'il rebondit ensuite de **+50%**, $+50\\%$ de 50 € font 25 €, portant la valeur finale à **75 €** (et non 100 € !).
+> - **Le piège de la somme simple (pointillés orange)** : Faire la somme arithmétique $-50\\% + 50\\% = 0\\%$ suggère à tort qu'aucune perte n'a eu lieu. C'est faux : l'investisseur a perdu 25% de son capital initial.
+> - **L'exactitude du log-rendement (courbe bleue)** : En sommant les log-rendements :
+>   $$r_1 = \\ln(50/100) = -0.6931, \\quad r_2 = \\ln(75/50) = +0.4055$$
+>   $$r_{\\text{total}} = -0.6931 + 0.4055 = -0.2877 = \\ln(75/100)$$
+>   La somme logarithmique donne rigoureusement le ratio de capital final $\\ln(P_T / P_0)$, sans distorsion.
+
 > 📊 **Pourquoi les Quants et Économètres privilégient le Log-Rendement ?**
 > - **Propriété d'additivité temporelle** : Le rendement composé sur $T$ périodes est la somme exacte des rendements journaliers :
 >   $$\\sum_{t=1}^T r_t = \\ln(P_T) - \\ln(P_0) = r_{0 \\to T}$$
@@ -93,11 +104,18 @@ MODULE_1 = {
 > 💡 **Rappel : Croisement de Moyennes Mobiles (Moving Average Crossover)**
 > 
 > En trading algorithmique et gestion quantitative de tendance (*Trend Following*), la comparaison de deux moyennes mobiles d'horizons distincts constitue un signal classique :
-> - **Moyenne rapide (ex: 2 séances)** : capture la dynamique immédiate des cours.
-> - **Moyenne lente (ex: 4 séances)** : filtre le bruit micro-structurel de marché.
+> - **Moyenne rapide (ex: 5 séances)** : capture la dynamique immédiate des cours.
+> - **Moyenne lente (ex: 20 séances)** : filtre le bruit micro-structurel de marché.
 > 
 > - **Golden Cross (Signal d'achat)** : La moyenne rapide passe au-dessus de la moyenne lente ($SMA_{\\text{rapide}} > SMA_{\\text{lente}}$).
 > - **Death Cross (Signal de vente)** : La moyenne rapide passe en-dessous ($SMA_{\\text{rapide}} < SMA_{\\text{lente}}$).
+
+![Signal Golden Cross](/images/theory/fig_golden_cross.png)
+
+> 🔍 **Comprendre ce graphique : L'inertie vs l'impulsion de court terme**
+> - **La courbe grise** : Cours quotidien brut, très agité par les micro-fluctuations et le bruit de carnet d'ordres.
+> - **La courbe orange (SMA 20)** : Elle représente l'inertie lourde du marché sur 20 séances.
+> - **Le point vert (Golden Cross)** : Lorsque la courbe bleue (SMA 5) perce à la hausse la courbe orange, cela prouve statistiquement que l'accélération récente est plus forte que la tendance historique. C'est le déclencheur d'achat des modèles de *Momentum*.
 """,
             "taskMarkdown": "Pour le ticker `'MC'` (LVMH), calculez `sma_2` (moyenne sur 2 séances : `ROWS BETWEEN 1 PRECEDING AND CURRENT ROW`) et `sma_4` (moyenne sur 4 séances : `ROWS BETWEEN 3 PRECEDING AND CURRENT ROW`) de `prix_cloture`. Ajoutez une colonne `signal` valant `'ACHAT'` si `sma_2 >= sma_4` sinon `'ATTENTE'`. Triez par `date`.",
             "initialCode": "-- Écrivez la requête du signal de croisement :\n",
@@ -123,6 +141,13 @@ MODULE_1 = {
 > $$DD_t = \\frac{P_t - M_t}{M_t} \\le 0$$
 > Le **Maximum Drawdown ($MDD$)** est la pire perte historique enregistrée :
 > $$MDD = \\min_{t \\in [0, T]} DD_t$$
+
+![Maximum Drawdown](/images/theory/fig_maximum_drawdown.png)
+
+> 🔍 **Comprendre ce graphique : L'immersion sous l'eau (Underwater Chart)**
+> - **La ligne rouge en pointillés** : Le *High Watermark*, c'est-à-dire le plus haut niveau jamais atteint par votre portefeuille. Elle ne peut que monter ou stagner.
+> - **La zone rouge ombrée** : Tant que le cours bleu est sous la ligne rouge, vous êtes "sous l'eau". La profondeur maximale atteinte correspond au **Maximum Drawdown**.
+> - **Pourquoi la volatilité ne suffit pas** : La volatilité standard traite les hausses soudaines et les krachs de la même manière. Le Drawdown, lui, mesure la douleur asymétrique : combien d'argent avez-vous réellement perdu au pire moment, et combien de temps faut-il pour récupérer ?
 
 > 📊 **Sens Métier en Gestion d'Actifs & Hedge Funds :**
 > - Les investisseurs institutionnels imposent souvent des contraintes strictes de *Drawdown Stop* (ex: sortie obligatoire si $DD_t < -15\\%$).
