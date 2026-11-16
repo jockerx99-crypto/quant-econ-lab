@@ -73,14 +73,14 @@ export function TheoryViewer({
   return (
     <div className="flex flex-col h-full bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-xs">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-stone-50/80 border-b border-stone-200 flex-wrap gap-2">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-sky-100 text-sky-700 border border-sky-200/50">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-stone-50/80 border-b border-stone-200 flex-wrap gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="p-1.5 rounded-lg bg-sky-100 text-sky-700 border border-sky-200/50 flex-shrink-0">
             <BookOpen className="w-4 h-4" />
           </div>
-          <div>
-            <h2 className="text-sm font-semibold text-stone-900">{exercise.title}</h2>
-            <div className="flex items-center gap-2 text-[11px] text-stone-500 mt-0.5">
+          <div className="min-w-0">
+            <h2 className="text-xs sm:text-sm font-semibold text-stone-900 truncate">{exercise.title}</h2>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-stone-500 mt-0.5 flex-wrap">
               <span className="text-sky-700 font-medium capitalize">
                 {exercise.category.replace("_", " ")}
               </span>
@@ -103,10 +103,10 @@ export function TheoryViewer({
         </div>
 
         {/* Tab switch inside Theory */}
-        <div className="flex items-center bg-stone-100 p-0.5 rounded-lg border border-stone-200/80">
+        <div className="flex items-center bg-stone-100 p-0.5 rounded-lg border border-stone-200/80 flex-shrink-0">
           <button
             onClick={() => setActiveTab("theory")}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+            className={`px-2 sm:px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
               activeTab === "theory"
                 ? "bg-white text-stone-900 shadow-xs"
                 : "text-stone-500 hover:text-stone-800"
@@ -116,7 +116,7 @@ export function TheoryViewer({
           </button>
           <button
             onClick={() => setActiveTab("task")}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+            className={`px-2 sm:px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
               activeTab === "task"
                 ? "bg-white text-stone-900 shadow-xs"
                 : "text-stone-500 hover:text-stone-800"
@@ -126,7 +126,7 @@ export function TheoryViewer({
           </button>
           <button
             onClick={() => setActiveTab("database")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
               activeTab === "database"
                 ? "bg-sky-600 text-white shadow-xs"
                 : "text-sky-700 hover:bg-sky-50"
@@ -148,9 +148,9 @@ export function TheoryViewer({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 space-y-4 text-stone-700 leading-relaxed text-sm min-w-0">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-3.5 md:p-4 lg:p-5 space-y-4 text-stone-700 leading-relaxed text-sm min-w-0">
         {activeTab === "theory" && (
-          <div className="prose prose-stone prose-sm max-w-none break-words min-w-0 prose-headings:text-stone-900 prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-stone-700 prose-code:text-sky-800 prose-code:bg-stone-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
+          <div className="prose prose-stone prose-sm w-full max-w-full break-words min-w-0 prose-headings:text-stone-900 prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-stone-700 prose-code:text-sky-800 prose-code:bg-stone-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
             <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
               {exercise.theoryMarkdown}
             </ReactMarkdown>
@@ -166,7 +166,7 @@ export function TheoryViewer({
               </div>
             </div>
 
-            <div className="prose prose-stone prose-sm max-w-none break-words min-w-0 prose-headings:text-stone-900 prose-p:text-stone-700 prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
+            <div className="prose prose-stone prose-sm w-full max-w-full break-words min-w-0 prose-headings:text-stone-900 prose-p:text-stone-700 prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {exercise.taskMarkdown}
               </ReactMarkdown>

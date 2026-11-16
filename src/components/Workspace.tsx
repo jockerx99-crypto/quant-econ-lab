@@ -364,48 +364,52 @@ export function Workspace() {
 
   return (
     <div className="flex flex-col h-screen max-h-screen bg-stone-50 text-stone-800 overflow-hidden font-sans">
-      {/* Global Top App Bar (Notion / Stripe Light Aesthetic) */}
-      <header className="h-14 border-b border-stone-200 bg-white/95 backdrop-blur-xs px-4 flex items-center justify-between flex-shrink-0 z-30 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
+      {/* Global Top App Bar (Notion / Stripe Light Aesthetic - Fully Responsive) */}
+      <header className="h-14 border-b border-stone-200 bg-white/95 backdrop-blur-xs px-3 sm:px-4 flex items-center justify-between flex-shrink-0 z-30 shadow-2xs gap-2 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
+          {/* Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center shadow-xs">
               <Sparkles className="w-4 h-4 text-amber-300" />
             </div>
             <div>
-              <span className="font-semibold text-sm tracking-tight text-stone-900">
-                QuantEcon Lab
+              <span className="font-semibold text-sm tracking-tight text-stone-900 whitespace-nowrap">
+                QuantEcon<span className="hidden sm:inline"> Lab</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] text-sky-800 font-medium px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200">
+              <span className="hidden xl:inline-block ml-2 text-[10px] text-sky-800 font-medium px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200">
                 Micro-Learning
               </span>
             </div>
           </div>
 
-          <div className="h-4 w-px bg-stone-200 hidden md:block" />
+          <div className="h-4 w-px bg-stone-200 hidden lg:block flex-shrink-0" />
 
           {/* Curriculum Version Switcher (V1 vs V2) */}
-          <div className="flex items-center rounded-xl bg-stone-100 p-1 border border-stone-200 shadow-2xs">
+          <div className="flex items-center rounded-xl bg-stone-100 p-0.5 sm:p-1 border border-stone-200 shadow-2xs flex-shrink-0">
             <button
               onClick={() => handleSwitchVersion("v1")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 curriculumVersion === "v1"
                   ? "bg-white text-stone-900 shadow-xs border border-stone-200/60"
                   : "text-stone-500 hover:text-stone-800"
               }`}
               title="Version 1 : Fondations Actuariat & Data Prep (52 exercices)"
             >
-              <span>V1 : Actuariat</span>
+              <span className="hidden md:inline">V1 : Actuariat</span>
+              <span className="md:hidden">V1</span>
             </button>
             <button
               onClick={() => handleSwitchVersion("v2")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
                 curriculumVersion === "v2"
                   ? "bg-sky-600 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-800"
               }`}
               title="Version 2 : Quantitative Finance, Économétrie & Monte Carlo (45 exercices)"
             >
-              <span>⚡ V2 : Quant & Monte Carlo</span>
+              <span className="hidden xl:inline">⚡ V2 : Quant & Monte Carlo</span>
+              <span className="hidden md:inline xl:hidden">⚡ V2 : Quant</span>
+              <span className="md:hidden">⚡ V2</span>
               <span
                 className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
                   curriculumVersion === "v2"
@@ -418,17 +422,17 @@ export function Workspace() {
             </button>
           </div>
 
-          <div className="h-4 w-px bg-stone-200 hidden lg:block" />
+          <div className="h-4 w-px bg-stone-200 hidden xl:block flex-shrink-0" />
 
-          {/* Module Switcher Dropdown */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Module Switcher Dropdown (visible on wide screens >= lg) */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             <select
               value={currentModuleIndex}
               onChange={(e) => {
                 setCurrentModuleIndex(Number(e.target.value));
                 setCurrentExerciseIndex(0);
               }}
-              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[240px] truncate cursor-pointer"
+              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[190px] xl:max-w-[240px] truncate cursor-pointer"
             >
               {modules.map((mod, idx) => (
                 <option key={mod.id} value={idx}>
@@ -440,9 +444,9 @@ export function Workspace() {
         </div>
 
         {/* STEPPER : Progress & Locked/Unlocked Next Button */}
-        <div className="flex items-center gap-3">
-          {/* Engine Status Pill */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-[11px] font-mono text-stone-600">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Engine Status Pill (hidden on tablet portrait, visible on xl) */}
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-[11px] font-mono text-stone-600">
             <span
               className={`w-2 h-2 rounded-full ${
                 isCurrentLanguageReady ? "bg-emerald-500" : "bg-amber-400 animate-pulse"
@@ -457,7 +461,7 @@ export function Workspace() {
           </div>
 
           {/* Stepper Navigation Container with Question Selector Dropdown */}
-          <div className="flex items-center gap-1.5 bg-stone-100/90 p-1 rounded-xl border border-stone-200">
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-stone-100/90 p-1 rounded-xl border border-stone-200">
             {/* Prev Button */}
             <button
               onClick={handlePrevExercise}
@@ -473,7 +477,7 @@ export function Workspace() {
               <select
                 value={currentExerciseIndex}
                 onChange={(e) => setCurrentExerciseIndex(Number(e.target.value))}
-                className="bg-white border border-stone-200 text-xs font-semibold text-stone-800 rounded-lg px-2.5 py-1 focus:outline-none focus:border-stone-400 cursor-pointer shadow-2xs hover:bg-stone-50 transition-colors max-w-[190px] sm:max-w-[280px] truncate"
+                className="bg-white border border-stone-200 text-xs font-semibold text-stone-800 rounded-lg px-2 py-1 focus:outline-none focus:border-stone-400 cursor-pointer shadow-2xs hover:bg-stone-50 transition-colors max-w-[130px] sm:max-w-[180px] md:max-w-[150px] lg:max-w-[220px] truncate"
                 title="Naviguer directement vers n'importe quelle question"
               >
                 {currentModule.exercises.map((ex, idx) => {
@@ -487,15 +491,15 @@ export function Workspace() {
               </select>
 
               {isCurrentCompleted && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  <span>Validé</span>
+                  <span className="hidden md:inline">Validé</span>
                 </span>
               )}
             </div>
 
-            {/* Progress Bar (visible on md+) */}
-            <div className="w-12 h-1.5 bg-stone-200 rounded-full overflow-hidden hidden lg:block" title={`Progression: ${progressPct}%`}>
+            {/* Progress Bar (visible on xl) */}
+            <div className="w-10 h-1.5 bg-stone-200 rounded-full overflow-hidden hidden xl:block" title={`Progression: ${progressPct}%`}>
               <div
                 className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                 style={{ width: `${progressPct}%` }}
@@ -509,10 +513,10 @@ export function Workspace() {
                 currentModuleIndex === modules.length - 1 &&
                 currentExerciseIndex === totalExercisesInModule - 1
               }
-              className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all bg-stone-900 hover:bg-stone-800 text-white shadow-xs cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition-all bg-stone-900 hover:bg-stone-800 text-white shadow-xs cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
               title="Passer à l'exercice suivant"
             >
-              <span>Suivant</span>
+              <span className="hidden xs:inline">Suivant</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
