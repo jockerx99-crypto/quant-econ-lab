@@ -50,8 +50,9 @@ body {
 }
 
 .katex {
-  font-size: 1.06em;
+  font-size: 1.05em;
   color: #0369a1; /* sky-700 for mathematical formulas */
+  max-width: 100%;
 }
 
 /* 2. Fraction line styling & visibility */
@@ -61,29 +62,57 @@ body {
   min-height: 1.5px !important;
 }
 
-/* 3. Display block equations */
+/* 3. Display block equations with responsive touch scrolling */
 .katex-display {
-  margin: 1.25em 0 !important;
+  margin: 1.15em 0 !important;
+  max-width: 100% !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  padding: 0.6rem 0.2rem !important;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem !important;
   text-align: center;
+  scrollbar-width: thin;
 }
 
 .katex-display > .katex {
   display: inline-block !important;
   text-align: center !important;
-  padding: 0.15em 0 !important;
+  max-width: 100%;
+}
+
+/* Custom discreet scrollbars for math formulas and code boxes on tablet/mobile */
+.katex-display::-webkit-scrollbar,
+blockquote::-webkit-scrollbar,
+pre::-webkit-scrollbar {
+  height: 4px;
+}
+
+.katex-display::-webkit-scrollbar-track,
+blockquote::-webkit-scrollbar-track,
+pre::-webkit-scrollbar-track {
+  background: rgba(224, 242, 254, 0.4);
+  border-radius: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb,
+blockquote::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb {
+  background: #7dd3fc;
+  border-radius: 4px;
 }
 
 /* Inside blockquotes, maintain clean KaTeX font scaling and padding */
 blockquote .katex {
-  font-size: 1.02em !important;
+  font-size: 0.98em !important;
 }
 
 blockquote .katex-display {
-  margin: 0.85em 0 !important;
-  padding: 0.35rem 0 !important;
+  margin: 0.65em 0 !important;
+  padding: 0.25rem 0.15rem !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Code block highlight & prose styling for light mode */
@@ -93,30 +122,85 @@ pre {
   color: #1c1917 !important;
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Callout & Blockquote styling for theoretical reminders */
+/* Callout & Blockquote styling for theoretical reminders (Fully Responsive Tablet/Mobile) */
 blockquote {
   border-left: 3.5px solid #0284c7 !important; /* sky-600 */
   background: #f0f9ff !important; /* sky-50/80 */
   border: 1px solid #bae6fd;
-  border-left-width: 4px;
-  padding: 0.75rem 1rem !important;
+  border-left-width: 4px !important;
+  padding: 0.75rem 0.9rem !important;
   border-radius: 0.75rem !important;
   margin: 0.85rem 0 !important;
   color: #0c4a6e !important; /* sky-950 */
   font-size: 0.825rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 blockquote p {
   margin: 0.35rem 0 !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+blockquote ul,
+blockquote ol {
+  padding-left: 1.25rem !important;
+  margin: 0.35rem 0 !important;
+}
+
+blockquote li {
+  margin: 0.2rem 0 !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 blockquote code {
   background-color: #e0f2fe !important;
   color: #0369a1 !important;
   font-weight: 600;
+  word-break: break-word;
+}
+
+blockquote pre {
+  background-color: #e0f2fe !important;
+  border: 1px solid #bae6fd !important;
+  padding: 0.5rem 0.75rem !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Tablet Optimizations (iPad Portrait & Landscape, 768px to 1024px) */
+@media (max-width: 1024px) {
+  .katex {
+    font-size: 0.96em;
+  }
+
+  blockquote {
+    font-size: 0.80rem;
+    padding: 0.65rem 0.8rem !important;
+  }
+
+  blockquote .katex {
+    font-size: 0.94em !important;
+  }
+
+  .katex-display {
+    margin: 0.85em 0 !important;
+    padding: 0.35rem 0.15rem !important;
+  }
 }
 
 /* Explanatory Figures styling */

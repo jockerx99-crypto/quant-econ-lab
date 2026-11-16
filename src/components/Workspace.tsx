@@ -520,11 +520,11 @@ export function Workspace() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 overflow-hidden p-2 sm:p-3 relative">
+      <main className="flex-1 overflow-hidden p-2 sm:p-2.5 lg:p-3 relative">
         {/* DESKTOP & TABLET: Split-Screen View (md and above) */}
-        <div className="hidden md:grid md:grid-cols-12 gap-3 h-full">
-          {/* Left Panel: Theory & Instructions (5 columns) */}
-          <div className="col-span-5 h-full overflow-hidden">
+        <div className="hidden md:grid md:grid-cols-12 gap-2.5 lg:gap-3 h-full min-w-0">
+          {/* Left Panel: Theory & Instructions (6 cols on tablet, 5 on desktop) */}
+          <div className="col-span-12 md:col-span-6 lg:col-span-5 h-full overflow-hidden min-w-0">
             <TheoryViewer
               exercise={currentExercise}
               onOpenDatasetModal={handleOpenDataset}
@@ -532,8 +532,8 @@ export function Workspace() {
             />
           </div>
 
-          {/* Right Panel: Editor & Results (7 columns, split vertically) */}
-          <div className="col-span-7 h-full flex flex-col gap-3 overflow-hidden">
+          {/* Right Panel: Editor & Results (6 cols on tablet, 7 on desktop) */}
+          <div className="col-span-12 md:col-span-6 lg:col-span-7 h-full flex flex-col gap-2.5 lg:gap-3 overflow-hidden min-w-0">
             {/* Top Right: Code Editor (58% height) */}
             <div className="flex-[3] min-h-[280px] overflow-hidden">
               <CodeEditor

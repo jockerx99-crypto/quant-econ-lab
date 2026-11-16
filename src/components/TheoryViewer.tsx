@@ -148,9 +148,9 @@ export function TheoryViewer({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-stone-700 leading-relaxed text-sm">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 space-y-4 text-stone-700 leading-relaxed text-sm min-w-0">
         {activeTab === "theory" && (
-          <div className="prose prose-stone prose-sm max-w-none prose-headings:text-stone-900 prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-stone-700 prose-code:text-sky-800 prose-code:bg-stone-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+          <div className="prose prose-stone prose-sm max-w-none break-words min-w-0 prose-headings:text-stone-900 prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-stone-700 prose-code:text-sky-800 prose-code:bg-stone-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
             <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
               {exercise.theoryMarkdown}
             </ReactMarkdown>
@@ -158,7 +158,7 @@ export function TheoryViewer({
         )}
 
         {activeTab === "task" && (
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             <div className="p-3.5 rounded-xl bg-sky-50/80 border border-sky-200/70 flex items-start gap-3">
               <CheckSquare className="w-4 h-4 text-sky-600 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-sky-900 leading-relaxed font-medium">
@@ -166,7 +166,7 @@ export function TheoryViewer({
               </div>
             </div>
 
-            <div className="prose prose-stone prose-sm max-w-none prose-headings:text-stone-900 prose-p:text-stone-700">
+            <div className="prose prose-stone prose-sm max-w-none break-words min-w-0 prose-headings:text-stone-900 prose-p:text-stone-700 prose-blockquote:not-italic prose-blockquote:before:content-none prose-blockquote:after:content-none">
               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
                 {exercise.taskMarkdown}
               </ReactMarkdown>
