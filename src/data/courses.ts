@@ -447,6 +447,24 @@ export const COURSE_MODULES: CourseModule[] = [
 > - **Les points bleus (lignes brutes)** : Chaque point représente un contrat individuel avec sa prime d'assurance propre.
 > - **Le partitionnement (\`GROUP BY\`)** : Le moteur SQL isole les contrats dans des bacs étanches par modalité de région (Nord, Sud, Ouest).
 > - **L'agrégation (\`AVG()\`)** : Pour chaque bac, la fonction calcule la moyenne arithmétique et compresse toutes les lignes du groupe en **une seule barre synthétique**.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Table miniature de 4 assurés) :**
+> Soit la mini-table suivante :
+> - Assuré 1 : Région \`'IDF'\`, Prime $900\\text{ EUR}$
+> - Assuré 2 : Région \`'PACA'\`, Prime $650\\text{ EUR}$
+> - Assuré 3 : Région \`'IDF'\`, Prime $1\\ 100\\text{ EUR}$
+> - Assuré 4 : Région \`'PACA'\`, Prime $750\\text{ EUR}$
+>
+> 1. **Partitionnement logique (\`GROUP BY region\`)** :
+>    - Groupe \`'IDF'\` : $\{900, 1100\}$ ($N = 2$)
+>    - Groupe \`'PACA'\` : $\{650, 750\}$ ($N = 2$)
+> 2. **Agrégation indépendante (\`COUNT(*)\` et \`AVG(prime)\`)** :
+>    - Groupe \`'IDF'\` : Effectif = $2$, Moyenne = $\\frac{900 + 1100}{2} = 1\\ 000\\text{ EUR}$
+>    - Groupe \`'PACA'\` : Effectif = $2$, Moyenne = $\\frac{650 + 750}{2} = 700\\text{ EUR}$
+> 3. **Projection finale (\`SELECT\`)** : La table résultante ne compte plus que 2 lignes (une ligne unique par modalité).
+>
+> 💻 **Le Pont vers le SQL :**
+> C'est exactement ce que réalise le moteur avec \`SELECT region, COUNT(*) AS nb_polices FROM assures GROUP BY region;\`.
         `,
         taskMarkdown: "Affichez \`region\` et le nombre de polices (\`nb_polices\`) groupées par région.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -778,6 +796,23 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
 > - **La ligne rouge (Seuil 100%)** : Le point d'équilibre où l'intégralité des primes perçues est absorbée par les sinistres indemnisés.
 > - **Barres vertes ($S/P < 80\\%$)** : Zone de rentabilité technique saine, permettant de couvrir les frais généraux et de dégager une marge.
 > - **Barre rouge ($S/P > 100\\%$)** : Zone de déficit technique caractérisant une **sous-tarification** de la région ou une dérive de la sinistralité climatique.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul du Loss Ratio sur 3 contrats) :**
+> Prenons 3 contrats de la région Occitanie :
+> - Contrat 1 : Prime = $500\\text{ EUR}$, 0 sinistre (Coût = $0\\text{ EUR}$)
+> - Contrat 2 : Prime = $700\\text{ EUR}$, 1 sinistre bris de glace (Coût = $400\\text{ EUR}$)
+> - Contrat 3 : Prime = $800\\text{ EUR}$, 1 sinistre corporel (Coût = $1\\ 200\\text{ EUR}$)
+>
+> 1. **Somme des primes encaissées ($P$)** :
+>    $$P = 500 + 700 + 800 = 2\\ 000\\text{ EUR}$$
+> 2. **Somme des sinistres indemnisés ($S$)** :
+>    $$S = 0 + 400 + 1\\ 200 = 1\\ 600\\text{ EUR}$$
+> 3. **Calcul algébrique du ratio $S/P$** :
+>    $$\\text{Ratio } S/P = \\frac{S}{P} = \\frac{1\\ 600}{2\\ 000} = 0.80 = \\mathbf{80.0\\%}$$
+>    *(Interprétation : pour 100 € de prime collectée, 80 € repartent en indemnisation).*
+>
+> 💻 **Le Pont vers le SQL :**
+> \`SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100\` calcule exactement ce rapport $S/P$ agrégé par région.
         `,
         taskMarkdown: "Calculez pour chaque région \`region\`, \`ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp\` via LEFT JOIN et GROUP BY.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -1115,8 +1150,31 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > 🔍 **Comprendre ce graphique : La minimisation des résidus au carré**
 > 
 > - **Les points noirs** : Observations empiriques $(X_i, Y_i)$ reliant l'âge de l'assuré à sa prime.
-> - **La droite bleue ($\\hat{Y} = \\hat{eta}_0 + \\hat{eta}_1 X$)** : L'unique droite dans l'espace qui minimise la somme des carrés des distances verticales.
+> - **La droite bleue ($\\hat{Y} = \\hat{\\beta}_0 + \\hat{\\beta}_1 X$)** : L'unique droite dans l'espace qui minimise la somme des carrés des distances verticales.
 > - **Les pointillés rouges ($e_i = Y_i - \\hat{Y}_i$)** : Les résidus ou erreurs d'estimation. L'élévation au carré pénalise plus fortement les grands écarts et garantit que la somme des résidus est exactement nulle ($\\sum e_i = 0$).
+
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas (Toy Example sur 3 points) :**
+> Soit 3 observations simples $(x, y)$ où $x$ est le taux directeur et $y$ le taux souverain :
+> - Point 1 : $(x_1=1, y_1=2)$
+> - Point 2 : $(x_2=2, y_2=3)$
+> - Point 3 : $(x_3=3, y_3=5)$
+>
+> 1. **Moyennes empiriques** :
+>    $$\\bar{x} = \\frac{1+2+3}{3} = 2.0, \\quad \\bar{y} = \\frac{2+3+5}{3} = \\frac{10}{3} \\approx 3.333$$
+> 2. **Écarts et covariances croisées** :
+>    - Point 1 : $(x_1 - \\bar{x}) = -1, \\quad (y_1 - \\bar{y}) = -1.333 \\implies (-1) \\times (-1.333) = +1.333$
+>    - Point 2 : $(x_2 - \\bar{x}) = 0, \\quad (y_2 - \\bar{y}) = -0.333 \\implies 0 \\times (-0.333) = 0$
+>    - Point 3 : $(x_3 - \\bar{x}) = +1, \\quad (y_3 - \\bar{y}) = +1.667 \\implies 1 \\times 1.667 = +1.667$
+>    - Somme des covariances : $\\sum (x_i - \\bar{x})(y_i - \\bar{y}) = 1.333 + 0 + 1.667 = \\mathbf{3.0}$
+> 3. **Somme des carrés de $x$ (Variance)** :
+>    $$\\sum (x_i - \\bar{x})^2 = (-1)^2 + 0^2 + 1^2 = 1 + 0 + 1 = \\mathbf{2.0}$$
+> 4. **Calcul de la pente $\\hat{\\beta}_1$ et de la constante $\\hat{\\beta}_0$** :
+>    $$\\hat{\\beta}_1 = \\frac{3.0}{2.0} = \\mathbf{1.50}$$
+>    $$\\hat{\\beta}_0 = \\bar{y} - \\hat{\\beta}_1 \\bar{x} = 3.333 - (1.50 \\times 2.0) = 3.333 - 3.0 = \\mathbf{0.333}$$
+>    L'équation optimale de régression est donc : $\\hat{y} = 0.333 + 1.50 x$.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> L'appel \`sm.OLS(y, sm.add_constant(x)).fit()\` résout exactement cette minimisation analytique des moindres carrés.
         `,
         taskMarkdown: "Estimez le modèle OLS \`model = sm.OLS(df['oat_10y'], X).fit()\` et affichez \`print(model.summary())\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1226,7 +1284,7 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Calculez beta_hat = (X^T X)^(-1) X^T Y à la main sans Statsmodels.",
         theoryMarkdown: `
-### Diagnostic des Résidus et Orthogonalité
+### Inversion Matricielle & Équations Normales des MCO
 
 > 💡 **Rappel : Perturbations théoriques vs Résidus empiriques**
 > 
@@ -1236,6 +1294,24 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > Par construction mathématique des MCO (équations normales) :
 > $$\\sum_{t=1}^T e_t = 0 \\implies \\bar{e} = 0, \\quad X'e = 0$$
 > Les résidus sont obligatoirement orthogonaux aux variables explicatives.
+
+> ✏️ **Exemple chiffré & Résolution matricielle pas-à-pas ($(X^T X)^{-1} X^T Y$) :**
+> Reprenons nos 3 points : $(1, 2), (2, 3), (3, 5)$.  
+> Matrice $X$ (avec constante unitaire) et vecteur $Y$ :
+> $$X = \\begin{pmatrix} 1 & 1 \\\\ 1 & 2 \\\\ 1 & 3 \\end{pmatrix}, \\quad Y = \\begin{pmatrix} 2 \\\\ 3 \\\\ 5 \\end{pmatrix}$$
+>
+> 1. **Produit $X^T X$ (Matrice de Gram)** :
+>    $$X^T X = \\begin{pmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 \\end{pmatrix} \\begin{pmatrix} 1 & 1 \\\\ 1 & 2 \\\\ 1 & 3 \\end{pmatrix} = \\begin{pmatrix} 3 & 6 \\\\ 6 & 14 \\end{pmatrix}$$
+> 2. **Déterminant & Inversion $(X^T X)^{-1}$** :
+>    $$\\det(X^T X) = (3 \\times 14) - (6 \\times 6) = 42 - 36 = 6$$
+>    $$(X^T X)^{-1} = \\frac{1}{6} \\begin{pmatrix} 14 & -6 \\\\ -6 & 3 \\end{pmatrix} = \\begin{pmatrix} 7/3 & -1 \\\\ -1 & 1/2 \\end{pmatrix}$$
+> 3. **Produit $X^T Y$** :
+>    $$X^T Y = \\begin{pmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 \\end{pmatrix} \\begin{pmatrix} 2 \\\\ 3 \\\\ 5 \\end{pmatrix} = \\begin{pmatrix} 2 + 3 + 5 \\\\ 2 + 6 + 15 \\end{pmatrix} = \\begin{pmatrix} 10 \\\\ 23 \\end{pmatrix}$$
+> 4. **Vecteur final des coefficients $\\hat{\\beta} = (X^T X)^{-1} X^T Y$** :
+>    $$\\hat{\\beta} = \\frac{1}{6} \\begin{pmatrix} 14 \\times 10 - 6 \\times 23 \\\\ -6 \\times 10 + 3 \\times 23 \\end{pmatrix} = \\frac{1}{6} \\begin{pmatrix} 140 - 138 \\\\ -60 + 69 \\end{pmatrix} = \\frac{1}{6} \\begin{pmatrix} 2 \\\\ 9 \\end{pmatrix} = \\begin{pmatrix} \\mathbf{0.333} \\\\ \\mathbf{1.500} \\end{pmatrix}$$
+>
+> 💻 **Le Pont vers NumPy :**
+> L'instruction \`np.linalg.inv(X.T @ X) @ X.T @ y\` exécute exactement cette algèbre matricielle en une seule ligne.
         `,
         taskMarkdown: "Calculez \`beta_numpy = np.linalg.inv(X.T @ X) @ X.T @ y\` en utilisant les tableaux NumPy \`X.values\` et \`y.values\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1605,6 +1681,20 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > - Choc de taux d'intérêt : $\\Delta r = +200$ points de base.
 > - Choc boursier : baisse de $-30 \\%$ des actions.
 > - Choc de sinistralité : survenance conjointe d'événements climatiques majeurs.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Sensibilité de Duration ALM) :**
+> Soit un portefeuille obligataire institutionnel de valeur initiale $V_0 = 100\\ 000\\ 000\\text{ EUR}$ (100 M€) avec une duration modifiée $D^* = 7.0$ ans.
+> La Banque Centrale relève brutalement son taux directeur de $+200\\text{ bps}$ (soit $\\Delta y = +0.02$).
+>
+> 1. **Approximation linéaire de Taylor (Sensibilité au 1er ordre)** :
+>    $$\\frac{\\Delta V}{V_0} \\approx -D^* \\times \\Delta y$$
+> 2. **Variation relative en pourcentage** :
+>    $$\\frac{\\Delta V}{V_0} = -7.0 \\times (+0.02) = -0.14 = \\mathbf{-14.0\\%}$$
+> 3. **Perte absolue en capital** :
+>    $$\\Delta V = -14.0\\% \\times 100\\ 000\\ 000\\text{ EUR} = \\mathbf{-14\\ 000\\ 000\\text{ EUR}} \\text{ (-14 M€)}$$
+>
+> 💻 **Le Pont vers le Code :**
+> \`perte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille\` calcule directement cette perte bilancielle en une ligne.
         `,
         taskMarkdown: "Calculez la perte en capital \`perte_estimee\` pour $V_0 = 100\\,000\\,000$ €, $D^* = 7.0$ ans et $\\Delta y = +0.02$.",
         initialCode: `# Écrivez votre code Python ci-dessous :

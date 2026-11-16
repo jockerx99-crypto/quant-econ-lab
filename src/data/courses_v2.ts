@@ -31,7 +31,7 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 
 > 🔍 **Comprendre ce graphique : L'illusion de l'addition arithmétique**
 > 
-> - **L'expérience mentale** : Imaginons un portefeuille partant de **100 €**. S'il subit une baisse de **-50%**, il tombe à **50 €**. S'il rebondit ensuite de **+50%**, $+50\\%$ de 50 € font 25 €, portant la valeur finale à **75 €** (et non 100 € !).
+> - **L'expérience mentale** : Imaginons un portefeuille partant de **100 €**. S'il subit une baisse de **-50%**, il tombe à **50 €**. S'il rebondit ensuite de **+50%**, +50% de 50 € font 25 €, portant la valeur finale à **75 €** (et non 100 € !).
 > - **Le piège de la somme simple (pointillés orange)** : Faire la somme arithmétique $-50\\% + 50\\% = 0\\%$ suggère à tort qu'aucune perte n'a eu lieu. C'est faux : l'investisseur a perdu 25% de son capital initial.
 > - **L'exactitude du log-rendement (courbe bleue)** : En sommant les log-rendements :
 >   $$r_1 = \\ln(50/100) = -0.6931, \\quad r_2 = \\ln(75/50) = +0.4055$$
@@ -76,14 +76,30 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > $$\\sigma_{\\text{annuelle}} = \\sigma_{\\text{jour}} \\times \\sqrt{252}$$
 > *(252 étant le nombre conventionnel de jours de cotation ouverts par an).*
 
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas (Toy Example sur 3 séances) :**
+> Considérons 3 rendements consécutifs : $r_1 = +2.0\\%$, $r_2 = -1.0\\%$, $r_3 = +1.4\\%$.
+> 1. **Moyenne empirique** :
+>    $$\\bar{r} = \\frac{2.0 + (-1.0) + 1.4}{3} = \\frac{2.4}{3} = +0.80\\%$$
+> 2. **Écarts quadratiques à la moyenne** :
+>    - Séance 1 : $(2.0 - 0.8)^2 = 1.2^2 = 1.44$
+>    - Séance 2 : $(-1.0 - 0.8)^2 = (-1.8)^2 = 3.24$
+>    - Séance 3 : $(1.4 - 0.8)^2 = 0.6^2 = 0.36$
+> 3. **Variance empirique ($N-1 = 2$)** :
+>    $$s^2 = \\frac{1.44 + 3.24 + 0.36}{2} = \\frac{5.04}{2} = 2.52 \\implies s_{\\text{jour}} = \\sqrt{2.52} \\approx 1.587\\%$$
+> 4. **Annualisation ($\\\\sqrt{252}$)** :
+>    $$\\sigma_{\\text{annuelle}} = 1.587\\% \\times \\sqrt{252} \\approx 1.587\\% \\times 15.8745 \\approx \\mathbf{25.19\\%}$$
+>
+> 💻 **Le Pont vers le SQL :**
+> La fenêtre \`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\` sélectionne exactement ces 3 lignes glissantes à chaque date pour calculer l'agrégat mobile.
+
 > 📌 **Spécification de la Fenêtre Mobile SQL :**
-> \`\`\`sql
-> OVER (
->   ORDER BY date
->   ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-> )
-> \`\`\`
-> Cette clause inclut la ligne courante et les 2 lignes antérieures, soit une fenêtre glissante de 3 séances.
+\`\`\`sql
+OVER (
+  ORDER BY date
+  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+)
+\`\`\`
+Cette clause inclut la ligne courante et les 2 lignes antérieures, soit une fenêtre glissante de 3 séances.
         `,
         taskMarkdown: "Pour le ticker `'BNP'`, sélectionnez `date`, `rendement_journalier` et calculez la moyenne glissante `moyenne_mobile_3j` des rendements sur la fenêtre mobile des 3 dernières séances (`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`). Triez par `date`.",
         initialCode: "-- Calculez la moyenne mobile des rendements sur 3 jours pour BNP :\n",
@@ -151,6 +167,21 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > - **La ligne rouge en pointillés** : Le *High Watermark*, c'est-à-dire le plus haut niveau jamais atteint par votre portefeuille. Elle ne peut que monter ou stagner.
 > - **La zone rouge ombrée** : Tant que le cours bleu est sous la ligne rouge, vous êtes "sous l'eau". La profondeur maximale atteinte correspond au **Maximum Drawdown**.
 > - **Pourquoi la volatilité ne suffit pas** : La volatilité standard traite les hausses soudaines et les krachs de la même manière. Le Drawdown, lui, mesure la douleur asymétrique : combien d'argent avez-vous réellement perdu au pire moment, et combien de temps faut-il pour récupérer ?
+
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas (Calcul du MDD sur 4 séances) :**
+> Suivons un portefeuille sur 4 dates avec les valeurs : $P_0 = 100\\text{ EUR}$, $P_1 = 120\\text{ EUR}$, $P_2 = 90\\text{ EUR}$, $P_3 = 110\\text{ EUR}$.
+> 1. **Date 0 ($P_0=100\\text{ EUR}$)** : Sommet $M_0 = 100\\text{ EUR} \\implies DD_0 = \\frac{100 - 100}{100} = \\mathbf{0\\%}$.
+> 2. **Date 1 ($P_1=120\\text{ EUR}$)** : Nouveau record $M_1 = \\max(100, 120) = 120\\text{ EUR} \\implies DD_1 = \\frac{120 - 120}{120} = \\mathbf{0\\%}$.
+> 3. **Date 2 ($P_2=90\\text{ EUR}$)** : Le sommet historique reste $M_2 = 120\\text{ EUR}$.  
+>    Chute sous le sommet : $DD_2 = \\frac{90 - 120}{120} = \\frac{-30}{120} = \\mathbf{-25\\%}$.
+> 4. **Date 3 ($P_3=110\\text{ EUR}$)** : Le sommet historique reste $M_3 = 120\\text{ EUR}$ (car $110 < 120$).  
+>    Le Drawdown s'atténue : $DD_3 = \\frac{110 - 120}{120} = \\frac{-10}{120} \\approx \\mathbf{-8.33\\%}$.
+> 5. **Maximum Drawdown global ($MDD$)** :
+>    $$MDD = \\min(0\\%, 0\\%, -25\\%, -8.33\\%) = \\mathbf{-25\\%}$$
+>
+> 💻 **Le Pont vers le SQL :**
+> * Le sommet $M_t$ est calculé par : \`MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)\`.
+> * Le drawdown $DD_t$ applique ensuite directement la formule \`((prix - sommet) / sommet) * 100\`.
 
 > 📊 **Sens Métier en Gestion d'Actifs & Hedge Funds :**
 > - Les investisseurs institutionnels imposent souvent des contraintes strictes de *Drawdown Stop* (ex: sortie obligatoire si $DD_t < -15\\%$).
@@ -266,6 +297,17 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > Après $n$ pas de temps et $j$ hausses ($0 \\le j \\le n$), le prix au nœud $(n, j)$ vaut :
 > $$S_{n,j} = S_0 \\times u^j \\times d^{n-j}$$
 
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Trajectoire d'arbre $S_0 = 100$, $u = 1.05$) :**
+> Observons la trajectoire de hausse pure à chaque pas de temps $n$ :
+> 1. **Pas $n=0$** : $S_0 = 100.0\\text{ EUR}$ (point de départ racine).
+> 2. **Pas $n=1$** : $S_1 = 100.0 \\times 1.05 = \\mathbf{105.0\\text{ EUR}}$.
+> 3. **Pas $n=2$** : $S_2 = 105.0 \\times 1.05 = 100 \\times 1.05^2 = \\mathbf{110.25\\text{ EUR}}$.
+> 4. **Pas $n=3$** : $S_3 = 110.25 \\times 1.05 = 100 \\times 1.05^3 = \\mathbf{115.7625\\text{ EUR}}$.
+>
+> 💻 **Le Pont vers le SQL Récursif :**
+> - L'ancre \`SELECT 0, 100.0\` initialise le nœud racine ($n=0$).
+> - La récursion \`SELECT n + 1, prix * 1.05 FROM arbre WHERE n < 3\` génère itérativement chaque pas jusqu'à la maturité.
+
 > 📌 **Puissance des CTE Récursives (\`WITH RECURSIVE\`) en SQL :**
 > Permet d'itérer mathématiquement sans boucle procédurale pour construire des structures arborescentes ou des graphes stochastiques.
         `,
@@ -318,6 +360,22 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > $$SR = \\frac{\\mathbb{E}[R] - r_f}{\\sigma}$$
 > - $SR > 0.3$ : Performance acceptable.
 > - $SR > 0.5$ : Bonne performance corrigée de la volatilité.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Arbitrage Sharpe vs Rendement Brut) :**
+> Soit un taux sans risque $r_f = 2.0\\%$ et deux actifs financiers :
+> - **Actif A (Action Volatile)** : $\\mathbb{E}[R_A] = 12.0\\%$, $\\sigma_A = 25.0\\%$.
+> - **Actif B (Fonds Diversifié)** : $\\mathbb{E}[R_B] = 8.0\\%$, $\\sigma_B = 10.0\\%$.
+>
+> 1. **Calcul des primes de risque (excès de rendement)** :
+>    - Actif A : $12\\% - 2\\% = 10\\%$
+>    - Actif B : $8\\% - 2\\% = 6\\%$
+> 2. **Calcul des Ratios de Sharpe** :
+>    - $$SR_A = \\frac{10\\%}{25\\%} = \\mathbf{0.40}$$
+>    - $$SR_B = \\frac{6\\%}{10\\%} = \\mathbf{0.60}$$
+> 3. **Conclusion quantitative** : Même si l'actif A génère un rendement brut plus élevé (12% vs 8%), l'actif B est **50% plus efficient** par unité de risque prise ($0.60 > 0.40$).
+>
+> 💻 **Le Pont vers le SQL :**
+> \`ratio_sharpe >= 0.30\` filtre directement les actifs sur cette efficience ajustée du risque.
 
 > 📊 **Sens Métier :**
 > L'intégration des critères ESG (Environnement, Social, Gouvernance) permet de réduire les risques de réputation et de transition climatique sans nécessairement dégrader le ratio de Sharpe.
@@ -484,6 +542,20 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > Le rendement espéré et la variance du portefeuille s'écrivent de manière compacte :
 > $$\\mathbb{E}[R_p] = \\mathbf{w}' \\boldsymbol{\\mu} = \\sum_{i=1}^K w_i \\mu_i$$
 > $$\\sigma_p^2 = \\operatorname{Var}(R_p) = \\mathbf{w}' \\Sigma \\mathbf{w} = \\sum_{i=1}^K \\sum_{j=1}^K w_i w_j \\sigma_{ij}$$
+
+> ✏️ **Exemple chiffré & Résolution matricielle pas-à-pas (Toy Example à 2 actifs) :**
+> Réduisons à $K=2$ actifs : $\\mathbf{w} = \\begin{pmatrix} 0.6 \\\\ 0.4 \\end{pmatrix}$, $\\boldsymbol{\\mu} = \\begin{pmatrix} 0.10 \\\\ 0.05 \\end{pmatrix}$, $\\Sigma = \\begin{pmatrix} 0.04 & 0.01 \\\\ 0.01 & 0.09 \\end{pmatrix}$.
+> 1. **Rendement espéré $\\mathbf{w}' \\boldsymbol{\\mu}$** :
+>    $$\\mathbb{E}[R_p] = 0.6 \\times 0.10 + 0.4 \\times 0.05 = 0.06 + 0.02 = \\mathbf{0.08} \\text{ (8.0\\%)}$$
+> 2. **Produit intermédiaire $\\Sigma \\mathbf{w}$** :
+>    $$\\Sigma \\mathbf{w} = \\begin{pmatrix} 0.04 \\times 0.6 + 0.01 \\times 0.4 \\\\ 0.01 \\times 0.6 + 0.09 \\times 0.4 \\end{pmatrix} = \\begin{pmatrix} 0.024 + 0.004 \\\\ 0.006 + 0.036 \\end{pmatrix} = \\begin{pmatrix} 0.028 \\\\ 0.042 \\end{pmatrix}$$
+> 3. **Variance finale $\\mathbf{w}' (\\Sigma \\mathbf{w})$** :
+>    $$\\sigma_p^2 = 0.6 \\times 0.028 + 0.4 \\times 0.042 = 0.0168 + 0.0168 = \\mathbf{0.0336}$$
+> 4. **Volatilité $\\sigma_p$** :
+>    $$\\sigma_p = \\sqrt{0.0336} \\approx \\mathbf{0.1833} \\text{ (18.33\\%)}$$
+>
+> 💻 **Le Pont vers NumPy :**
+> Ces 4 calculs matriciels s'exécutent en une seule instruction vectorisée ultra-rapide : \`w @ Sigma @ w\`.
 
 > 📌 **Opérateur Python Moderne \`@\` :**
 > En Python 3.5+, l'opérateur \`@\` effectue le produit matriciel (équivalent à \`np.matmul\` ou \`np.dot\`).
@@ -699,6 +771,23 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > $$\\mathbf{w}_{GMVP} = \\frac{\\Sigma^{-1} \\mathbf{1}}{\\mathbf{1}' \\Sigma^{-1} \\mathbf{1}}$$
 > La variance minimale correspondante est :
 > $$\\sigma^2_{GMVP} = \\frac{1}{\\mathbf{1}' \\Sigma^{-1} \\mathbf{1}}$$
+
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas (Cas à 2 actifs décorrélés) :**
+> Soit 2 actifs décorrélés de variances $\\sigma_1^2 = 0.04$ ($20\\%$) et $\\sigma_2^2 = 0.16$ ($40\\%$).  
+> La matrice $\\Sigma$ et son inverse sont diagonales :
+> $$\\Sigma = \\begin{pmatrix} 0.04 & 0 \\\\ 0 & 0.16 \\end{pmatrix} \\implies \\Sigma^{-1} = \\begin{pmatrix} 25 & 0 \\\\ 0 & 6.25 \\end{pmatrix}$$
+> 1. **Produit $\\Sigma^{-1} \\mathbf{1}$** :
+>    $$\\Sigma^{-1} \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 25 \\\\ 6.25 \\end{pmatrix}$$
+> 2. **Facteur de normalisation scalaire $\\mathbf{1}' \\Sigma^{-1} \\mathbf{1}$** :
+>    $$\\mathbf{1}' \\begin{pmatrix} 25 \\\\ 6.25 \\end{pmatrix} = 25 + 6.25 = 31.25$$
+> 3. **Poids optimaux $\\mathbf{w}_{GMVP}$** :
+>    $$w_1 = \\frac{25}{31.25} = \\mathbf{0.80} \\text{ (80\\%)}, \\quad w_2 = \\frac{6.25}{31.25} = \\mathbf{0.20} \\text{ (20\\%)}$$
+> 4. **Variance et Volatilité minimales** :
+>    $$\\sigma^2_{GMVP} = \\frac{1}{31.25} = 0.032 \\implies \\sigma_{GMVP} = \\sqrt{0.032} \\approx \\mathbf{17.89\\%}$$
+>    *(Remarquez que $17.89\\%$ est strictement inférieur à la volatilité du meilleur actif seul ($20\\%$) : c'est le gain pur de la diversification !)*
+>
+> 💻 **Le Pont vers NumPy :**
+> L'instruction \`(inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)\` résout exactement ce ratio vectoriel en une fraction de milliseconde.
         `,
         taskMarkdown: "Soit la matrice de covariance `Sigma`. Calculez l'inverse `inv_Sigma = np.linalg.inv(Sigma)`, le vecteur unitaire `ones = np.ones(3)`, le vecteur des poids optimaux `w_gmvp = (inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)` et la volatilité minimale `vol_gmvp = float(np.sqrt(1.0 / (ones @ inv_Sigma @ ones)))`. Affichez les poids et la volatilité.",
         initialCode: "import numpy as np\n\nSigma = np.array([\n    [0.04, 0.015, 0.008],\n    [0.015, 0.06, 0.02],\n    [0.008, 0.02, 0.03]\n])\n\n# Calculez w_gmvp et vol_gmvp :\n",
@@ -785,6 +874,29 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > - **$\\alpha_i$ (Alpha de Jensen)** : surperformance anormale non expliquée par l'exposition au marché.
 > - **Décomposition du risque total** :
 >   $$\\operatorname{Var}(R_i) = \\beta_i^2 \\sigma_m^2 + \\sigma_{\\varepsilon}^2$$
+
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas (Toy Example sur 3 séances) :**
+> Soit 3 séances d'excès de rendements observés pour le Marché $R_m$ et l'Actif $R_i$ :
+> - Séance 1 : $R_{m,1} = +2\\%$, $R_{i,1} = +3\\%$
+> - Séance 2 : $R_{m,2} = -1\\%$, $R_{i,2} = -1\\%$
+> - Séance 3 : $R_{m,3} = +2\\%$, $R_{i,3} = +4\\%$
+>
+> 1. **Moyennes empiriques** :
+>    $$\\bar{R}_m = \\frac{2 - 1 + 2}{3} = +1.0\\%, \\quad \\bar{R}_i = \\frac{3 - 1 + 4}{3} = +2.0\\%$$
+> 2. **Variance de Marché $\\operatorname{Var}(R_m)$ ($N-1=2$)** :
+>    - Écarts : $(2-1)=1$, $(-1-1)=-2$, $(2-1)=1$
+>    - Somme des carrés : $1^2 + (-2)^2 + 1^2 = 1 + 4 + 1 = 6$
+>    - $\\operatorname{Var}(R_m) = \\frac{6}{2} = 3.0$
+> 3. **Covariance Marché-Actif $\\operatorname{Cov}(R_i, R_m)$** :
+>    - Écarts de l'actif : $(3-2)=1$, $(-1-2)=-3$, $(4-2)=2$
+>    - Produits croisés : $1 \\times 1 + (-2) \\times (-3) + 1 \\times 2 = 1 + 6 + 2 = 9$
+>    - $\\operatorname{Cov}(R_i, R_m) = \\frac{9}{2} = 4.5$
+> 4. **Bêta de marché $\\beta_i$ & Alpha de Jensen $\\alpha_i$** :
+>    $$\\beta_i = \\frac{\\operatorname{Cov}(R_i, R_m)}{\\operatorname{Var}(R_m)} = \\frac{4.5}{3.0} = \\mathbf{1.50}$$
+>    $$\\alpha_i = \\bar{R}_i - \\beta_i \\bar{R}_m = 2.0\\% - (1.50 \\times 1.0\\%) = 2.0\\% - 1.5\\% = \\mathbf{+0.50\\%}$$
+>
+> 💻 **Le Pont vers Statsmodels / Python :**
+> En exécutant \`sm.OLS(R_i, sm.add_constant(R_m)).fit()\`, le moteur MCO résout précisément ce système algébrique pour renvoyer $\\alpha = 0.005$ et $\\beta = 1.50$.
         `,
         taskMarkdown: "À partir des excès de rendements de marché `R_m` et de l'actif `R_i`, régressez `R_i` sur une constante et `R_m` avec `sm.OLS`. Extrayez l'alpha estimé `alpha_jensen = float(model.params[0])`, le bêta `beta_capm = float(model.params[1])` et le $R^2$ `r_squared = float(model.rsquared)`. Affichez les paramètres.",
         initialCode: "import numpy as np\nimport statsmodels.api as sm\n\nnp.random.seed(42)\nT = 120\nR_m = np.random.randn(T) * 0.04 + 0.005\nR_i = 0.002 + 1.25 * R_m + np.random.randn(T) * 0.02\n\n# Estimez le CAPM avec statsmodels OLS :\n",
@@ -867,6 +979,19 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > 2. **Expected Shortfall ($CVaR_{99\\%}$)** : espérance conditionnelle de la perte sachant qu'elle dépasse la VaR :
 >    $$CVaR_{99\\%}(L) = \\mathbb{E}[L \\mid L > VaR_{99\\%}]$$
 >    Le CVaR est une mesure de risque **cohérente** au sens d'Artzner et est désormais la norme sous les accords de Bâle III / FRTB (*Fundamental Review of the Trading Book*).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Échantillon ordonné de 10 pertes) :**
+> Considérons 10 scénarios de pertes journalières classées par ordre croissant :
+> $$L = [-1.5\\%, -0.8\\%, -0.2\\%, +0.1\\%, +0.4\\%, +0.9\\%, +1.2\\%, +1.8\\%, +2.5\\%, +4.0\\%]$$
+> Pour un seuil de confiance de $90\\%$ (soit les $10\\%$ de pires pertes, c'est-à-dire le dernier décile) :
+> 1. **Rang du quantile 90%** : $10 \\times 0.90 = 9^{\\text{ème}}$ valeur $\\implies$ $VaR_{90\\%} = \\mathbf{+2.5\\%}$.
+> 2. **Expected Shortfall (CVaR)** : moyenne arithmétique de toutes les pertes qui dépassent ou égalent la VaR ($+2.5\\%$ et $+4.0\\%$) :
+>    $$CVaR_{90\\%} = \\frac{2.5\\% + 4.0\\%}{2} = \\mathbf{+3.25\\%}$$
+> *(Remarquez que le CVaR est toujours supérieur à la VaR car il intègre la sévérité extrême du krach à $+4.0\\%$, que la VaR seule ignore totalement).*
+>
+> 💻 **Le Pont vers NumPy :**
+> * \`np.percentile(pertes, 90)\` isole le seuil de coupure (+2.5%).
+> * \`pertes[pertes >= var].mean()\` filtre le sous-ensemble extrême et calcule sa moyenne (+3.25%).
         `,
         taskMarkdown: "À partir des rendements simulés `rendements`, calculez les pertes `pertes = -rendements`. Calculez la VaR historique 99% `var_hist_99 = float(np.percentile(pertes, 99))` et la CVaR historique 99% `cvar_hist_99 = float(pertes[pertes >= var_hist_99].mean())`. Affichez `var_hist_99` et `cvar_hist_99`.",
         initialCode: "import numpy as np\n\nnp.random.seed(42)\n# 1000 observations de rendements journaliers avec queues épaisses (loi de Student)\nrendements = np.random.standard_t(df=4, size=1000) * 0.015 - 0.0005\n\n# Calculez var_hist_99 et cvar_hist_99 :\n",
@@ -1085,6 +1210,25 @@ export const COURSE_MODULES_V2: CourseModule[] = [
 > où $\\Phi$ est la fonction de répartition de la loi normale standard $\\mathcal{N}(0, 1)$ (\`scipy.stats.norm.cdf\`) :
 > $$d_1 = \\frac{\\ln(S_0 / K) + \\left( r + \\frac{1}{2}\\sigma^2 \\right) T}{\\sigma \\sqrt{T}}$$
 > $$d_2 = d_1 - \\sigma \\sqrt{T}$$
+
+> ✏️ **Exemple chiffré & Résolution algébrique pas-à-pas :**
+> Prenons les paramètres exacts : $S_0 = 100\\text{ EUR}$, Strike $K = 100\\text{ EUR}$ (option à la monnaie), $r = 5\\%$, $\\sigma = 20\\%$, $T = 1$ an.
+> 1. **Terme de dérive $\\ln(S_0 / K)$ et ajustement de convexité** :
+>    $$\\ln(100/100) = \\ln(1) = 0$$
+>    $$r + \\frac{1}{2}\\sigma^2 = 0.05 + \\frac{1}{2}(0.04) = 0.05 + 0.02 = 0.07$$
+> 2. **Calcul de $d_1$ et $d_2$** :
+>    $$d_1 = \\frac{0 + 0.07 \\times 1}{0.20 \\times \\sqrt{1}} = \\frac{0.07}{0.20} = \\mathbf{0.35}$$
+>    $$d_2 = d_1 - \\sigma\\sqrt{T} = 0.35 - 0.20 = \\mathbf{0.15}$$
+> 3. **Probabilités cumulées normales $\\Phi(d)$** (tables de Laplace-Gauss) :
+>    $$\\Phi(0.35) \\approx 0.63683 \\quad (\\text{le Delta de couverture}), \\quad \\Phi(0.15) \\approx 0.55962$$
+> 4. **Facteur d'actualisation sans risque** :
+>    $$e^{-r T} = e^{-0.05 \\times 1} \\approx 0.95123$$
+> 5. **Prix exact du Call $C$** :
+>    $$C = 100 \\times 0.63683 - 100 \\times 0.95123 \\times 0.55962$$
+>    $$C = 63.683 - 53.232 = \\mathbf{10.451\\text{ EUR}}$$
+>
+> 💻 **Le Pont vers le Code :**
+> Avec \`scipy.stats.norm.cdf\`, Python évalue ces 5 étapes algébriques sans table papier.
         `,
         taskMarkdown: "À partir des mêmes paramètres ($S_0=100, K=100, r=0.05, \\sigma=0.20, T=1.0$), implémentez le calcul analytique de `d1`, `d2`, et déterminez `prix_bs = float(S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2))`. Affichez `prix_bs`.",
         initialCode: "import numpy as np\nfrom scipy.stats import norm\n\nS0 = 100.0\nK = 100.0\nr = 0.05\nsigma = 0.20\nT = 1.0\n\n# Calculez d1, d2 et le prix analytique Black-Scholes prix_bs :\n",
