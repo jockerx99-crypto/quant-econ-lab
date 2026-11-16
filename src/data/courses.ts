@@ -439,6 +439,14 @@ export const COURSE_MODULES: CourseModule[] = [
 
 > 📊 **Contexte Métier & Actuariat :**
 > En tarification automobile, le \`GROUP BY region\` permet de construire le **zonier tarifaire** en mesurant l'exposition géographique (densité de contrats en Île-de-France vs province).
+
+![Mécanisme GROUP BY & Agrégation](/images/theory/fig_v1_sql_groupby.png)
+
+> 🔍 **Comprendre ce graphique : Le paradigme Split - Apply - Combine**
+> 
+> - **Les points bleus (lignes brutes)** : Chaque point représente un contrat individuel avec sa prime d'assurance propre.
+> - **Le partitionnement (\`GROUP BY\`)** : Le moteur SQL isole les contrats dans des bacs étanches par modalité de région (Nord, Sud, Ouest).
+> - **L'agrégation (\`AVG()\`)** : Pour chaque bac, la fonction calcule la moyenne arithmétique et compresse toutes les lignes du groupe en **une seule barre synthétique**.
         `,
         taskMarkdown: "Affichez \`region\` et le nombre de polices (\`nb_polices\`) groupées par région.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -629,6 +637,13 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
 
 > 📊 **Sens Actuariel & Économétrique :**
 > En actuariat, le dénominateur de la sinistralité est l'**exposition totale** (l'ensemble des polices souscrites, y compris celles sans sinistre). Utiliser un \`INNER JOIN\` éliminerait tous les conducteurs vertueux sans sinistre, provoquant un **biais de sélection dramatique** qui surestimerait le risque moyen.
+
+![INNER JOIN vs LEFT JOIN en Actuariat](/images/theory/fig_v1_sql_joins.png)
+
+> 🔍 **Comprendre ce graphique : L'importance vitale du LEFT JOIN en actuariat**
+> 
+> - **À gauche (INNER JOIN - Le piège)** : Seuls les assurés ayant déclaré un sinistre ont une correspondance dans la table \`sinistres\`. L'INNER JOIN élimine tous les assurés sains (en rouge), ce qui détruit le dénominateur de votre portefeuille et surévalue artificiellement la prime de risque !
+> - **À droite (LEFT JOIN - La bonne pratique)** : Tous les assurés de la table de gauche sont intégralement préservés. Les conducteurs sans sinistre reçoivent des valeurs \`NULL\` (faciles à remplacer par \`0 €\` via \`COALESCE\`), garantissant une mesure sans biais de l'exposition globale.
         `,
         taskMarkdown: "Écrivez un LEFT JOIN entre \`assures a\` et \`sinistres s\` affichant \`a.police_id\`, \`a.region\` et \`s.cout_total\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -755,6 +770,14 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
 > SELECT * FROM stats_region WHERE nb_polices >= 2;
 > \`\`\`
 > Avantages majeurs : lisibilité exceptionnelle, maintenance aisée et réutilisation de la table temporaire dans plusieurs jointures.
+
+![Le Loss Ratio S/P en Assurance](/images/theory/fig_v1_loss_ratio.png)
+
+> 🔍 **Comprendre ce graphique : L'indicateur roi de la rentabilité technique**
+> 
+> - **La ligne rouge (Seuil 100%)** : Le point d'équilibre où l'intégralité des primes perçues est absorbée par les sinistres indemnisés.
+> - **Barres vertes ($S/P < 80\\%$)** : Zone de rentabilité technique saine, permettant de couvrir les frais généraux et de dégager une marge.
+> - **Barre rouge ($S/P > 100\\%$)** : Zone de déficit technique caractérisant une **sous-tarification** de la région ou une dérive de la sinistralité climatique.
         `,
         taskMarkdown: "Calculez pour chaque région \`region\`, \`ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp\` via LEFT JOIN et GROUP BY.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -1020,6 +1043,15 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 
 > ⚠️ **Piège fondamental : Corrélation $\\ne$ Causalité !**
 > En séries temporelles, deux séries non-stationnaires peuvent afficher un $\\rho > 0.90$ simplement parce qu'elles croissent toutes les deux dans le temps (*régression fallacieuse*).
+
+![Anatomie du Boxplot et Règle de Tukey](/images/theory/fig_v1_boxplot_tukey.png)
+
+> 🔍 **Comprendre ce graphique : La robustesse de l'écart interquartile (IQR)**
+> 
+> - **La boîte centrale ($Q_1$ à $Q_3$)** : Contient exactement $50\\%$ des observations centrales du portefeuille.
+> - **La barre rouge médiane ($Q_2$)** : La valeur qui sépare la population en deux parts égales (insensible aux valeurs extrêmes).
+> - **Les moustaches ($\\pm 1.5 \\times IQR$)** : L'intervalle de dispersion statistique normale établi par John Tukey.
+> - **Les points rouges isolés (Outliers)** : Sinistres exceptionnels (grands sinistres corporels ou industriels) à isoler pour éviter de fausser les estimations de prime pure.
         `,
         taskMarkdown: "Calculez \`q25\`, \`q75\`, \`iqr = q75 - q25\` et \`seuil_haut = q75 + 1.5 * iqr\` pour \`inflation_hicp\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1077,6 +1109,14 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 
 > 📌 **Propriété BLUE (Théorème de Gauss-Markov) :**
 > Sous les hypothèses classiques (erreurs centrées, homoscédastiques et non-autocorrélées), les MCO sont les Meilleurs Estimateurs Linéaires Sans Biais.
+
+![Principe Géométrique des Moindres Carrés Ordinaires](/images/theory/fig_v1_ols_residuals.png)
+
+> 🔍 **Comprendre ce graphique : La minimisation des résidus au carré**
+> 
+> - **Les points noirs** : Observations empiriques $(X_i, Y_i)$ reliant l'âge de l'assuré à sa prime.
+> - **La droite bleue ($\\hat{Y} = \\hat{eta}_0 + \\hat{eta}_1 X$)** : L'unique droite dans l'espace qui minimise la somme des carrés des distances verticales.
+> - **Les pointillés rouges ($e_i = Y_i - \\hat{Y}_i$)** : Les résidus ou erreurs d'estimation. L'élévation au carré pénalise plus fortement les grands écarts et garantit que la somme des résidus est exactement nulle ($\\sum e_i = 0$).
         `,
         taskMarkdown: "Estimez le modèle OLS \`model = sm.OLS(df['oat_10y'], X).fit()\` et affichez \`print(model.summary())\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1133,6 +1173,14 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > Le coefficient de détermination $R^2$ est la part de variance expliquée :
 > $$R^2 = \\frac{\\text{SCE}}{\\text{SCT}} = 1 - \\frac{\\text{SCR}}{\\text{SCT}} \\in [0, 1]$$
 > Dans une régression simple, $R^2 = r_{x,y}^2$ (le carré du coefficient de Pearson).
+
+![Test de Student et Zone de Rejet](/images/theory/fig_v1_student_test.png)
+
+> 🔍 **Comprendre ce graphique : Comment décider si une variable a un impact réel**
+> 
+> - **La courbe en cloche** : Distribution théorique de la statistique de test sous l'hypothèse nulle $H_0: eta_1 = 0$ (aucun effet de la variable).
+> - **La zone bleue centrale ($95\\%$)** : Si la statistique calculée $t$ tombe ici, on ne peut pas exclure que la relation observée soit due au pur hasard (p-valeur $> 0.05$).
+> - **Les zones rouges extrêmes ($\\pm 1.96$)** : Si $|t| \\ge 1.96$ (p-valeur $< 0.05$), le résultat est statistiquement significatif au seuil de $5\\%$ : on rejette formellement l'absence d'effet.
         `,
         taskMarkdown: "Extrayez la p-valeur de l'Euribor via \`p_val = model.pvalues['euribor_3m']\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1329,6 +1377,13 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > - **$H_1$** : Pas de racine unitaire $\\implies$ la série est **stationnaire**.
 > 
 > Règle de décision : Si la **p-valeur $< 0.05$**, on rejette $H_0$ au seuil de 5 %.
+
+![Homoscédasticité vs Hétéroscédasticité](/images/theory/fig_v1_heteroscedasticity.png)
+
+> 🔍 **Comprendre ce graphique : Quand les hypothèses OLS s'effondrent**
+> 
+> - **Graphique de gauche (Homoscédasticité - Idéal)** : Les résidus forment une bande horizontale régulière de largeur constante autour de 0. Les écarts-types d'OLS sont fiables.
+> - **Graphique de droite (Hétéroscédasticité - En entonnoir)** : La dispersion des erreurs augmente avec les valeurs prédites $\\hat{Y}$ (fréquent en actuariat où les gros contrats ont une variance de sinistralité beaucoup plus forte). Les tests de Student ordinaires deviennent invalides et nécessitent une correction robuste de White (HC).
         `,
         taskMarkdown: "Exécutez \`het_breuschpagan(model_multi.resid, X_multi)\` et extrayez la p-valeur du test LM.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1410,6 +1465,14 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
 > Condition de stationnarité stricte :
 > $$|\\phi| < 1$$
 > Si $\\phi = 1$, la série est une **marche aléatoire** (non-stationnaire).
+
+![Le Piège de la Régression Fallacieuse](/images/theory/fig_v1_spurious_regression.png)
+
+> 🔍 **Comprendre ce graphique : L'illusion de corrélation temporelle**
+> 
+> - **Deux séries indépendantes** : La courbe bleue et la courbe jaune ont été générées par deux tirages aléatoires totalement distincts et sans aucun lien causal.
+> - **Le piège de la tendance stochastique** : Parce que les deux séries dérivent avec le temps (processus intégrés $I(1)$), une régression OLS naïve affichera un $R^2 > 0.80$ et un t-stat spectaculaire !
+> - **Le réflexe économétrique** : Toujours tester la présence d'une racine unitaire (test ADF) et passer aux différences premières $\\Delta Y_t = Y_t - Y_{t-1}$ pour stationnariser les séries avant de régresser.
         `,
         taskMarkdown: "Calculez la statistique de Durbin-Watson sur le modèle en niveau et constatez sa valeur $< 1.5$.",
         initialCode: `# Écrivez votre code Python ci-dessous :
