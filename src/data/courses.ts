@@ -1218,27 +1218,41 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 10,
         description: "Testez l'hypothèse de nullité du coefficient H0: beta = 0.",
         theoryMarkdown: `
-### Coefficient de Détermination R² et Qualité d'Ajustement
+### Test de Significativité Individuelle (Student t-stat)
 
-> 💡 **Rappel théorique : La décomposition de variance (ANOVA)**
+> 💡 **Rappel théorique : Test de Student sur les coefficients**
 > 
-> La dispersion totale des observations se décompose selon l'identité fondamentale :
-> $$\\text{SCT} = \\text{SCE} + \\text{SCR}$$
-> - $\\text{SCT} = \\sum (y_t - \\bar{y})^2$ : Somme des Carrés Totale (variabilité globale).
-> - $\\text{SCE} = \\sum (\\hat{y}_t - \\bar{y})^2$ : Somme des Carrés Expliquée par le modèle.
-> - $\\text{SCR} = \\sum e_t^2$ : Somme des Carrés des Résidus (erreurs non expliquées).
+> Pour chaque variable explicative, on teste si son impact marginal est significativement différent de zéro :
+> - **Hypothèse nulle** : $H_0: \\beta_1 = 0$ (aucun effet sur la variable expliquée).
+> - **Hypothèse alternative** : $H_1: \\beta_1 \\neq 0$ (effet statistiquement avéré).
 > 
-> Le coefficient de détermination $R^2$ est la part de variance expliquée :
-> $$R^2 = \\frac{\\text{SCE}}{\\text{SCT}} = 1 - \\frac{\\text{SCR}}{\\text{SCT}} \\in [0, 1]$$
-> Dans une régression simple, $R^2 = r_{x,y}^2$ (le carré du coefficient de Pearson).
+> La statistique de Student s'écrit sous $H_0$ :
+> $$t = \\frac{\\hat{\\beta}_1 - 0}{\\hat{\\sigma}_{\\hat{\\beta}_1}} \\sim \\mathcal{T}(T - K - 1)$$
+> Au seuil de risque usuel de $\\alpha = 5\\%$ (pour un grand échantillon, approximation normale $\\mathcal{N}(0, 1)$) :
+> - Si $|t| \\ge 1.96$ (p-valeur $< 0.05$), on **rejette $H_0$** : le coefficient est statistiquement significatif.
+> - Si $|t| < 1.96$ (p-valeur $\\ge 0.05$), on **ne peut pas rejeter $H_0$** : l'effet n'est pas distinguable du bruit.
 
 ![Test de Student et Zone de Rejet](/images/theory/fig_v1_student_test.png)
 
 > 🔍 **Comprendre ce graphique : Comment décider si une variable a un impact réel**
 > 
-> - **La courbe en cloche** : Distribution théorique de la statistique de test sous l'hypothèse nulle $H_0: eta_1 = 0$ (aucun effet de la variable).
+> - **La courbe en cloche** : Distribution théorique de la statistique de test sous l'hypothèse nulle $H_0: \\beta_1 = 0$ (aucun effet de la variable).
 > - **La zone bleue centrale ($95\\%$)** : Si la statistique calculée $t$ tombe ici, on ne peut pas exclure que la relation observée soit due au pur hasard (p-valeur $> 0.05$).
 > - **Les zones rouges extrêmes ($\\pm 1.96$)** : Si $|t| \\ge 1.96$ (p-valeur $< 0.05$), le résultat est statistiquement significatif au seuil de $5\\%$ : on rejette formellement l'absence d'effet.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul du t-stat et Décision) :**
+> Soit un coefficient estimé de l'Euribor $\\hat{\\beta}_1 = 1.50$ avec un écart-type estimé $\\hat{\\sigma}_{\\hat{\\beta}_1} = 0.25$ :
+>
+> 1. **Calcul de la statistique $t$ empirique** :
+>    $$t = \\frac{1.50 - 0}{0.25} = \\mathbf{6.0}$$
+> 2. **Règle de décision au seuil critique de 5%** :
+>    $$|t| = 6.0 > 1.96 \\implies \\text{Zone de rejet critique (rouge)}$$
+> 3. **P-valeur associée (probabilité bilatérale)** :
+>    $$p = 2 \\times \\mathbb{P}(T > 6.0) \\approx 1.2 \\times 10^{-7} < 0.05$$
+>    Conclusion : L'effet de l'Euribor est **hautement significatif**, $H_0$ est rejetée avec une certitude quasi-absolue.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.tvalues['euribor_3m']\` et \`model.pvalues['euribor_3m']\` calculent automatiquement cette statistique $t$ et sa p-valeur bilatérale.
         `,
         taskMarkdown: "Extrayez la p-valeur de l'Euribor via \`p_val = model.pvalues['euribor_3m']\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1257,15 +1271,36 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 10,
         description: "Analysez le pourcentage de variance expliqué.",
         theoryMarkdown: `
-### Régression Multiple & Effet Ceteris Paribus
+### Coefficient de Détermination R² et Qualité d'Ajustement (ANOVA)
 
-> 💡 **Rappel : Formulation Matricielle des MCO**
+> 💡 **Rappel théorique : La décomposition de variance (ANOVA)**
 > 
-> Pour plusieurs variables explicatives $X_1, X_2, \\dots, X_K$ :
-> $$y = X \\beta + \\varepsilon$$
-> L'estimateur matriciel s'écrit de manière compacte :
-> $$\\hat{\\beta} = (X'X)^{-1} X' y$$
-> Chaque coefficient partiel $\\beta_j$ capture l'impact spécifique de la variable $X_j$ **après avoir neutralisé l'effet de toutes les autres variables explicatives** du modèle.
+> La dispersion totale des observations se décompose selon l'identité fondamentale :
+> $$\\text{SCT} = \\text{SCE} + \\text{SCR}$$
+> - $\\text{SCT} = \\sum (y_t - \\bar{y})^2$ : Somme des Carrés Totale (variabilité globale).
+> - $\\text{SCE} = \\sum (\\hat{y}_t - \\bar{y})^2$ : Somme des Carrés Expliquée par le modèle.
+> - $\\text{SCR} = \\sum e_t^2$ : Somme des Carrés des Résidus (erreurs non expliquées).
+> 
+> Le coefficient de détermination $R^2$ est la part de variance expliquée :
+> $$R^2 = \\frac{\\text{SCE}}{\\text{SCT}} = 1 - \\frac{\\text{SCR}}{\\text{SCT}} \\in [0, 1]$$
+> Pour pénaliser l'ajout artificiel de variables inutiles, le $R^2$ ajusté introduit les degrés de liberté ($N$ observations, $K$ régresseurs) :
+> $$\\bar{R}^2 = 1 - \\frac{\\text{SCR} / (N - K - 1)}{\\text{SCT} / (N - 1)}$$
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul de $R^2$ et $\\bar{R}^2$) :**
+> Soit un échantillon de $N=20$ trimestres avec $K=2$ variables explicatives :
+> - Somme des carrés totale : $\\text{SCT} = 100.0$
+> - Somme des carrés résiduelle : $\\text{SCR} = 15.0$
+>
+> 1. **Calcul du $R^2$ brut** :
+>    $$R^2 = 1 - \\frac{15.0}{100.0} = 1 - 0.15 = \\mathbf{0.850} \\text{ (85.0% de variance expliquée)}$$
+> 2. **Pénalisation des degrés de liberté ($N - K - 1 = 20 - 2 - 1 = 17$ et $N-1 = 19$)** :
+>    $$\\frac{\\text{SCR} / 17}{\\text{SCT} / 19} = \\frac{15.0 / 17}{100.0 / 19} = \\frac{0.8824}{5.2632} \\approx 0.1676$$
+> 3. **Calcul du $R^2$ ajusté $\\bar{R}^2$** :
+>    $$\\bar{R}^2 = 1 - 0.1676 = \\mathbf{0.8324} \\text{ (83.24%)}$$
+>    *(Remarquez que $\\bar{R}^2 < R^2$ : la pénalisation évite le sur-apprentissage).*
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.rsquared\` et \`model.rsquared_adj\` extraient instantanément ces deux grandeurs.
         `,
         taskMarkdown: "Stockez \`r2 = model.rsquared\` et \`r2_adj = model.rsquared_adj\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1330,17 +1365,27 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 10,
         description: "Vérifiez que la moyenne des résidus empiriques est nulle.",
         theoryMarkdown: `
-### Test de Normalité des Résidus de Jarque-Bera
+### Diagnostic des Résidus : Orthogonalité et Somme Nulle
 
-> 💡 **Rappel théorique : Asymétrie (Skewness) et Aplatissement (Kurtosis)**
+> 💡 **Rappel : Équations normales et résidus MCO**
 > 
-> Pour que les tests $t$ de Student et $F$ de Fisher soient exacts en petits échantillons, les erreurs doivent suivre une loi normale $\\varepsilon \\sim \\mathcal{N}(0, \\sigma^2)$ :
-> - **Skewness (Asymétrie)** : $S = 0$ pour une loi normale.
-> - **Kurtosis (Aplatissement)** : $K = 3$ pour une loi normale.
-> 
-> La statistique de Jarque-Bera teste la normalité conjointe :
-> $$JB = \\frac{T}{6} \\left( S^2 + \\frac{(K - 3)^2}{4} \\right) \\sim \\chi^2(2)$$
-> Si la **p-valeur $< 0.05$**, on rejette l'hypothèse de normalité des résidus.
+> En présence d'une constante dans le modèle, les conditions du premier ordre de minimisation des MCO imposent :
+> $$\\sum_{t=1}^T e_t = 0 \\implies \\bar{e} = 0$$
+> Les résidus sont également strictement orthogonaux à chaque variable explicative : $X' e = 0$.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Vérification de la somme nulle) :**
+> Reprenons nos 3 points $(x, y) = (1, 2), (2, 3), (3, 5)$ avec la droite ajustée $\\hat{y} = 0.333 + 1.50 x$ :
+> - Point 1 : $\\hat{y}_1 = 0.333 + 1.50(1) = 1.833 \\implies e_1 = 2 - 1.833 = \\mathbf{+0.167}$
+> - Point 2 : $\\hat{y}_2 = 0.333 + 1.50(2) = 3.333 \\implies e_2 = 3 - 3.333 = \\mathbf{-0.333}$
+> - Point 3 : $\\hat{y}_3 = 0.333 + 1.50(3) = 4.833 \\implies e_3 = 5 - 4.833 = \\mathbf{+0.167}$
+>
+> 1. **Somme des résidus** :
+>    $$\\sum e_i = (+0.167) + (-0.333) + (+0.167) = \\mathbf{0.000}$$
+> 2. **Moyenne des résidus** :
+>    $$\\bar{e} = \\frac{0.000}{3} = \\mathbf{0.0}$$
+>
+> 💻 **Le Pont vers Python :**
+> \`model.resid.mean()\` confirme numériquement que cette moyenne est égale à 0 aux erreurs d'arrondi machine près ($< 10^{-15}$).
         `,
         taskMarkdown: "Extrayez \`residus = model.resid\` et vérifiez que \`residus.mean()\` est proche de 0 ($< 10^{-4}$).",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1359,14 +1404,30 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Estimez le modèle complet expliquant l'OAT par deux variables exogènes.",
         theoryMarkdown: `
-### Diagnostic d'Hétéroscédasticité (White / Breusch-Pagan)
+### Régression Multivariée & Effet Ceteris Paribus
 
-> 💡 **Rappel : L'hypothèse d'homoscédasticité**
+> 💡 **Rappel théorique : Formulation Matricielle des MCO**
 > 
-> L'homoscédasticité impose que la variance des perturbations soit constante au cours du temps :
-> $$\\operatorname{Var}(\\varepsilon_t) = \\sigma^2 = \\text{Constante} \\quad (\\forall t)$$
-> Si la variance dépend du niveau des variables ou du temps, il y a **hétéroscédasticité**.
-> - Conséquence : Les coefficients MCO restent sans biais mais **ne sont plus efficaces** et les écarts-types sont faux.
+> Pour plusieurs variables explicatives $X_1, X_2, \\dots, X_K$ :
+> $$y = X \\beta + \\varepsilon$$
+> L'estimateur matriciel s'écrit de manière compacte :
+> $$\\hat{\\beta} = (X'X)^{-1} X' y$$
+> Chaque coefficient partiel $\\beta_j$ capture l'impact spécifique de la variable $X_j$ **après avoir neutralisé l'effet de toutes les autres variables explicatives** du modèle (*ceteris paribus* : toutes choses égales par ailleurs).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Interprétation Ceteris Paribus) :**
+> Considérons l'estimation multivariée des taux d'emprunt d'État (OAT 10 ans) :
+> $$\\widehat{\\text{OAT}}_{10Y} = 0.50 + 0.80 \\cdot \\text{Euribor}_{3M} + 0.35 \\cdot \\text{Inflation}_{\\text{HICP}}$$
+> 
+> 1. **Sensibilité marginale à l'Euribor** ($\\beta_1 = 0.80$) :
+>    Une hausse de $+1.0\\%$ de l'Euribor à 3 mois entraîne une hausse attendue de $+0.80$ point de pourcentage sur le taux 10 ans, **à inflation constante**.
+> 2. **Sensibilité marginale à l'Inflation** ($\\beta_2 = 0.35$) :
+>    Une accélération de $+1.0\\%$ de l'inflation entraîne une hausse de $+0.35$ point sur l'OAT, **à taux Euribor inchangé**.
+> 3. **Scénario macroéconomique combiné** :
+>    Si l'Euribor grimpe de $+0.5\\%$ et l'inflation de $+1.0\\%$ simultanément :
+>    $$\\Delta \\widehat{\\text{OAT}} = 0.80 \\times (+0.5) + 0.35 \\times (+1.0) = 0.40 + 0.35 = \\mathbf{+0.75 \\text{ point}}$$
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.params['euribor_3m']\` et \`model.params['inflation_hicp']\` fournissent directement ces élasticités partielles.
         `,
         taskMarkdown: "Ajustez le modèle multivarié avec les régresseurs \`['euribor_3m', 'inflation_hicp']\` avec constante.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1385,17 +1446,35 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 10,
         description: "Interprétez le test global de nullité conjointe de tous les coefficients.",
         theoryMarkdown: `
-### Autocorrélation des Résidus : Test de Durbin-Watson
+### Test de Significativité Globale du Modèle (Test F de Fisher)
 
-> 💡 **Rappel théorique : L'indépendance temporelle des erreurs**
+> 💡 **Rappel théorique : Le test F conjoint de Fisher-Snedecor**
 > 
-> L'hypothèse MCO exige l'absence d'autocorrélation :
-> $$\\operatorname{Cov}(\\varepsilon_t, \\varepsilon_{t-1}) = 0$$
-> La statistique de Durbin-Watson teste une autocorrélation d'ordre 1 :
-> $$DW = \\frac{\\sum_{t=2}^T (e_t - e_{t-1})^2}{\\sum_{t=1}^T e_t^2} \\approx 2(1 - \\hat{\\rho})$$
-> où $\\hat{\\rho}$ est le coefficient d'autocorrélation des résidus.
-> - **$DW \\approx 2$** : Absence d'autocorrélation ($\\hat{\\rho} = 0$). Tout va bien !
-> - **$DW < 1.5$** : Forte autocorrélation positive (fréquent en séries temporelles non stationnarisées).
+> Alors que le test $t$ évalue chaque variable isolément, le test $F$ évalue la significativité conjointe de **toutes** les variables explicatives non constantes :
+> - **Hypothèse nulle** : $H_0: \\beta_1 = \\beta_2 = \\dots = \\beta_K = 0$ (le modèle n'explique rien, $R^2 = 0$).
+> - **Hypothèse alternative** : $H_1: \\exists j \\in \\{1, \\dots, K\\}, \\beta_j \\neq 0$ (au moins un coefficient n'est pas nul).
+> 
+> La statistique de test s'écrit à partir du $R^2$ ($K$ régresseurs, $T$ observations) :
+> $$F = \\frac{\\text{SCE} / K}{\\text{SCR} / (T - K - 1)} = \\frac{R^2 / K}{(1 - R^2) / (T - K - 1)} \\sim \\mathcal{F}(K, T - K - 1)$$
+> Si la **p-valeur $< 0.05$**, on rejette formellement $H_0$.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul de la statistique F) :**
+> Soit un échantillon de $T=100$ trimestres avec $K=2$ prédicteurs et un $R^2 = 0.70$ :
+> - Degrés de liberté du numérateur : $\\text{ddl}_1 = K = 2$
+> - Degrés de liberté du dénominateur : $\\text{ddl}_2 = T - K - 1 = 100 - 2 - 1 = 97$
+>
+> 1. **Calcul du numérateur** :
+>    $$\\frac{R^2}{K} = \\frac{0.70}{2} = 0.350$$
+> 2. **Calcul du dénominateur** :
+>    $$\\frac{1 - R^2}{T - K - 1} = \\frac{1 - 0.70}{97} = \\frac{0.30}{97} \\approx 0.003093$$
+> 3. **Calcul de la statistique $F$** :
+>    $$F = \\frac{0.350}{0.003093} = \\mathbf{113.16}$$
+> 4. **Comparaison au seuil critique** :
+>    La valeur critique tabulée $\\mathcal{F}_{0.05}(2, 97) \\approx 3.09$.
+>    Comme $F = 113.16 \\gg 3.09$, la p-valeur est $< 10^{-20}$ : on rejette $H_0$ avec une immense certitude.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.fvalue\` et \`model.f_pvalue\` renvoient directement cette statistique et sa p-valeur conjointe.
         `,
         taskMarkdown: "Extrayez la statistique F (\`model_multi.fvalue\`) et sa p-valeur (\`model_multi.f_pvalue\`).",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1414,13 +1493,30 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Calculez le Facteur d'Inflation de la Variance (VIF).",
         theoryMarkdown: `
-### Correction d'Hétéroscédasticité et d'Autocorrélation (HAC / Newey-West)
+### Multicolinéarité & Facteur d'Inflation de la Variance (VIF)
 
-> 💡 **Rappel : La matrice de covariance robuste**
+> 💡 **Rappel théorique : Le danger de la corrélation entre régresseurs**
 > 
-> Lorsque les résidus sont à la fois hétéroscédastiques et autocorrélés, on corrige la matrice de variance-covariance des estimateurs via l'estimateur de **Newey-West (HAC)** :
-> $$\\operatorname{Var}_{\\text{HAC}}(\\hat{\\beta}) = (X'X)^{-1} \\hat{\\Omega} (X'X)^{-1}$$
-> Cette correction ajuste les écarts-types des coefficients sans modifier les estimations ponctuelles $\\hat{\\beta}$, garantissant des p-valeurs fiables.
+> Lorsque deux variables explicatives sont fortement corrélées (ex: Euribor et inflation), la matrice $(X'X)$ devient quasi-singulière. La variance des estimateurs explose :
+> $$\\operatorname{Var}(\\hat{\\beta}_j) = \\frac{\\sigma^2}{\\sum (x_{jt} - \\bar{x}_j)^2} \\times \\frac{1}{1 - R_j^2}$$
+> Le facteur d'inflation de variance s'obtient par la régression auxiliaire de $X_j$ sur les autres régresseurs :
+> $$VIF_j = \\frac{1}{1 - R_j^2}$$
+> - **$VIF = 1$** : Absence totale de corrélation (orthogonalité idéale).
+> - **$VIF > 5$** : Présence de colinéarité modérée (attention requise).
+> - **$VIF > 10$** : Forte multicolinéarité pathologique (coefficients instables, inversion matricielle imprécise).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul du VIF) :**
+> Supposons que la régression auxiliaire de l'Euribor sur l'inflation produise un $R_1^2 = 0.75$ :
+>
+> 1. **Calcul de la tolérance ($1 - R_1^2$)** :
+>    $$\\text{Tolérance} = 1 - 0.75 = 0.25$$
+> 2. **Calcul du $VIF$** :
+>    $$VIF_1 = \\frac{1}{0.25} = \\mathbf{4.0}$$
+> 3. **Interprétation de l'inflation de variance** :
+>    L'écart-type de $\\hat{\\beta}_1$ est gonflé d'un facteur $\\sqrt{VIF} = \\sqrt{4.0} = 2.0$. Les intervalles de confiance sont deux fois plus larges que si les régresseurs étaient orthogonaux.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`variance_inflation_factor(X.values, i)\` calcule automatiquement le VIF pour chaque colonne de la matrice de régresseurs.
         `,
         taskMarkdown: "Calculez le VIF de la variable 'euribor_3m' (indice 1 de la matrice X_multi).",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1439,27 +1535,41 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Vérifiez l'hypothèse d'homoscédasticité Var(e|X) = sigma^2.",
         theoryMarkdown: `
-### Test de Stationnarité : Augmented Dickey-Fuller (ADF)
+### Diagnostic d'Hétéroscédasticité : Test de Breusch-Pagan
 
-> 💡 **Rappel fondamental : Qu'est-ce qu'une série stationnaire ?**
+> 💡 **Rappel : Hypothèse d'homoscédasticité et régression auxiliaire**
 > 
-> Une série $y_t$ est stationnaire au second ordre si :
-> 1. Son espérance est constante : $E[y_t] = \\mu$
-> 2. Sa variance est constante et finie : $\\operatorname{Var}(y_t) = \\sigma^2$
-> 3. Ses autocovariances ne dépendent que du décalage $h$ : $\\operatorname{Cov}(y_t, y_{t-h}) = \\gamma(h)$
+> Les MCO supposent une variance des erreurs constante dans le temps : $\\mathbb{E}[\\varepsilon_t^2] = \\sigma^2$.
+> Le test de Breusch-Pagan (1979) teste si la variance dépend linéairement des prédicteurs :
+> - **Hypothèse nulle** : $H_0: \\sigma_t^2 = \\sigma^2$ (homoscédasticité, variance stable).
+> - **Hypothèse alternative** : $H_1: \\sigma_t^2 = \\gamma_0 + \\sum \\gamma_j X_{jt}$ (hétéroscédasticité).
 > 
-> **Hypothèses du test ADF :**
-> - **$H_0$** : Présence d'une racine unitaire $\\implies$ la série est **non-stationnaire**.
-> - **$H_1$** : Pas de racine unitaire $\\implies$ la série est **stationnaire**.
-> 
-> Règle de décision : Si la **p-valeur $< 0.05$**, on rejette $H_0$ au seuil de 5 %.
+> On estime la régression auxiliaire des résidus au carré :
+> $$e_t^2 = \\gamma_0 + \\gamma_1 X_{1t} + \\dots + \\gamma_K X_{Kt} + u_t$$
+> La statistique du multiplicateur de Lagrange ($LM$) suit sous $H_0$ une loi du Chi-deux :
+> $$LM = T \\cdot R^2_{\\text{aux}} \\sim \\chi^2(K)$$
+> Si la **p-valeur $< 0.05$**, on rejette $H_0$ : les écarts-types MCO classiques sont trompeurs et sous-estimés !
 
-![Homoscédasticité vs Hétéroscédasticité](/images/theory/fig_v1_heteroscedasticity.png)
+![Diagnostic d'Hétéroscédasticité](/images/theory/fig_v1_heteroscedasticity.png)
 
-> 🔍 **Comprendre ce graphique : Quand les hypothèses OLS s'effondrent**
-> 
-> - **Graphique de gauche (Homoscédasticité - Idéal)** : Les résidus forment une bande horizontale régulière de largeur constante autour de 0. Les écarts-types d'OLS sont fiables.
-> - **Graphique de droite (Hétéroscédasticité - En entonnoir)** : La dispersion des erreurs augmente avec les valeurs prédites $\\hat{Y}$ (fréquent en actuariat où les gros contrats ont une variance de sinistralité beaucoup plus forte). Les tests de Student ordinaires deviennent invalides et nécessitent une correction robuste de White (HC).
+> 🔍 **Comprendre ce graphique : Homoscédasticité vs Hétéroscédasticité**
+> - **Homoscédasticité (gauche)** : La dispersion des résidus reste parfaitement constante le long de l'axe des prédictions.
+> - **Hétéroscédasticité (droite - en entonnoir)** : La variance s'élargit à mesure que la variable augmente, invalidant les écarts-types MCO classiques.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul de la statistique LM) :**
+> Soit un échantillon de $T=120$ observations trimestrielles avec $K=2$ variables explicatives :
+> - La régression auxiliaire des $e_t^2$ donne un coefficient de détermination $R^2_{\\text{aux}} = 0.10$.
+>
+> 1. **Calcul de la statistique $LM$** :
+>    $$LM = 120 \\times 0.10 = \\mathbf{12.0}$$
+> 2. **Seuil critique au degré de liberté $K=2$** :
+>    Pour un seuil $\\alpha = 0.05$, la table de $\\chi^2(2)$ donne une valeur critique de $\\mathbf{5.99}$.
+> 3. **Décision** :
+>    Comme $LM = 12.0 > 5.99$, on a une p-valeur $p = \\mathbb{P}(\\chi^2(2) > 12.0) \\approx 0.0025 < 0.05$.
+>    Conclusion : Présence avérée d'**hétéroscédasticité**. Il est impératif d'utiliser les écarts-types robustes de White !
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`het_breuschpagan(residus, X)\` effectue cette régression auxiliaire et renvoie la statistique $LM$ et sa p-valeur.
         `,
         taskMarkdown: "Exécutez \`het_breuschpagan(model_multi.resid, X_multi)\` et extrayez la p-valeur du test LM.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1478,14 +1588,30 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Ajustez le modèle avec la matrice de variance robuste de White.",
         theoryMarkdown: `
-### Différenciation Première et Stationnarisation ($\\Delta y_t$)
+### Correction d'Hétéroscédasticité : L'Estimateur Robuste de Halbert White (HC)
 
-> 💡 **Rappel : L'opérateur de différence première**
+> 💡 **Rappel : L'Estimateur de Variance « Sandwich » (1980)**
 > 
-> Si une série $y_t$ est intégrée d'ordre 1 ($I(1)$), sa différence première est stationnaire ($I(0)$) :
-> $$\\Delta y_t = y_t - y_{t-1} = (1 - L) y_t$$
-> où $L$ est l'opérateur retard (*Lag operator* : $L y_t = y_{t-1}$).
-> En Pandas : \`df['colonne'].diff()\` calcule cette différence première.
+> Pour corriger les écarts-types sans imposer de forme paramétrique à l'hétéroscédasticité, Halbert White introduit la matrice robuste :
+> $$\\operatorname{Var}_{\\text{HC}}(\\hat{\\beta}) = (X'X)^{-1} \\left( \\sum_{t=1}^T e_t^2 x_t x_t' \\right) (X'X)^{-1}$$
+> - Le « pain » : $(X'X)^{-1}$ (identique aux MCO).
+> - La « viande » : $\\sum e_t^2 x_t x_t'$ (pondération des carrés résiduels empiriques).
+> - **Variante HC1** : applique une correction de petits échantillons $\\frac{T}{T - K - 1}$.
+> - Les coefficients $\\hat{\\beta}$ restent rigoureusement identiques, seuls les écarts-types et p-valeurs sont corrigés.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Impact de la correction HC1) :**
+> Soit un coefficient estimé $\\hat{\\beta}_1 = 0.85$ :
+> - Écart-type classique MCO (naïf) : $\\hat{\\sigma}_{\\text{OLS}} = 0.30$
+> - Écart-type robuste White HC1 : $\\hat{\\sigma}_{\\text{HC1}} = 0.55$
+>
+> 1. **Test $t$ naïf (sans correction)** :
+>    $$t_{\\text{OLS}} = \\frac{0.85}{0.30} = 2.83 \\implies p \\approx 0.005 < 0.05 \\text{ (Faux positif !)}$$
+> 2. **Test $t$ robuste HC1 (avec correction de White)** :
+>    $$t_{\\text{HC1}} = \\frac{0.85}{0.55} = 1.55 \\implies p \\approx 0.124 > 0.05 \\text{ (Non significatif)}$$
+>    Conclusion : Ignorer l'hétéroscédasticité menait à déclarer à tort un effet statistiquement significatif. L'estimateur HC1 rétablit la rigueur scientifique.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.fit(cov_type='HC1')\` recalcule instantanément la matrice de covariance sandwich.
         `,
         taskMarkdown: "Ajustez le modèle OLS avec \`cov_type='HC1'\` et comparez les écarts-types robustes aux classiques.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1504,15 +1630,39 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 10,
         description: "Testez si les résidus suivent une loi normale gaussienne.",
         theoryMarkdown: `
-### Autocorrélations Simple et Partielle (ACF & PACF)
+### Test de Normalité des Résidus de Jarque-Bera
 
-> 💡 **Rappel théorique : La méthodologie de Box-Jenkins**
+> 💡 **Rappel théorique : Asymétrie (Skewness) et Aplatissement (Kurtosis)**
 > 
-> - **ACF (Autocorrelation Function)** : Mesure la corrélation globale entre $y_t$ et $y_{t-k}$.
-> - **PACF (Partial Autocorrelation Function)** : Mesure la corrélation nette entre $y_t$ et $y_{t-k}$ en éliminant l'influence des retards intermédiaires $1, 2, \\dots, k-1$.
+> Pour que les tests $t$ de Student et $F$ de Fisher soient rigoureusement exacts en petits échantillons, les erreurs doivent suivre une distribution normale :
+> - **Skewness (Asymétrie)** : $S = 0$ pour une loi normale symétrique.
+> - **Kurtosis (Aplatissement)** : $K = 3$ pour une loi normale mésokurtique.
 > 
-> Règle de diagnostic pour les processus autorégressifs $AR(p)$ :
-> La PACF se coupe brutalement après le retard $p$, tandis que l'ACF décroît exponentiellement.
+> La statistique de Jarque-Bera teste la normalité conjointe des moments d'ordre 3 et 4 :
+> $$JB = \\frac{T}{6} \\left( S^2 + \\frac{(K - 3)^2}{4} \\right) \\sim \\chi^2(2)$$
+> Si la **p-valeur $< 0.05$**, on rejette l'hypothèse de normalité des résidus.
+
+![Asymétrie et Épaisseur des Queues](/images/theory/fig_fat_tails_jarque_bera.png)
+
+> 🔍 **Comprendre ce graphique : Normalité vs Queues Épaisses**
+> - **Courbe Gaussienne (bleue)** : Skewness = 0, Kurtosis = 3.
+> - **Distribution Réelle Empirique (rouge)** : Pics pointus et queues épaisses (Kurtosis > 3), les événements extrêmes sont plus fréquents que prévu par la loi normale.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul de la statistique JB) :**
+> Soit un échantillon de $T=150$ observations avec des résidus présentant un skewness $S = +0.50$ (asymétrie droite) et un kurtosis $K = 4.20$ (queues épaisses, leptokurtique) :
+>
+> 1. **Écart à la symétrie** :
+>    $$S^2 = (0.50)^2 = 0.25$$
+> 2. **Écart au kurtosis normal** :
+>    $$\\frac{(K - 3)^2}{4} = \\frac{(4.20 - 3)^2}{4} = \\frac{1.44}{4} = 0.36$$
+> 3. **Calcul de la statistique $JB$** :
+>    $$JB = \\frac{150}{6} \\left( 0.25 + 0.36 \\right) = 25 \\times 0.61 = \\mathbf{15.25}$$
+> 4. **Décision au seuil de 5%** :
+>    La valeur critique $\\chi^2(2)$ à 5% est de $5.99$.
+>    Comme $JB = 15.25 > 5.99$, la p-valeur est $p \\approx 0.00049 < 0.05$ : on rejette formellement l'hypothèse de normalité des résidus.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`jarque_bera(model.resid)\` retourne la statistique $JB$ et sa p-valeur associée.
         `,
         taskMarkdown: "Calculez le test de Jarque-Bera sur les résidus via \`jarque_bera(model_multi.resid)\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1531,24 +1681,41 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Comprenez pourquoi deux séries non stationnaires créent une fausse causalité.",
         theoryMarkdown: `
-### Processus Autorégressif d'Ordre 1 : AR(1)
+### Séries Temporelles & Piège de la Régression Spurieuse
 
-> 💡 **Rappel mathématique : L'équation AR(1)**
+> 💡 **Rappel : Granger & Newbold (1974) et la Statistique de Durbin-Watson**
 > 
-> Le modèle AR(1) exprime la valeur courante comme une fonction linéaire de la valeur passée et d'un bruit blanc :
-> $$y_t = c + \\phi y_{t-1} + \\varepsilon_t, \\quad \\varepsilon_t \\sim \\text{WN}(0, \\sigma^2)$$
+> En séries temporelles, régresser deux variables non-stationnaires (ex: deux marches aléatoires $I(1)$ sans aucun lien réel) conduit à une **régression fallacieuse** (*spurious regression*) :
+> - Le coefficient de détermination $R^2$ apparaît anormalement élevé ($> 0.80$).
+> - Les $t$-statistiques explosent, indiquant à tort une significativité extrême.
+> - Les résidus présentent une mémoire temporelle quasi-parfaite ($\\rho \\approx 1$).
 > 
-> Condition de stationnarité stricte :
-> $$|\\phi| < 1$$
-> Si $\\phi = 1$, la série est une **marche aléatoire** (non-stationnaire).
+> La statistique de Durbin-Watson mesure l'autocorrélation d'ordre 1 des résidus :
+> $$DW = \\frac{\\sum_{t=2}^T (e_t - e_{t-1})^2}{\\sum_{t=1}^T e_t^2} \\approx 2(1 - \\hat{\\rho})$$
+> - **$DW \\approx 2$** : Absence d'autocorrélation ($\\hat{\\rho} = 0$, situation saine).
+> - **$DW \\approx 0$** : Forte persistance positive ($\\hat{\\rho} \\to 1$, typique d'une régression spurieuse).
+> - Règle pratique de Granger-Newbold : Si **$R^2 > DW$**, méfiance absolue, la régression est très probablement fallacieuse !
 
-![Le Piège de la Régression Fallacieuse](/images/theory/fig_v1_spurious_regression.png)
+![Régression Spurieuse en Séries Temporelles](/images/theory/fig_v1_spurious_regression.png)
 
-> 🔍 **Comprendre ce graphique : L'illusion de corrélation temporelle**
-> 
-> - **Deux séries indépendantes** : La courbe bleue et la courbe jaune ont été générées par deux tirages aléatoires totalement distincts et sans aucun lien causal.
-> - **Le piège de la tendance stochastique** : Parce que les deux séries dérivent avec le temps (processus intégrés $I(1)$), une régression OLS naïve affichera un $R^2 > 0.80$ et un t-stat spectaculaire !
-> - **Le réflexe économétrique** : Toujours tester la présence d'une racine unitaire (test ADF) et passer aux différences premières $\\Delta Y_t = Y_t - Y_{t-1}$ pour stationnariser les séries avant de régresser.
+> 🔍 **Comprendre ce graphique : Le Piège de Granger-Newbold**
+> - Deux marches aléatoires indépendantes dérivent au cours du temps par simple accumulation de chocs stochastiques non stationnaires.
+> - L'estimation en niveau produit artificiellement un $R^2$ élevé et des résidus hautement autocorrélés ($DW \approx 0$).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Diagnostic de Régression Fallacieuse) :**
+> Soient deux séries macroéconomiques indépendantes simulées sur $T=200$ périodes. L'ajustement OLS donne :
+> - $R^2 = 0.82$ (semble excellent au premier coup d'œil).
+> - Coefficient d'autocorrélation résiduelle estimé : $\\hat{\\rho} = 0.985$.
+>
+> 1. **Calcul de la statistique de Durbin-Watson** :
+>    $$DW \\approx 2(1 - 0.985) = 2 \\times 0.015 = \\mathbf{0.030}$$
+> 2. **Application de la règle de Granger-Newbold** :
+>    $$R^2 = 0.82 \\gg DW = 0.030$$
+> 3. **Diagnostic** :
+>    La corrélation observée est purement artificielle, induite par les tendances stochastiques des séries. La régression en niveau n'a aucune validité économétrique : il faut stationnariser les séries !
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`durbin_watson(model.resid)\` calcule instantanément la valeur exacte de la statistique $DW$.
         `,
         taskMarkdown: "Calculez la statistique de Durbin-Watson sur le modèle en niveau et constatez sa valeur $< 1.5$.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1567,15 +1734,34 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 15,
         description: "Testez formellement la stationnarité d'une série temporelle.",
         theoryMarkdown: `
-### Sélection de Modèles : Critères d'Information AIC & BIC
+### Test de Racine Unitaire : Augmented Dickey-Fuller (ADF)
 
-> 💡 **Rappel : Le compromis vraisemblance vs parcimonie**
+> 💡 **Rappel théorique : Détection de non-stationnarité stochastique**
 > 
-> Ajouter des paramètres améliore mécaniquement la vraisemblance mais augmente le risque de surapprentissage (*overfitting*). Les critères d'information pénalisent le nombre de paramètres $k$ :
-> - **AIC (Akaike)** : $\\text{AIC} = 2k - 2\\ln(L)$
-> - **BIC (Schwarz / Bayesien)** : $\\text{BIC} = k \\ln(T) - 2\\ln(L)$
+> Une série temporelle $y_t$ admet une racine unitaire si sa dynamique suit une marche aléatoire :
+> $$y_t = \\rho y_{t-1} + \\varepsilon_t \\iff \\Delta y_t = \\gamma y_{t-1} + \\varepsilon_t \\quad (\\text{avec } \\gamma = \\rho - 1)$$
+> Le test de Dickey-Fuller teste :
+> - **Hypothèse nulle $H_0$** : $\\gamma = 0$ ($\\rho = 1$, racine unitaire $\\implies$ série non-stationnaire $I(1)$).
+> - **Hypothèse alternative $H_1$** : $\\gamma < 0$ ($\\rho < 1$, série stationnaire à retour à la moyenne $I(0)$).
 > 
-> Règle d'or : **Le meilleur modèle est celui qui minimise le critère (AIC ou BIC le plus faible).** Le BIC pénalise plus sévèrement les modèles complexes.
+> La statistique $t_{\\text{ADF}} = \\frac{\\hat{\\gamma}}{\\hat{\\sigma}_{\\hat{\\gamma}}}$ ne suit pas une loi de Student classique, mais la distribution asymétrique de Dickey-Fuller (valeurs critiques de MacKinnon).
+> Pour rejeter $H_0$ à 5%, il faut que $t_{\\text{ADF}}$ soit **plus négative** que la valeur critique (ex: $t_{\\text{ADF}} < -2.88$ avec constante).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul et Décision ADF) :**
+> Soit la régression ADF estimée sur le taux OAT 10 ans ($T=100$) avec constante :
+> $$\\Delta y_t = 0.12 - 0.04 y_{t-1} + u_t$$
+> On observe $\\hat{\\gamma} = -0.04$ et un écart-type estimé $\\hat{\\sigma}_{\\hat{\\gamma}} = 0.025$ :
+>
+> 1. **Calcul de la statistique $t_{\\text{ADF}}$** :
+>    $$t_{\\text{ADF}} = \\frac{-0.04}{0.025} = \\mathbf{-1.60}$$
+> 2. **Comparaison à la valeur critique de MacKinnon (seuil 5% avec constante : -2.88)** :
+>    $$-1.60 > -2.88 \\implies \\text{On est à droite du seuil critique de rejet}$$
+> 3. **Décision** :
+>    On **ne peut pas rejeter $H_0$** (p-valeur $\\approx 0.48 > 0.05$).
+>    Conclusion : La série présente une racine unitaire ($I(1)$), elle n'est pas stationnaire en niveau.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`adfuller(df['oat_10y'])\` renvoie la statistique ADF, la p-valeur exacte et le dictionnaire des valeurs critiques (1%, 5%, 10%).
         `,
         taskMarkdown: "Exécutez le test ADF sur la série différenciée \`df['oat_10y'].diff().dropna()\` et extrayez la p-valeur.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1594,13 +1780,28 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Estimez la relation instantanée entre variations de taux sans biais fallacieux.",
         theoryMarkdown: `
-### Prévision Hors-Échantillon et Erreur de Prédiction
+### Stationnarisation par Différenciation Première ($\\Delta y_t$)
 
-> 💡 **Rappel : L'espérance conditionnelle future**
+> 💡 **Rappel : L'opérateur de différence première**
 > 
-> La prévision à horizon 1 ($h=1$) d'un modèle AR(1) conditionnellement à l'information disponible à l'instant $T$ est :
-> $$\\hat{y}_{T+1 \\mid T} = E[y_{T+1} \\mid \\mathcal{F}_T] = \\hat{c} + \\hat{\\phi} y_T$$
-> L'erreur de prévision est $e_{T+1} = y_{T+1} - \\hat{y}_{T+1 \\mid T}$.
+> Si une série temporelle $y_t$ est intégrée d'ordre 1 ($I(1)$), sa différence première est garantie stationnaire ($I(0)$) :
+> $$\\Delta y_t = y_t - y_{t-1} = (1 - L) y_t$$
+> où $L$ est l'opérateur retard (*Lag operator* : $L y_t = y_{t-1}$).
+> - En finance et macroéconomie, pour une variable en logarithme $\\ln(P_t)$, la différence première $\\Delta \\ln(P_t) = \\ln(P_t) - \\ln(P_{t-1})$ correspond exactement au rendement continu stationnaire.
+> - Travailler sur des séries stationnaires élimine le risque de régression spurieuse et rétablit la validité des théorèmes limites d'inférence.
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Différenciation pas-à-pas) :**
+> Soit une série non-stationnaire présentant une dérive temporelle :
+> - Période $t=1$ : $y_1 = 10.0$
+> - Période $t=2$ : $y_2 = 12.5 \\implies \\Delta y_2 = 12.5 - 10.0 = \\mathbf{+2.5}$
+> - Période $t=3$ : $y_3 = 14.1 \\implies \\Delta y_3 = 14.1 - 12.5 = \\mathbf{+1.6}$
+> - Période $t=4$ : $y_4 = 16.8 \\implies \\Delta y_4 = 16.8 - 14.1 = \\mathbf{+2.7}$
+>
+> 1. **Comportement en niveau ($y_t$)** : La série s'éloigne continuellement de son origine (moyenne non constante, variance croissante avec $t$).
+> 2. **Comportement en différence ($\\Delta y_t$)** : Les accroissements oscillent autour d'une moyenne stable $\\bar{\\Delta y} \\approx +2.27$ avec une dispersion bornée : la série est devenue **parfaitement stationnaire**.
+>
+> 💻 **Le Pont vers Pandas :**
+> \`df['oat_diff'] = df['oat_10y'].diff().dropna()\` calcule cette différence première et élimine la première observation devenue \`NaN\`.
         `,
         taskMarkdown: "Créez \`df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()\` et ajustez le modèle OLS sur les variations.",
         initialCode: `# Écrivez votre code Python ci-dessous :
@@ -1619,14 +1820,32 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         durationMinutes: 12,
         description: "Corrigez à la fois l'autocorrélation et l'hétéroscédasticité temporelle.",
         theoryMarkdown: `
-### Volatilité Conditionnelle et Hétéroscédasticité ARCH/GARCH
+### Correction de l'Autocorrélation : Estimateur HAC de Newey-West
 
-> 💡 **Rappel financier : Les faits stylisés des séries de prix**
+> 💡 **Rappel théorique : Hétéroscédasticité et Autocorrélation Robustes (HAC)**
 > 
-> Les rendements financiers présentent des **grappes de volatilité** (*volatility clustering* : de fortes variations sont généralement suivies de fortes variations).
-> Dans un modèle ARCH(1) de Robert Engle (Prix Nobel 2003) :
-> $$\\sigma_t^2 = \\omega + \\alpha_1 \\varepsilon_{t-1}^2$$
-> La variance conditionnelle dépend de la magnitude du choc de la veille au carré $\\varepsilon_{t-1}^2$.
+> Lorsque les résidus sont à la fois hétéroscédastiques et corrélés dans le temps ($\\mathbb{E}[e_t e_{t-l}] \\neq 0$), l'estimateur de Newey et West (1987) corrige la matrice de covariance :
+> $$\\hat{\\Omega}_{\\text{HAC}} = \\hat{\\Gamma}_0 + \\sum_{l=1}^L w_l \\left( \\hat{\\Gamma}_l + \\hat{\\Gamma}_l' \\right)$$
+> Pour garantir que la matrice résultante soit toujours semi-définie positive, Newey-West utilise un noyau triangulaire de Bartlett :
+> $$w_l = 1 - \\frac{l}{L + 1}$$
+> où $L$ est le nombre maximal de retards (*bandwidth* ou *lags* pris en compte).
+
+> ✏️ **Exemple chiffré & Résolution pas-à-pas (Calcul des poids de Bartlett pour $L=2$) :**
+> Supposons que l'on autorise une mémoire temporelle résiduelle de $L=2$ trimestres :
+>
+> 1. **Poids de Bartlett du retard 0 (contemporain)** :
+>    $$w_0 = 1.0$$
+> 2. **Poids de Bartlett du retard 1 ($l=1$)** :
+>    $$w_1 = 1 - \\frac{1}{2 + 1} = 1 - \\frac{1}{3} = \\frac{2}{3} \\approx \\mathbf{0.667}$$
+> 3. **Poids de Bartlett du retard 2 ($l=2$)** :
+>    $$w_2 = 1 - \\frac{2}{2 + 1} = 1 - \\frac{2}{3} = \\frac{1}{3} \\approx \\mathbf{0.333}$$
+> 4. **Pondération d'un autocovariance exemple** :
+>    Si $\\hat{\\Gamma}_0 = 1.0$, $\\hat{\\Gamma}_1 = 0.30$, $\\hat{\\Gamma}_2 = 0.15$ :
+>    $$\\hat{\\Omega}_{\\text{HAC}} = 1.0 + 2 \\times [0.667 \\times 0.30 + 0.333 \\times 0.15] = 1.0 + 2 \\times [0.200 + 0.050] = \\mathbf{1.50}$$
+>    L'écart-type réel corrigé de la persistance est $\\sqrt{1.50} \\approx 1.225$ fois plus grand que l'écart-type naïf.
+>
+> 💻 **Le Pont vers Statsmodels :**
+> \`model.fit(cov_type='HAC', cov_kwds={'maxlags': 4})\` applique automatiquement la correction robuste de Newey-West.
         `,
         taskMarkdown: "Ajustez le modèle dynamique avec \`cov_type='HAC'\` et \`cov_kwds={'maxlags': 2}\`.",
         initialCode: `# Écrivez votre code Python ci-dessous :
