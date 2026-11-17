@@ -44,96 +44,52 @@ body {
   display: none !important;
 }
 
-/* 2. Neutralize Tailwind Preflight light-gray border color on math lines & preserve currentColor */
+/* 2. Neutralize Tailwind Preflight light-gray border color & box-sizing on math */
 .katex,
 .katex *,
 .katex ::after,
 .katex ::before {
   border-color: currentColor;
+  box-sizing: content-box;
 }
 
 .katex {
   font-size: 1.04em;
   color: #0369a1; /* sky-700 for mathematical formulas */
+  line-height: 1.2 !important;
   text-rendering: auto;
-  line-height: normal;
   white-space: normal;
   text-indent: 0;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
 }
 
-/* 3. CRITICAL: Neutralize inherited line-height & box-sizing from .prose / blockquote
-      This prevents accents (\bar{R}, \hat{\beta}) and exponents (^2) from being displaced or clipped */
-.katex .vlist-t,
-.katex .vlist-t2 {
-  display: inline-table !important;
-  table-layout: fixed !important;
-  border-collapse: collapse !important;
-  box-sizing: content-box !important;
-}
-
-.katex .vlist-r {
-  display: table-row !important;
-}
-
-.katex .vlist {
-  display: table-cell !important;
-  vertical-align: bottom !important;
-  position: relative !important;
-  box-sizing: content-box !important;
-  line-height: 0 !important;
-}
-
-.katex .vlist > span {
-  display: block !important;
-  height: 0 !important;
-  position: relative !important;
-  line-height: 0 !important;
-  box-sizing: content-box !important;
-}
-
-.katex .vlist > span > span {
+/* Keep atomic math segments together (prevent R^2 splitting across lines inside blockquote) */
+.katex .base {
+  white-space: nowrap !important;
   display: inline-block !important;
-  line-height: normal !important;
 }
 
-.katex .pstrut {
-  display: inline-block !important;
-  overflow: hidden !important;
-  width: 0 !important;
-  line-height: 0 !important;
-  box-sizing: content-box !important;
-}
-
-/* 4. Fraction line styling & visibility: clear, sharp fraction bar */
+/* 3. Fraction line styling & visibility (Tailwind Preflight border-width: 0 override) */
 .katex .mfrac .frac-line {
-  display: block !important;
+  border-bottom-width: 1px !important;
   border-bottom-style: solid !important;
-  border-bottom-width: 0.08em !important;
   border-bottom-color: currentColor !important;
-  min-height: 1.5px !important;
-  box-sizing: content-box !important;
-  margin-top: 0.08em !important;
-  margin-bottom: 0.08em !important;
+  min-height: 1px !important;
 }
 
-/* 5. Accents (bar, hat): ensure exact alignment above character */
-.katex .katex-accent {
-  position: relative !important;
-}
-
-.katex .katex-accent .accent-body {
-  position: relative !important;
-}
-
-/* 6. Display block equations ($$ ... $$) with responsive touch scrolling */
+/* 4. Display block equations ($$ ... $$) with responsive touch scrolling */
 .katex-display {
   display: block !important;
   margin: 1em 0 !important;
   max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 0.5rem 0.25rem !important;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
   text-align: center;
   scrollbar-width: thin;
 }
@@ -178,10 +134,10 @@ blockquote .katex {
 
 blockquote .katex-display {
   margin: 0.6em 0 !important;
-  padding: 0.25rem 0.15rem !important;
+  padding: 0.35rem 0.15rem !important;
   max-width: 100% !important;
   overflow-x: auto !important;
-  overflow-y: visible !important;
+  overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -302,5 +258,17 @@ blockquote pre {
   max-width: 100%;
   height: auto;
   background-color: #ffffff;
+}
+
+/* Explicit Tailwind Preflight protection for KaTeX fractions & display equations */
+.katex .mfrac .frac-line {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+}
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
 }
 
