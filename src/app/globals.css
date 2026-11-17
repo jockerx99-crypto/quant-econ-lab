@@ -100,7 +100,6 @@ body {
   display: inline-block !important;
   overflow: hidden !important;
   width: 0 !important;
-  height: 0 !important;
   line-height: 0 !important;
   box-sizing: content-box !important;
 }
