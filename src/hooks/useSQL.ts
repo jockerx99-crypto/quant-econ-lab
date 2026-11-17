@@ -53,7 +53,7 @@ export function useSQL() {
     setIsReady(false);
     setStatusMessage("Démarrage du worker SQLite WASM...");
 
-    const worker = new Worker("/workers/sql.worker.js");
+    const worker = new Worker("/workers/sql.worker.js?v=5");
     workerRef.current = worker;
 
     worker.onmessage = (event: MessageEvent) => {

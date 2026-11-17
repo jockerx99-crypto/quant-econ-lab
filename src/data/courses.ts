@@ -173,21 +173,20 @@ export const COURSE_MODULES: CourseModule[] = [
         durationMinutes: 5,
         description: "Sélectionnez les polices couvrant un SUV ou une Sportive.",
         theoryMarkdown: `
-### Filtrage d'Ensemble avec IN (...)
+### Disjonction Logique avec OR
 
-> 💡 **Rappel : Simplification des disjonctions d'égalité**
+> 💡 **Rappel : Union de conditions booléennes**
 > 
-> Le prédicat \`IN (valeur1, valeur2, ...)\` teste l'appartenance à un ensemble discret fini :
+> L'opérateur \`OR\` (OU logique) retient une ligne dès qu'**au moins une** des conditions est satisfaite :
 > \`\`\`sql
-> WHERE type_vehicule IN ('SUV', 'Sportive');
-> \`\`\`
-> C'est l'équivalent optimisé et beaucoup plus lisible de :
-> \`\`\`sql
+> SELECT police_id, type_vehicule
+> FROM assures
 > WHERE type_vehicule = 'SUV' OR type_vehicule = 'Sportive';
 > \`\`\`
+> - En présence simultanée de \`AND\` et de \`OR\`, l'opérateur \`AND\` est toujours prioritaire : utilisez systématiquement des parenthèses dès que vous combinez les deux.
 
 > 📊 **Sens Métier :**
-> Permet de regrouper des segments de véhicules présentant des distributions de risques comparables (*véhicules puissants ou à coût de réparation élevé*).
+> Permet de regrouper des segments de véhicules présentant des profils de sinistralité ou de valeur à neuf élevés (*véhicules puissants ou SUV*).
         `,
         taskMarkdown: "Sélectionnez \`police_id\` et \`type_vehicule\` où \`type_vehicule = 'SUV' OR type_vehicule = 'Sportive'\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -206,18 +205,20 @@ export const COURSE_MODULES: CourseModule[] = [
         durationMinutes: 5,
         description: "Filtrez les types de véhicules avec l'opérateur IN.",
         theoryMarkdown: `
-### Recherche de Motifs avec LIKE & Wildcards
+### Filtrage d'Ensemble avec IN (...)
 
-> 💡 **Rappel : Les méta-caractères (jokers) SQL**
+> 💡 **Rappel : Simplification des disjonctions d'égalité**
 > 
-> L'opérateur \`LIKE\` effectue un filtrage par expression de motif sur les colonnes textuelles :
-> - \`%\` (pourcentage) : correspond à **0, 1 ou plusieurs caractères quelconques**.
-> - \`_\` (underscore) : correspond à **exactement 1 caractère**.
-> 
-> Exemples classiques :
-> - \`type_contrat LIKE 'Tous%'\` : commence par "Tous" (ex : 'Tous Risques').
-> - \`type_contrat LIKE '%Risques'\` : se termine par "Risques".
-> - \`type_contrat LIKE '%Étendu%'\` : contient "Étendu" à n'importe quelle position.
+> Le prédicat \`IN (valeur1, valeur2, ...)\` teste l'appartenance à un ensemble discret fini de valeurs :
+> \`\`\`sql
+> SELECT police_id, type_vehicule
+> FROM assures
+> WHERE type_vehicule IN ('Citadine', 'Berline');
+> \`\`\`
+> C'est l'équivalent strict, plus concis et plus lisible que d'enchaîner plusieurs \`OR\` sur la même colonne.
+
+> 📊 **Sens Actuariel :**
+> Permet d'isoler proprement plusieurs modalités tarifaires homogènes (ex. segments grand public par opposition aux véhicules sportifs ou utilitaires).
         `,
         taskMarkdown: "Sélectionnez \`police_id\` et \`type_vehicule\` pour les véhicules \`IN ('Citadine', 'Berline')\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -328,16 +329,21 @@ export const COURSE_MODULES: CourseModule[] = [
         durationMinutes: 5,
         description: "Comptez le nombre total de polices souscrites.",
         theoryMarkdown: `
-### Dédoublonnage d'Attributs avec DISTINCT
+### Comptage d'Effectifs avec COUNT()
 
-> 💡 **Rappel : Suppression des doublons de projection**
+> 💡 **Rappel : Mesurer la taille de l'exposition**
 > 
-> La clause \`DISTINCT\` élimine les doublons du jeu de résultat pour ne conserver qu'une seule occurrence de chaque combinaison de valeurs :
+> La fonction d'agrégation \`COUNT()\` dénombre les observations d'un jeu de données :
+> - \`COUNT(*)\` : compte le nombre total de lignes de la table (y compris avec des valeurs \`NULL\`).
+> - \`COUNT(colonne)\` : compte uniquement les lignes où \`colonne\` est non nulle (\`IS NOT NULL\`).
+> - \`COUNT(DISTINCT region)\` : compte le nombre de modalités uniques.
+> 
 > \`\`\`sql
-> SELECT DISTINCT region FROM assures;
+> SELECT COUNT(*) AS nb_total_polices FROM assures;
 > \`\`\`
-> - Si \`assures\` contient 100 lignes mais seulement 4 régions distinctes, la requête retournera exactement 4 lignes.
-> - Coût algorithmique : le moteur effectue un tri interne ou une table de hachage temporaire $\\mathcal{O}(N \\log N)$.
+
+> 📊 **Sens Actuariel :**
+> Permet de vérifier l'exposition globale du portefeuille (nombre de contrats actifs $N$) avant de calculer des fréquences ou des primes moyennes.
         `,
         taskMarkdown: "Calculez le nombre total de polices sous l'alias \`nb_total_polices\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -356,17 +362,23 @@ export const COURSE_MODULES: CourseModule[] = [
         durationMinutes: 8,
         description: "Calculez le volume total de primes et la prime moyenne.",
         theoryMarkdown: `
-### Fonctions d'Agrégation Scalaires : COUNT & SUM
+### Fonctions d'Agrégation Scalaires : SUM, AVG & ROUND
 
-> 💡 **Rappel : Réduction scalaire d'un ensemble**
+> 💡 **Rappel : Agrégation de montants financiers**
 > 
-> Les fonctions d'agrégation réduisent $N$ lignes en une valeur synthétique unique :
-> - \`COUNT(*)\` : compte le nombre total de lignes (y compris celles contenant des valeurs \`NULL\`).
-> - \`COUNT(colonne)\` : compte uniquement les lignes où \`colonne\` est non-nulle (\`IS NOT NULL\`).
-> - \`SUM(colonne)\` : calcule la somme arithmétique $\\sum_{i=1}^N x_i$.
+> Les fonctions \`SUM\` et \`AVG\` réduisent une colonne numérique en indicateurs globaux :
+> - \`SUM(colonne)\` : calcule le cumul total $\\sum_{i=1}^N x_i$.
+> - \`AVG(colonne)\` : calcule la moyenne arithmétique $\\bar{x} = \\frac{1}{N}\\sum_{i=1}^N x_i$ (en ignorant les \`NULL\`).
+> - \`ROUND(valeur, 2)\` : arrondit proprement à 2 décimales pour l'affichage en euros.
+> 
+> \`\`\`sql
+> SELECT ROUND(SUM(prime_annuelle), 2) AS total_primes,
+>        ROUND(AVG(prime_annuelle), 2) AS prime_moyenne
+> FROM assures;
+> \`\`\`
 
 > 📊 **Sens Actuariel :**
-> \`COUNT(*)\` mesure la taille du portefeuille (exposition totale $N$) et \`SUM(prime_annuelle)\` correspond à la **prime totale encaissée** (chiffre d'affaires brut).
+> \`SUM(prime_annuelle)\` correspond au **chiffre d'affaires encaissé** (primes acquises brutes), tandis que \`AVG(prime_annuelle)\` donne la **prime moyenne commerciale** du portefeuille.
         `,
         taskMarkdown: "Calculez \`total_primes\` (\`ROUND(SUM(prime_annuelle), 2)\`) et \`prime_moyenne\` (\`ROUND(AVG(prime_annuelle), 2)\`).",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -588,12 +600,14 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
 > $$1500 + \\text{NULL} = \\text{NULL}$$
 > La fonction \`COALESCE(valeur, remplacement)\` renvoie le premier argument non nul de sa liste.
 > \`\`\`sql
-> COALESCE(cout_corporel, 0.0) AS corporel_impute
+> SELECT sinistre_id, cout_dommages_materiels,
+>        COALESCE(cout_corporel, 0.0) AS corporel_impute
+> FROM sinistres;
 > \`\`\`
-> Si un sinistre n'a causé aucun dommage corporel (\`NULL\`), il est imputé proprement à \`0.0\`.
+> Si un sinistre de la table \`sinistres\` n'a causé aucun dommage corporel (\`NULL\`), il est imputé proprement à \`0.0\`.
 
 > ⚠️ **Règle pratique :**
-> Toujours utiliser \`COALESCE\` sur les montants de sinistres avant d'effectuer des additions ou des jointures externes.
+> Attention à bien cibler la table \`sinistres\` (et non \`assures\`) qui contient les colonnes \`cout_dommages_materiels\` et \`cout_corporel\`.
         `,
         taskMarkdown: "Affichez \`sinistre_id\`, \`cout_dommages_materiels\` et \`COALESCE(cout_corporel, 0.0) AS corporel_impute\` depuis \`sinistres\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -680,19 +694,20 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
         durationMinutes: 12,
         description: "Imputez 0 € aux polices saines sans sinistre.",
         theoryMarkdown: `
-### Jointures Multiples & Relations Chaînées
+### Combinaison LEFT JOIN + COALESCE : Neutraliser les NULLs de Jointure
 
-> 💡 **Rappel : Composition de relations relationnelles**
+> 💡 **Rappel : Imputer les contrats sans sinistre**
 > 
-> En base de données, les jointures peuvent se chaîner pour relier des entités distantes :
+> Lors d'un \`LEFT JOIN\` entre \`assures a\` et \`sinistres s\`, tout contrat n'ayant déclaré aucun sinistre reçoit la valeur \`NULL\` dans \`s.cout_total\`.
+> En combinant \`LEFT JOIN\` et \`COALESCE\`, on transforme ces \`NULL\` en \`0.0 €\` exploitables dans les sommes et moyennes :
 > \`\`\`sql
-> FROM table_A a
-> LEFT JOIN table_B b ON a.id = b.a_id
-> LEFT JOIN table_C c ON a.id_autre = c.id
+> SELECT a.police_id, COALESCE(s.cout_total, 0.0) AS cout_charge
+> FROM assures a
+> LEFT JOIN sinistres s ON a.police_id = s.police_id;
 > \`\`\`
 
 > ⚠️ **Attention aux doublons de jointure (Fan-out) :**
-> Si une table de droite comporte plusieurs enregistrements pour une même clé, les lignes de la table de gauche seront dupliquées. Pensez à vérifier vos volumes avec \`COUNT(DISTINCT a.police_id)\`.
+> Si un assuré a déclaré plusieurs sinistres dans \`sinistres\`, sa ligne est répétée autant de fois : pensez à agréger (\`SUM\`) ou compter avec \`COUNT(DISTINCT a.police_id)\` pour l'exposition.
         `,
         taskMarkdown: "Affichez \`a.police_id\` et \`COALESCE(s.cout_total, 0.0) AS cout_charge\` via LEFT JOIN.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -742,20 +757,20 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
         durationMinutes: 15,
         description: "Sélectionnez les assurés ayant au moins un sinistre déclaré.",
         theoryMarkdown: `
-### Tables Dérivées (Sous-Requêtes dans le FROM)
+### Sous-Requêtes Filtrantes avec IN (...)
 
-> 💡 **Rappel : Transformer une requête en table temporaire en mémoire**
+> 💡 **Rappel : Filtrer une table à partir d'une autre table sans jointure**
 > 
-> Une requête SQL peut servir de source de données pour une autre requête en la plaçant dans la clause \`FROM\` :
+> Lorsqu'on souhaite isoler les enregistrements de \`assures\` ayant une correspondance dans \`sinistres\`, on utilise \`IN\` avec une sous-requête :
 > \`\`\`sql
-> SELECT sub.region, sub.nb
-> FROM (
->     SELECT region, COUNT(*) AS nb 
->     FROM assures 
->     GROUP BY region
-> ) sub;
+> SELECT police_id, age, region
+> FROM assures
+> WHERE police_id IN (SELECT DISTINCT police_id FROM sinistres);
 > \`\`\`
-> - **Règle ANSI impérative** : Toute sous-requête dans un \`FROM\` doit obligatoirement avoir un alias (ici \`sub\`).
+> - Contrairement à un \`INNER JOIN\`, cette écriture préserve **une seule ligne par contrat** même si un assuré a déclaré plusieurs sinistres !
+
+> 📊 **Sens Actuariel :**
+> Isole le sous-portefeuille sinistré (*risques aggravés*) sans risquer de dupliquer les assurés multi-sinistrés.
         `,
         taskMarkdown: "Affichez \`police_id\`, \`age\` et \`region\` pour les polices présentes dans la table sinistres.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :
@@ -774,20 +789,19 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
         durationMinutes: 15,
         description: "Calculez le ratio S/P régional en pourcentage.",
         theoryMarkdown: `
-### Common Table Expressions (WITH / CTE)
+### Ratio Sinistres / Primes (S/P ou Loss Ratio)
 
-> 💡 **Rappel : Les CTE pour un code SQL lisible et modulaire**
+> 💡 **Rappel théorique : La métrique reine de l'actuariat non-vie**
 > 
-> La clause \`WITH\` définit une table temporaire nommée (*Common Table Expression*) en préambule de la requête :
+> Le Ratio Sinistres sur Primes ($S/P$) mesure la rentabilité technique pure d'un portefeuille d'assurance :
+> $$\\text{Ratio S/P} = \\frac{\\sum \\text{Charge des sinistres}}{\\sum \\text{Primes acquises}} \\times 100$$
+> - **$S/P < 100\\%$** : Le portefeuille est bénéficiaire sur le plan technique.
+> - **$S/P > 100\\%$** : Le portefeuille est déficitaire (la charge des sinistres dépasse les cotisations perçues).
+> 
+> Formule SQL robuste combinant \`LEFT JOIN\` (pour conserver les primes des contrats sans sinistre) et \`COALESCE\` :
 > \`\`\`sql
-> WITH stats_region AS (
->     SELECT region, COUNT(*) AS nb_polices
->     FROM assures
->     GROUP BY region
-> )
-> SELECT * FROM stats_region WHERE nb_polices >= 2;
+> ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp
 > \`\`\`
-> Avantages majeurs : lisibilité exceptionnelle, maintenance aisée et réutilisation de la table temporaire dans plusieurs jointures.
 
 ![Le Loss Ratio S/P en Assurance](/images/theory/fig_v1_loss_ratio.png)
 
@@ -831,20 +845,18 @@ $$\\text{Lignes brutes} \\xrightarrow{\\text{WHERE}} \\text{Lignes filtrées} \\
         durationMinutes: 15,
         description: "Récupérez le taux Euribor du trimestre précédent.",
         theoryMarkdown: `
-### Ratio Sinistres / Primes (S/P ou Loss Ratio)
+### Fenêtrage Temporel : La Fonction LAG() OVER
 
-> 💡 **Rappel théorique : La métrique reine de l'actuariat non-vie**
+> 💡 **Rappel : Accéder à la période précédente ($t - 1$) en SQL**
 > 
-> Le Ratio Sinistres sur Primes ($S/P$) mesure la rentabilité technique pure d'un portefeuille d'assurance :
-> $$\\text{Ratio S/P} = \\frac{\\sum \\text{Charge des sinistres}}{\\sum \\text{Primes acquises}} \\times 100$$
-> - **$S/P < 100\\%$** : Le portefeuille est bénéficiaire sur le plan technique.
-> - **$S/P > 100\\%$** : Le portefeuille est déficitaire (la charge des sinistres dépasse les cotisations perçues).
-
-#### 📌 Formule SQL robuste :
-\`\`\`sql
-ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp
-\`\`\`
-Combiné avec \`LEFT JOIN\` (pour conserver les primes des contrats sans sinistre) et \`GROUP BY a.region\`.
+> En économétrie et en ALM sur séries temporelles (table \`macro_taux\`), la fonction de fenêtre \`LAG(colonne, k)\` récupère la valeur située $k$ trimestres plus tôt selon un tri chronologique explicite :
+> \`\`\`sql
+> SELECT periode, euribor_3m,
+>        LAG(euribor_3m, 1) OVER (ORDER BY periode) AS euribor_prev
+> FROM macro_taux;
+> \`\`\`
+> - Sur la toute première observation (\`2020-Q1\`), il n'existe pas de trimestre antérieur : \`LAG\` retourne logiquement \`NULL\`.
+> - Cette technique est la base du calcul de variations trimestrielles ($\\Delta r_t = r_t - r_{t-1}$) en pur SQL.
         `,
         taskMarkdown: "Affichez \`periode\`, \`euribor_3m\` et \`LAG(euribor_3m, 1) OVER (ORDER BY periode) AS euribor_prev\` depuis \`macro_taux\`.",
         initialCode: `-- Écrivez votre requête SQL ci-dessous :

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -38,6 +38,32 @@ export function TheoryViewer({
   const [viewMode, setViewMode] = useState<"data" | "schema">("data");
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [copiedTable, setCopiedTable] = useState<boolean>(false);
+
+  // Auto-select the primary table relevant to the active exercise in the Database Explorer
+  useEffect(() => {
+    const codeText = `${exercise.solutionCode || ""} ${exercise.taskMarkdown || ""}`.toLowerCase();
+    const tableOrder = [
+      "sinistres",
+      "courbe_taux_oat",
+      "matrice_correlations",
+      "portefeuilles_actifs",
+      "marche_actions",
+      "macro_taux",
+      "assures",
+    ];
+    // Prefer direct FROM <table> match first, then any mention in solution/task
+    const fromMatch = codeText.match(/\bfrom\s+([a-z_][a-z0-9_]*)/);
+    if (fromMatch && tableOrder.includes(fromMatch[1])) {
+      setSelectedTable(fromMatch[1]);
+      setSearchFilter("");
+      return;
+    }
+    const mentioned = tableOrder.find((t) => codeText.includes(t));
+    if (mentioned) {
+      setSelectedTable(mentioned);
+      setSearchFilter("");
+    }
+  }, [exercise.id, exercise.solutionCode, exercise.taskMarkdown]);
 
   const currentDataset =
     APP_DATABASE_TABLES.find((t) => t.tableName === selectedTable || t.name === selectedTable) ||

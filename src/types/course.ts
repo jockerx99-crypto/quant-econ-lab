@@ -5,7 +5,7 @@ export interface ExerciseDataset {
   tableName?: string;
   description: string;
   columns: { name: string; type: string; description: string }[];
-  sampleRows?: Record<string, string | number>[];
+  sampleRows?: Record<string, string | number | null>[];
 }
 
 export interface Exercise {

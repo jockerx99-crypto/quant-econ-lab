@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quantecon-v4';
+const CACHE_NAME = 'quantecon-v5';
 const ASSETS_TO_CACHE = [
   '/manifest.json',
   '/icons/icon-192.png',
@@ -34,9 +34,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // 1. Navigation & Next.js chunks : Network-First strategy
-  // Always fetch latest code and courses from network, fallback to cache when offline
-  if (event.request.mode === 'navigate' || event.request.url.includes('/_next/')) {
+  // 1. Navigation, Next.js chunks & Web Workers (SQL/Pyodide) : Network-First strategy
+  // Always fetch latest code, workers and SQLite seed database from network
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.url.includes('/_next/') ||
+    event.request.url.includes('/workers/') ||
+    event.request.url.includes('/sqljs/')
+  ) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
