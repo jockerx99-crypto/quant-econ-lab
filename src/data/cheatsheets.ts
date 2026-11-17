@@ -1,0 +1,1111 @@
+export interface CheatSheetEntry {
+  id: string;
+  title: string;
+  exerciseRef: string;
+  syntax?: string;
+  formula?: string;
+  description: string;
+  exampleCode: string;
+  tags: string[];
+}
+
+export interface CheatSheetSection {
+  id: string;
+  title: string;
+  subtitle: string;
+  entries: CheatSheetEntry[];
+}
+
+export interface ModuleCheatSheet {
+  moduleId: string;
+  version: "V1" | "V2";
+  moduleNumber: number;
+  title: string;
+  language: "sql" | "python";
+  overview: string;
+  datasetsSummary: string[];
+  sections: CheatSheetSection[];
+}
+
+const r = String.raw;
+
+export const MODULE_CHEAT_SHEETS: ModuleCheatSheet[] = [
+  // =========================================================================
+  // V1 — MODULE 1 : SQL POUR L'ACTUARIAT & LA DATA PREP
+  // =========================================================================
+  {
+    moduleId: "sql-actuariat",
+    version: "V1",
+    moduleNumber: 1,
+    title: "SQL pour l'Actuariat & la Data Prep",
+    language: "sql",
+    overview:
+      "Toutes les clauses SQL (SQLite) essentielles pour extraire, nettoyer, joindre des polices d'assurance, calculer des ratios S/P et appliquer des fonctions de fenêtrage.",
+    datasetsSummary: [
+      "assures : police_id, assure_id, age, sexe, region, type_contrat, bonus_malus, anciennete_permis, type_vehicule, puissance_fiscale, usage, prime_annuelle",
+      "sinistres : sinistre_id, police_id, date_survenance, date_declaration, nature_sinistre, cout_dommages_materiels, cout_corporel, cout_total, responsabilite_pct, statut_dossier",
+      "macro_taux : periode, euribor_3m, oat_10y, spread_credit_bbb, inflation_hicp, pib_croissance, cac40_rendement",
+    ],
+    sections: [
+      {
+        id: "sql-v1-extract",
+        title: "1. Extraction, Filtrage & Tri",
+        subtitle: "Projeter, filtrer les segments de portefeuille et ordonner les résultats",
+        entries: [
+          {
+            id: "sql-v1-select-as",
+            title: "Projection, Dédoublonnage & Alias",
+            exerciseRef: "Ex. 1–2, 23",
+            syntax: "SELECT DISTINCT col1, col2 AS alias FROM table;",
+            description:
+              "Sélectionne uniquement les colonnes utiles et renomme une colonne ou un calcul via `AS`. `DISTINCT` supprime les doublons.",
+            exampleCode: r`SELECT DISTINCT region AS code_region, police_id, prime_annuelle AS prime_nette
+FROM assures;`,
+            tags: ["SELECT", "AS", "DISTINCT", "FROM", "alias", "projection"],
+          },
+          {
+            id: "sql-v1-where-bool",
+            title: "Filtrage WHERE & Logique Booléenne (AND / OR)",
+            exerciseRef: "Ex. 3–6",
+            syntax: "WHERE cond1 AND (cond2 OR cond3)",
+            description:
+              "Filtre les lignes avant toute agrégation. Attention : `AND` est prioritaire sur `OR` — utilisez toujours des parenthèses dès qu'un `OR` coexiste avec un `AND`. Les chaînes utilisent des guillemets simples `'IDF'`.",
+            exampleCode: r`SELECT police_id, age, region, bonus_malus
+FROM assures
+WHERE region = 'IDF'
+  AND (type_vehicule = 'SUV' OR type_vehicule = 'Sportive')
+  AND bonus_malus > 0.8;`,
+            tags: ["WHERE", "AND", "OR", "filtrage", "parenthèses"],
+          },
+          {
+            id: "sql-v1-in-between",
+            title: "Liste de Valeurs (IN) & Intervalle Continu (BETWEEN)",
+            exerciseRef: "Ex. 7–8",
+            syntax: "WHERE col IN ('A', 'B') | WHERE col BETWEEN a AND b",
+            description:
+              "`IN` remplace une suite de `OR` sur une même colonne. `BETWEEN a AND b` inclut les deux bornes (`a <= col <= b`).",
+            exampleCode: r`SELECT police_id, age, type_vehicule
+FROM assures
+WHERE type_vehicule IN ('Citadine', 'Berline')
+  AND age BETWEEN 25 AND 45;`,
+            tags: ["IN", "BETWEEN", "intervalle", "liste"],
+          },
+          {
+            id: "sql-v1-order-limit",
+            title: "Tri (ORDER BY) & Extraction Top N (LIMIT)",
+            exerciseRef: "Ex. 9–10",
+            syntax: "ORDER BY col DESC LIMIT n;",
+            description:
+              "Trie par ordre décroissant (`DESC`) ou croissant (`ASC`, par défaut), puis ne conserve que les `n` premières lignes.",
+            exampleCode: r`SELECT police_id, type_vehicule, prime_annuelle
+FROM assures
+ORDER BY prime_annuelle DESC
+LIMIT 5;`,
+            tags: ["ORDER BY", "DESC", "ASC", "LIMIT", "top"],
+          },
+        ],
+      },
+      {
+        id: "sql-v1-agg",
+        title: "2. Agrégations, Segmentation & Nettoyage",
+        subtitle: "Résumer un portefeuille, recoder des variables et imputer les valeurs manquantes",
+        entries: [
+          {
+            id: "sql-v1-agg-funcs",
+            title: "Agrégats & Arrondi : COUNT, SUM, AVG, MIN, MAX, ROUND",
+            exerciseRef: "Ex. 11–13",
+            syntax: "ROUND(AVG(col), 2), COUNT(*), SUM(col), MIN(col), MAX(col)",
+            description:
+              "`COUNT(*)` compte toutes les lignes (y compris NULL), tandis que `COUNT(col)`, `SUM`, `AVG`, `MIN`, `MAX` ignorent les valeurs `NULL`.",
+            exampleCode: r`SELECT COUNT(*) AS nb_polices,
+       ROUND(SUM(prime_annuelle), 2) AS total_primes,
+       ROUND(AVG(prime_annuelle), 2) AS prime_moyenne,
+       MIN(prime_annuelle) AS prime_min,
+       MAX(prime_annuelle) AS prime_max
+FROM assures;`,
+            tags: ["COUNT", "SUM", "AVG", "MIN", "MAX", "ROUND", "agrégation"],
+          },
+          {
+            id: "sql-v1-groupby-having",
+            title: "Regroupement (GROUP BY) & Filtrage Post-Agrégation (HAVING)",
+            exerciseRef: "Ex. 14–16",
+            syntax: "SELECT dim, COUNT(*) FROM table GROUP BY dim HAVING COUNT(*) >= 2;",
+            description:
+              "Règle d'or SQL : toute colonne du `SELECT` hors fonction d'agrégation doit figurer dans `GROUP BY`. Utilisez `WHERE` pour filtrer les lignes brutes et `HAVING` pour filtrer les groupes agrégés.",
+            exampleCode: r`SELECT region,
+       COUNT(*) AS nb_polices,
+       ROUND(AVG(prime_annuelle), 2) AS prime_moyenne
+FROM assures
+GROUP BY region
+HAVING COUNT(*) >= 2
+ORDER BY prime_moyenne DESC;`,
+            tags: ["GROUP BY", "HAVING", "WHERE", "segmentation"],
+          },
+          {
+            id: "sql-v1-case-when",
+            title: "Discrétisation Conditionnelle (CASE WHEN)",
+            exerciseRef: "Ex. 17",
+            syntax: "CASE WHEN cond THEN val1 ELSE val2 END AS col",
+            description:
+              "Permet de créer des classes tarifaires ou tranches d'âge directement en SQL (équivalent d'un `if / elif / else`).",
+            exampleCode: r`SELECT police_id, prime_annuelle,
+       CASE
+         WHEN prime_annuelle > 1000 THEN 'Élevée'
+         WHEN prime_annuelle >= 600 THEN 'Intermédiaire'
+         ELSE 'Standard'
+       END AS categorie_prime
+FROM assures;`,
+            tags: ["CASE", "WHEN", "ELSE", "END", "catégorie", "segmentation"],
+          },
+          {
+            id: "sql-v1-coalesce",
+            title: "Gestion des Valeurs Nulles (COALESCE)",
+            exerciseRef: "Ex. 18, 21",
+            syntax: "COALESCE(colonne_nullable, 0.0)",
+            description:
+              "Remplace tout `NULL` (par ex. `cout_corporel` vide ou police sans sinistre après un `LEFT JOIN`) par une valeur numérique neutre `0.0` afin d'éviter la propagation du `NULL` dans les sommes.",
+            exampleCode: r`SELECT sinistre_id,
+       cout_dommages_materiels,
+       COALESCE(cout_corporel, 0.0) AS corporel_impute,
+       cout_total
+FROM sinistres;`,
+            tags: ["COALESCE", "NULL", "imputation", "cout_corporel", "cout_dommages_materiels"],
+          },
+        ],
+      },
+      {
+        id: "sql-v1-joins",
+        title: "3. Jointures Actuarielles, Sous-Requêtes & Ratio S/P",
+        subtitle: "Relier polices et sinistres sans biaiser l'exposition au risque",
+        entries: [
+          {
+            id: "sql-v1-inner-vs-left",
+            title: "INNER JOIN vs LEFT JOIN + COALESCE (Exposition)",
+            exerciseRef: "Ex. 19–21",
+            syntax: "FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id",
+            description:
+              "`INNER JOIN` ne retourne que les assurés ayant au moins un sinistre (biais de sélection !). `LEFT JOIN` conserve **100 % du portefeuille assuré** ; combiné à `COALESCE(s.cout_total, 0.0)`, une police sans sinistre compte pour `0.0`.",
+            exampleCode: r`SELECT a.police_id,
+       a.region,
+       a.prime_annuelle,
+       COALESCE(s.cout_total, 0.0) AS cout_charge
+FROM assures a
+LEFT JOIN sinistres s ON a.police_id = s.police_id;`,
+            tags: ["INNER JOIN", "LEFT JOIN", "ON", "exposition", "COALESCE"],
+          },
+          {
+            id: "sql-v1-subqueries",
+            title: "Sous-Requêtes Scalaires & Filtrantes (IN)",
+            exerciseRef: "Ex. 22–23",
+            syntax: "WHERE col > (SELECT AVG(col) FROM table)",
+            description:
+              "Une sous-requête scalaire renvoie une valeur unique utilisable dans un comparateur (`>`, `<`). Une sous-requête multi-lignes s'utilise avec `IN (...)` pour filtrer à partir d'une autre table.",
+            exampleCode: r`-- Assurés payant plus que la moyenne et ayant eu au moins un sinistre
+SELECT police_id, age, region, prime_annuelle
+FROM assures
+WHERE prime_annuelle > (SELECT AVG(prime_annuelle) FROM assures)
+  AND police_id IN (SELECT DISTINCT police_id FROM sinistres);`,
+            tags: ["subquery", "sous-requête", "AVG", "IN", "DISTINCT"],
+          },
+          {
+            id: "sql-v1-loss-ratio",
+            title: "Loss Ratio S/P (Sinistres sur Primes)",
+            exerciseRef: "Ex. 24",
+            syntax: "ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2)",
+            formula: r`$$\text{Ratio S/P (en \%)} = \frac{\sum \text{Coûts totaux de sinistres}}{\sum \text{Primes annuelles acquises}} \times 100$$`,
+            description:
+              "Indicateur clé de rentabilité technique en IARD. Un S/P $> 100\\%$ signifie que les sinistres dépassent les primes encaissées. Exige un `LEFT JOIN` pour inclure les primes des polices non sinistrées.",
+            exampleCode: r`SELECT a.region,
+       ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp
+FROM assures a
+LEFT JOIN sinistres s ON a.police_id = s.police_id
+GROUP BY a.region
+ORDER BY ratio_sp DESC;`,
+            tags: ["S/P", "loss ratio", "rentabilité", "sinistralité", "GROUP BY"],
+          },
+        ],
+      },
+      {
+        id: "sql-v1-windows",
+        title: "4. Fonctions de Fenêtrage (Window Functions)",
+        subtitle: "Analyser des séries macroéconomiques et classer des segments sans perdre le grain",
+        entries: [
+          {
+            id: "sql-v1-lag",
+            title: "Décalage Temporel : LAG() OVER (...)",
+            exerciseRef: "Ex. 25",
+            syntax: "LAG(col, offset) OVER (ORDER BY periode)",
+            formula: r`$$\Delta X_t = X_t - X_{t-1}$$`,
+            description:
+              "Accède à la ligne précédente (`offset = 1`) selon un ordre chronologique, sans recourir à une auto-jointure complexe.",
+            exampleCode: r`SELECT periode,
+       euribor_3m,
+       LAG(euribor_3m, 1) OVER (ORDER BY periode) AS euribor_prev,
+       ROUND(euribor_3m - LAG(euribor_3m, 1) OVER (ORDER BY periode), 2) AS variation_taux
+FROM macro_taux;`,
+            tags: ["LAG", "OVER", "ORDER BY", "window", "série temporelle", "macro_taux"],
+          },
+          {
+            id: "sql-v1-dense-rank",
+            title: "Classement sans Ex-Æquo Perdus : DENSE_RANK()",
+            exerciseRef: "Ex. 26",
+            syntax: "DENSE_RANK() OVER (ORDER BY agrégat DESC)",
+            description:
+              "Attribue un rang `1, 2, 3...` sans laisser de trou en cas d'égalité (contrairement à `RANK()` qui passerait de `1` à `3`). Se combine directement après un `GROUP BY` sur un agrégat.",
+            exampleCode: r`SELECT a.region,
+       ROUND(SUM(COALESCE(s.cout_total, 0)), 2) AS total_cout,
+       DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
+FROM assures a
+LEFT JOIN sinistres s ON a.police_id = s.police_id
+GROUP BY a.region
+ORDER BY rang_cout ASC;`,
+            tags: ["DENSE_RANK", "OVER", "classement", "sinistralité"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V1 — MODULE 2 : PYTHON POUR L'ÉCONOMÉTRIE, RISQUE & PRICING
+  // =========================================================================
+  {
+    moduleId: "python-econometrie",
+    version: "V1",
+    moduleNumber: 2,
+    title: "Python pour l'Économétrie, Risque & Pricing",
+    language: "python",
+    overview:
+      "Mémento complet de statistiques descriptives Pandas, estimation MCO / OLS (Statsmodels & NumPy), diagnostics de Gauss-Markov, séries temporelles (ADF, HAC) et risque de taux ALM.",
+    datasetsSummary: [
+      "df (DataFrame pandas préchargé = macro_taux) : periode, euribor_3m, oat_10y, spread_credit_bbb, inflation_hicp, pib_croissance, cac40_rendement",
+      "Imports principaux : pandas (pd), numpy (np), statsmodels.api (sm), matplotlib.pyplot (plt)",
+    ],
+    sections: [
+      {
+        id: "py-v1-eda",
+        title: "1. Exploration Pandas, Moments & Outliers",
+        subtitle: "Décrire la distribution empirique et détecter les valeurs aberrantes",
+        entries: [
+          {
+            id: "py-v1-inspect",
+            title: "Aperçu & Dimensions (.head, .shape, colonne dérivée)",
+            exerciseRef: "Ex. 1–2, 5",
+            syntax: "df.head(n) | df.shape | df['nouvelle'] = df['a'] - df['b']",
+            description:
+              "`df.shape` renvoie le tuple `(N_lignes, K_colonnes)` donnant directement la taille d'échantillon $N$. On crée une nouvelle variable par simple soustraction vectorisée (ex. pente des taux).",
+            exampleCode: r`print("Dimensions (N, K) :", df.shape)
+df['pente_taux'] = df['oat_10y'] - df['euribor_3m']
+print(df[['periode', 'euribor_3m', 'oat_10y', 'pente_taux']].head(3))`,
+            tags: ["pandas", "head", "shape", "pente", "spread"],
+          },
+          {
+            id: "py-v1-moments",
+            title: "Moyenne, Écart-Type, Médiane & Quantiles",
+            exerciseRef: "Ex. 3–4",
+            syntax: "s.mean(), s.std(), s.median(), s.quantile(q)",
+            formula: r`$$\bar{x} = \frac{1}{N}\sum_{i=1}^N x_i, \qquad s = \sqrt{\frac{1}{N-1}\sum_{i=1}^N (x_i - \bar{x})^2}$$`,
+            description:
+              "Par défaut, `.std()` de Pandas utilise `ddof=1` (estimateur sans biais). `.quantile(0.95)` retourne le 95e centile.",
+            exampleCode: r`oat_moy = df['oat_10y'].mean()
+oat_vol = df['oat_10y'].std()
+med_inf = df['inflation_hicp'].median()
+q95_inf = df['inflation_hicp'].quantile(0.95)
+print(f"OAT moy: {oat_moy:.3f} % | Vol: {oat_vol:.3f} % | Q95 Inf: {q95_inf:.2f} %")`,
+            tags: ["mean", "std", "median", "quantile", "volatilité", "espérance"],
+          },
+          {
+            id: "py-v1-corr-iqr",
+            title: "Corrélation Linéaire (.corr) & Outliers IQR de Tukey",
+            exerciseRef: "Ex. 6–7",
+            syntax: "df[cols].corr() | IQR = Q75 - Q25",
+            formula: r`$$IQR = Q_{75} - Q_{25}, \qquad \text{Seuil Haut} = Q_{75} + 1.5 \times IQR$$`,
+            description:
+              "La matrice `.corr()` mesure la liaison linéaire entre paires de variables. L'écart interquartile (IQR) détecte les chocs extrêmes au-dessus de $Q_{75} + 1.5 \cdot IQR$ ou sous $Q_{25} - 1.5 \cdot IQR$.",
+            exampleCode: r`print(df[['euribor_3m', 'oat_10y', 'inflation_hicp']].corr().round(3))
+
+q25 = df['inflation_hicp'].quantile(0.25)
+q75 = df['inflation_hicp'].quantile(0.75)
+iqr = q75 - q25
+seuil_haut = q75 + 1.5 * iqr
+print(f"IQR = {iqr:.2f} | Seuil Tukey = {seuil_haut:.2f}")`,
+            tags: ["corr", "quantile", "IQR", "Tukey", "outlier"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-ols",
+        title: "2. Régression MCO / OLS & Algèbre Matricielle",
+        subtitle: "Estimer les paramètres, tester leur significativité et mesurer R²",
+        entries: [
+          {
+            id: "py-v1-ols-fit",
+            title: "Spécification OLS & Ordonnée à l'Origine (sm.add_constant)",
+            exerciseRef: "Ex. 8–9, 15",
+            syntax: "X = sm.add_constant(df[['x1', 'x2']]); model = sm.OLS(y, X).fit()",
+            formula: r`$$Y_t = \beta_0 + \beta_1 X_{1,t} + \dots + \beta_K X_{K,t} + \varepsilon_t$$`,
+            description:
+              "`sm.OLS` **n'ajoute pas** automatiquement de constante $\\beta_0$ : il faut impérativement passer `sm.add_constant(...)`. Notez l'ordre `(y, X)` (variable expliquée en premier !).",
+            exampleCode: r`import statsmodels.api as sm
+
+X = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+y = df['oat_10y']
+model = sm.OLS(y, X).fit()
+print(model.summary())`,
+            tags: ["statsmodels", "OLS", "add_constant", "fit", "summary"],
+          },
+          {
+            id: "py-v1-student",
+            title: "Coefficients, Statistique de Student & P-valeur",
+            exerciseRef: "Ex. 10–11",
+            syntax: "model.params, model.tvalues, model.pvalues['var']",
+            formula: r`$$t_j = \frac{\hat{\beta}_j}{\operatorname{SE}(\hat{\beta}_j)} \quad (\text{Test } H_0 : \beta_j = 0)$$`,
+            description:
+              "Si `pvalues[var] < 0.05` (ou $|t| > 2$ approximativement), on rejette $H_0$ au seuil de 5 % : la variable a un effet statistiquement significatif.",
+            exampleCode: r`print("Coefficients :\n", model.params)
+print("Statistiques t :\n", model.tvalues)
+p_val = model.pvalues['euribor_3m']
+print(f"P-valeur Euribor : {p_val:.4e}")`,
+            tags: ["params", "pvalues", "tvalues", "Student", "significativité"],
+          },
+          {
+            id: "py-v1-r2-fstat",
+            title: "Qualité d'Ajustement (R², R² Ajusté) & Test de Fisher",
+            exerciseRef: "Ex. 12, 16",
+            syntax: "model.rsquared, model.rsquared_adj, model.fvalue, model.f_pvalue",
+            formula: r`$$R^2 = 1 - \frac{SCR}{SCT}, \quad \bar{R}^2 = 1 - \frac{SCR / (N - K - 1)}{SCT / (N - 1)}, \quad F = \frac{SCE / K}{SCR / (N - K - 1)}$$`,
+            description:
+              "$R^2$ augmente mécaniquement dès qu'on ajoute une variable ; $\\bar{R}^2$ pénalise les degrés de liberté. La statistique $F$ teste la significativité conjointe de toutes les variables explicatives.",
+            exampleCode: r`print(f"R² : {model.rsquared:.4f} | R² ajusté : {model.rsquared_adj:.4f}")
+print(f"F-stat : {model.fvalue:.2f} | Prob(F) : {model.f_pvalue:.4e}")`,
+            tags: ["rsquared", "rsquared_adj", "fvalue", "f_pvalue", "Fisher", "R2"],
+          },
+          {
+            id: "py-v1-ols-matrix",
+            title: "Formule Matricielle MCO & Propriété des Résidus",
+            exerciseRef: "Ex. 13–14",
+            syntax: "beta = np.linalg.inv(X.T @ X) @ X.T @ y | model.resid",
+            formula: r`$$\hat{\beta} = (X'X)^{-1}X'y, \qquad \frac{1}{N}\sum_{i=1}^N \hat{\varepsilon}_i = 0$$`,
+            description:
+              "Avec une constante dans $X$, les résidus $\\hat{\\varepsilon} = y - X\\hat{\\beta}$ (`model.resid`) ont toujours une moyenne nulle (aux erreurs d'arrondi flottant près) et sont orthogonaux aux régresseurs.",
+            exampleCode: r`import numpy as np
+import statsmodels.api as sm
+
+X = sm.add_constant(df[['euribor_3m']]).values
+y = df['oat_10y'].values
+beta_numpy = np.linalg.inv(X.T @ X) @ X.T @ y
+print("Beta NumPy :", beta_numpy)`,
+            tags: ["linalg.inv", "matrice", "resid", "résidus", "MCO"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-diag",
+        title: "3. Diagnostics Économétriques (Gauss-Markov)",
+        subtitle: "Vérifier colinéarité, homoscédasticité et normalité des erreurs",
+        entries: [
+          {
+            id: "py-v1-vif",
+            title: "Multicolinéarité : Facteur d'Inflation de Variance (VIF)",
+            exerciseRef: "Ex. 17",
+            syntax: "variance_inflation_factor(X.values, idx_col)",
+            formula: r`$$VIF_j = \frac{1}{1 - R_j^2}$$`,
+            description:
+              "Mesure dans quelle mesure la variance de $\\hat{\\beta}_j$ est gonflée par la corrélation entre régresseurs. `idx_col = 0` correspond à la constante : commencez à `1` pour vos variables. Seuil d'alerte usuel : $VIF > 5$ ou $10$.",
+            exampleCode: r`from statsmodels.stats.outliers_influence import variance_inflation_factor
+import statsmodels.api as sm
+
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+vif_euribor = variance_inflation_factor(X_multi.values, 1)
+print(f"VIF Euribor : {vif_euribor:.3f}")`,
+            tags: ["VIF", "multicolinéarité", "variance_inflation_factor"],
+          },
+          {
+            id: "py-v1-bp-white",
+            title: "Hétéroscédasticité : Breusch-Pagan & Correction de White (HC1)",
+            exerciseRef: "Ex. 18–19",
+            syntax: "het_breuschpagan(resid, X) | .fit(cov_type='HC1')",
+            formula: r`$$LM = N \cdot R^2_{\text{aux}} \sim \chi^2(K)$$`,
+            description:
+              "Si la p-valeur de Breusch-Pagan est $< 0.05$, la variance des résidus n'est pas constante. Utilisez `cov_type='HC1'` (White) pour corriger les écarts-types `.bse` et `.pvalues` sans biaiser $\\hat{\\beta}$.",
+            exampleCode: r`from statsmodels.stats.diagnostic import het_breuschpagan
+import statsmodels.api as sm
+
+X = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+model = sm.OLS(df['oat_10y'], X).fit()
+lm_stat, p_bp, _, _ = het_breuschpagan(model.resid, X)
+print(f"Breusch-Pagan p-val : {p_bp:.4e}")
+
+model_hc1 = sm.OLS(df['oat_10y'], X).fit(cov_type='HC1')
+print("SE robustes HC1 :\n", model_hc1.bse)`,
+            tags: ["Breusch-Pagan", "hétéroscédasticité", "HC1", "White", "bse"],
+          },
+          {
+            id: "py-v1-jb",
+            title: "Normalité des Perturbations : Test de Jarque-Bera",
+            exerciseRef: "Ex. 20",
+            syntax: "jb_stat, p_val, skew, kurt = jarque_bera(model.resid)",
+            formula: r`$$JB = \frac{N}{6}\left(S^2 + \frac{(K - 3)^2}{4}\right) \sim \chi^2(2)$$`,
+            description:
+              "Teste simultanément l'asymétrie ($S = 0$) et l'aplatissement gaussien ($K = 3$). Rejet de la normalité si `p_val < 0.05` (soit $JB > 5.99$).",
+            exampleCode: r`from statsmodels.stats.stattools import jarque_bera
+
+jb_stat, p_jb, skew, kurt = jarque_bera(model.resid)
+print(f"JB = {jb_stat:.2f} | p-val = {p_jb:.4f} | Skew = {skew:.2f} | Kurt = {kurt:.2f}")`,
+            tags: ["Jarque-Bera", "normalité", "skewness", "kurtosis"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-ts-alm",
+        title: "4. Séries Temporelles, Matplotlib & Risque ALM",
+        subtitle: "Éviter les régressions fallacieuses et chiffrer la sensibilité aux taux",
+        entries: [
+          {
+            id: "py-v1-dw-adf",
+            title: "Autocorrélation (Durbin-Watson) & Stationnarité (ADF)",
+            exerciseRef: "Ex. 21–23",
+            syntax: "durbin_watson(resid) | adfuller(serie.diff().dropna())",
+            formula: r`$$DW = \frac{\sum_{t=2}^T (\hat{e}_t - \hat{e}_{t-1})^2}{\sum_{t=1}^T \hat{e}_t^2} \approx 2(1 - \hat{\rho}_1)$$`,
+            description:
+              "$DW \\approx 2$ indique l'absence d'autocorrélation d'ordre 1 ($DW \\ll 2 \\Rightarrow$ autocorrélation positive). Si `adfuller(serie)[1] > 0.05`, la série a une racine unitaire : travaillez en différences premières `.diff().dropna()`.",
+            exampleCode: r`from statsmodels.stats.stattools import durbin_watson
+from statsmodels.tsa.stattools import adfuller
+
+print(f"Durbin-Watson : {durbin_watson(model.resid):.3f}")
+oat_diff = df['oat_10y'].diff().dropna()
+print(f"P-valeur ADF (différence 1re) : {adfuller(oat_diff)[1]:.4e}")`,
+            tags: ["Durbin-Watson", "ADF", "adfuller", "diff", "stationnarité"],
+          },
+          {
+            id: "py-v1-hac",
+            title: "Estimation Robuste HAC de Newey-West",
+            exerciseRef: "Ex. 24",
+            syntax: "sm.OLS(y, X).fit(cov_type='HAC', cov_kwds={'maxlags': 2})",
+            description:
+              "Fournit des écarts-types convergents en présence simultanée d'hétéroscédasticité **et** d'autocorrélation sérielle jusqu'au retard `maxlags`.",
+            exampleCode: r`import statsmodels.api as sm
+
+df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()
+X_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])
+model_hac = sm.OLS(df_diff['oat_10y'], X_dyn).fit(cov_type='HAC', cov_kwds={'maxlags': 2})
+print(model_hac.summary())`,
+            tags: ["HAC", "Newey-West", "maxlags", "autocorrélation"],
+          },
+          {
+            id: "py-v1-plot-alm",
+            title: "Graphique Observé vs Prédit & Sensibilité de Duration (ALM)",
+            exerciseRef: "Ex. 25–26",
+            syntax: "model.fittedvalues | plt.plot(...) | perte = -D_mod * delta_y * V0",
+            formula: r`$$\Delta V \approx -D^* \cdot \Delta y \cdot V_0$$`,
+            description:
+              "`model.fittedvalues` extrait $\\hat{y}$. En gestion actif-passif (ALM), la duration modifiée $D^*$ mesure la perte relative d'un portefeuille obligataire pour un choc de taux $\\Delta y$.",
+            exampleCode: r`# Sensibilité obligataire (choc de taux +200 bps = +0.02)
+V0, D_mod, dy = 100_000_000, 7.0, 0.02
+perte_estimee = -D_mod * dy * V0
+print(f"Perte en capital ALM : {perte_estimee:,.2f} EUR")`,
+            tags: ["matplotlib", "fittedvalues", "duration", "ALM", "choc de taux"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V2 — MODULE 1 : SQL AVANCÉ & DATA ENGINEERING FINANCIER
+  // =========================================================================
+  {
+    moduleId: "sql-quant",
+    version: "V2",
+    moduleNumber: 1,
+    title: "SQL Avancé & Data Engineering Financier",
+    language: "sql",
+    overview:
+      "Fenêtres glissantes de marché, log-rendements, drawdown, jointures temporelles ASOF, CTE récursives, covariance SQL et backtesting anti-lookahead.",
+    datasetsSummary: [
+      "marche_actions : id, date, ticker, nom_societe, secteur, prix_ouverture, prix_haut, prix_bas, prix_cloture, volume, rendement_journalier",
+      "courbe_taux_oat : date, taux_1y, taux_2y, taux_5y, taux_10y, taux_20y, taux_30y",
+      "portefeuilles_actifs : ticker, nom, secteur, classe_actif, rendement_espere, volatilite, beta_marche, score_esg, ratio_sharpe",
+      "matrice_correlations : actif_a, actif_b, correlation",
+    ],
+    sections: [
+      {
+        id: "sql-v2-ts",
+        title: "1. Séries Financières, Fenêtres Glissantes & Drawdown",
+        subtitle: "Calculer des rendements continus, moyennes mobiles et pertes maximales",
+        entries: [
+          {
+            id: "sql-v2-logret",
+            title: "Log-Rendements Journaliers (LN & LAG)",
+            exerciseRef: "Ex. 1",
+            syntax: "LN(prix_cloture / LAG(prix_cloture, 1) OVER (ORDER BY date))",
+            formula: r`$$r_t = \ln\left(\frac{P_t}{P_{t-1}}\right)$$`,
+            description:
+              "Le log-rendement est additif dans le temps ($r_{t_0 \\to t_k} = \\sum r_t$). `LAG` récupère la clôture $P_{t-1}$ ordonnée par `date` (utilisez `PARTITION BY ticker` si plusieurs actions).",
+            exampleCode: r`SELECT date,
+       prix_cloture,
+       LN(prix_cloture / LAG(prix_cloture, 1) OVER (ORDER BY date)) AS rendement_log
+FROM marche_actions
+WHERE ticker = 'TTE'
+ORDER BY date;`,
+            tags: ["LN", "LAG", "log-rendement", "marche_actions", "OVER"],
+          },
+          {
+            id: "sql-v2-sma-golden",
+            title: "Fenêtre Mobile (ROWS BETWEEN) & Signal Golden Cross",
+            exerciseRef: "Ex. 2–3",
+            syntax: "AVG(col) OVER (ORDER BY date ROWS BETWEEN k PRECEDING AND CURRENT ROW)",
+            description:
+              "`ROWS BETWEEN k PRECEDING AND CURRENT ROW` inclut la ligne courante plus les $k$ lignes précédentes (donc $k+1$ jours au total). On génère un signal via `CASE WHEN sma_courte >= sma_longue THEN 'ACHAT' ...`.",
+            exampleCode: r`SELECT date,
+       prix_cloture,
+       AVG(prix_cloture) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS sma_2,
+       AVG(prix_cloture) OVER (ORDER BY date ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS sma_4
+FROM marche_actions
+WHERE ticker = 'MC'
+ORDER BY date;`,
+            tags: ["ROWS BETWEEN", "PRECEDING", "CURRENT ROW", "moyenne mobile", "Golden Cross"],
+          },
+          {
+            id: "sql-v2-drawdown",
+            title: "Maximum Drawdown Cumulatif (UNBOUNDED PRECEDING)",
+            exerciseRef: "Ex. 4",
+            syntax: "MAX(prix) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
+            formula: r`$$\text{Drawdown}_t \text{ (\%)} = \frac{P_t - \max_{u \le t} P_u}{\max_{u \le t} P_u} \times 100$$`,
+            description:
+              "Calcule le sommet historique atteint jusqu'à la date $t$ (*running peak*), puis mesure l'écart relatif en pourcentage par rapport à ce plus haut.",
+            exampleCode: r`SELECT date,
+       prix_cloture,
+       MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS sommet_cumule,
+       ((prix_cloture - MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW))
+        / MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) * 100 AS drawdown_pct
+FROM marche_actions
+WHERE ticker = 'TTE'
+ORDER BY date;`,
+            tags: ["drawdown", "UNBOUNDED PRECEDING", "running peak", "MAX"],
+          },
+        ],
+      },
+      {
+        id: "sql-v2-struct",
+        title: "2. Quantiles, Jointures Asynchrones & CTE Récursives",
+        subtitle: "Segmenter, aligner des horodatages différents et construire des arbres",
+        entries: [
+          {
+            id: "sql-v2-ntile",
+            title: "Déciles & Quantiles de Performance (NTILE)",
+            exerciseRef: "Ex. 5",
+            syntax: "NTILE(k) OVER (ORDER BY rendement_journalier DESC)",
+            description:
+              "Découpe les lignes en $k$ groupes égaux (quartiles pour $k=4$, déciles pour $k=10$, moitié haute/basse pour $k=2$) pour construire des portefeuilles *Long-Short*.",
+            exampleCode: r`SELECT ticker, nom_societe, rendement_journalier,
+       NTILE(2) OVER (ORDER BY rendement_journalier DESC) AS groupe_perf
+FROM marche_actions
+WHERE date = '2024-01-02'
+ORDER BY rendement_journalier DESC;`,
+            tags: ["NTILE", "quantiles", "déciles", "ranking"],
+          },
+          {
+            id: "sql-v2-asof",
+            title: "Jointure Temporelle Asynchrone (ASOF Join / Forward-Fill)",
+            exerciseRef: "Ex. 6",
+            syntax: "(SELECT taux_10y FROM courbe_taux_oat WHERE date <= m.date ORDER BY date DESC LIMIT 1)",
+            description:
+              "Lorsque deux séries n'ont pas exactement les mêmes dates (ex. jours ouvrés vs courbe OAT), une sous-requête corrélée `date <= m.date ORDER BY date DESC LIMIT 1` récupère la dernière observation connue **sans fuite du futur**.",
+            exampleCode: r`SELECT m.date, m.ticker, m.prix_cloture,
+       (SELECT taux_10y
+        FROM courbe_taux_oat
+        WHERE date <= m.date
+        ORDER BY date DESC
+        LIMIT 1) AS dernier_taux_10y
+FROM marche_actions m
+WHERE m.ticker = 'AI'
+ORDER BY m.date;`,
+            tags: ["ASOF", "forward-fill", "courbe_taux_oat", "sous-requête corrélée"],
+          },
+          {
+            id: "sql-v2-recursive",
+            title: "CTE Récursive & Arbre Binomial CRR (WITH RECURSIVE)",
+            exerciseRef: "Ex. 7–8",
+            syntax: "WITH RECURSIVE arbre(n, prix) AS (base UNION ALL récursion WHERE n < N)",
+            formula: r`$$S_{n+1} = S_n \cdot u, \qquad u = 1.05$$`,
+            description:
+              "Permet d'itérer jusqu'à une condition d'arrêt (arbre binomial, amortissement) directement en SQL. Pour filtrer une matrice symétrique (`matrice_correlations`), excluez la diagonale avec `actif_a != actif_b`.",
+            exampleCode: r`WITH RECURSIVE arbre(n, prix) AS (
+  SELECT 0, 100.0
+  UNION ALL
+  SELECT n + 1, prix * 1.05
+  FROM arbre
+  WHERE n < 3
+)
+SELECT n, prix FROM arbre ORDER BY n;`,
+            tags: ["WITH RECURSIVE", "CTE", "arbre binomial", "matrice_correlations"],
+          },
+        ],
+      },
+      {
+        id: "sql-v2-quant",
+        title: "3. Anomalies, Multi-Actifs & Covariance Empirique",
+        subtitle: "Détecter les pics de volume, pondérer un portefeuille et estimer Cov(X,Y)",
+        entries: [
+          {
+            id: "sql-v2-partition-filter",
+            title: "Filtrer sur une Window Function (Sous-Requête Externe)",
+            exerciseRef: "Ex. 9–10",
+            syntax: "SELECT * FROM (SELECT ..., AVG(vol) OVER (PARTITION BY ticker) AS moy) WHERE vol > 1.15 * moy;",
+            description:
+              "SQL évalue `WHERE` avant les window functions : enveloppez le calcul `OVER (PARTITION BY ...)` dans une sous-requête (ou CTE) pour filtrer les anomalies de volume. Pour `portefeuilles_actifs`, filtrez directement sur `score_esg` et `ratio_sharpe`.",
+            exampleCode: r`SELECT date, ticker, volume, vol_moyen
+FROM (
+  SELECT date, ticker, volume,
+         AVG(volume) OVER (PARTITION BY ticker) AS vol_moyen
+  FROM marche_actions
+)
+WHERE volume > 1.15 * vol_moyen
+ORDER BY date;`,
+            tags: ["PARTITION BY", "anomalie", "volume", "sharpe", "ESG"],
+          },
+          {
+            id: "sql-v2-selfjoin-cov",
+            title: "Portefeuille 60/40 (Self-Join) & Covariance SQL",
+            exerciseRef: "Ex. 11–12",
+            syntax: "AVG(b.r * t.r) - AVG(b.r) * AVG(t.r)",
+            formula: r`$$\operatorname{Cov}(X, Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]$$`,
+            description:
+              "En alignant deux actifs à la même `date` via une auto-jointure (`JOIN marche_actions t ON b.date = t.date`), on valorise un portefeuille pondéré ou on calcule leur covariance via la formule de Koenig-Huygens.",
+            exampleCode: r`SELECT (AVG(b.rendement_journalier * t.rendement_journalier)
+        - AVG(b.rendement_journalier) * AVG(t.rendement_journalier)) AS cov_estimee
+FROM marche_actions b
+JOIN marche_actions t ON b.date = t.date
+WHERE b.ticker = 'BNP' AND t.ticker = 'TTE';`,
+            tags: ["covariance", "self-join", "portefeuille", "AVG", "Koenig-Huygens"],
+          },
+        ],
+      },
+      {
+        id: "sql-v2-perf-backtest",
+        title: "4. Optimisation, Backtesting & Agrégation Sectorielle",
+        subtitle: "Auditer le moteur SQLite, éviter le lookahead bias et consolider",
+        entries: [
+          {
+            id: "sql-v2-explain",
+            title: "Plan d'Exécution (EXPLAIN QUERY PLAN) & Agrégats Sectoriels",
+            exerciseRef: "Ex. 13, 15",
+            syntax: "EXPLAIN QUERY PLAN SELECT ...;",
+            description:
+              "Affiche si SQLite réalise un `SEARCH` instantané sur index/clé primaire ou un `SCAN` séquentiel coûteux sur toute la table. `GROUP BY secteur` consolide les métriques de `portefeuilles_actifs`.",
+            exampleCode: r`EXPLAIN QUERY PLAN
+SELECT * FROM marche_actions WHERE id = 5;`,
+            tags: ["EXPLAIN QUERY PLAN", "index", "optimisation", "GROUP BY", "secteur"],
+          },
+          {
+            id: "sql-v2-backtest",
+            title: "Backtesting Momentum Sans Fuite du Futur (LAG)",
+            exerciseRef: "Ex. 14",
+            syntax: "LAG(CASE WHEN rendement > 0 THEN 1 ELSE -1 END, 1) OVER (ORDER BY date) * rendement",
+            formula: r`$$\text{PnL}_t = \text{Position}_{t-1} \cdot r_t$$`,
+            description:
+              "Règle cardinale du backtesting : la position prise pour le jour $t$ ne peut dépendre que du signal observé à la clôture $t-1$ (`LAG(..., 1)`), jamais du rendement du jour même.",
+            exampleCode: r`SELECT date,
+       rendement_journalier,
+       LAG(CASE WHEN rendement_journalier > 0 THEN 1 ELSE -1 END, 1)
+           OVER (ORDER BY date) AS position_hier,
+       (LAG(CASE WHEN rendement_journalier > 0 THEN 1 ELSE -1 END, 1)
+           OVER (ORDER BY date) * rendement_journalier) AS pnl_journalier
+FROM marche_actions
+WHERE ticker = 'CW8'
+ORDER BY date;`,
+            tags: ["backtesting", "LAG", "PnL", "lookahead", "momentum"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V2 — MODULE 2 : ALGÈBRE MATRICIELLE & ÉCONOMÉTRIE FINANCIÈRE
+  // =========================================================================
+  {
+    moduleId: "python-finance-econometrics",
+    version: "V2",
+    moduleNumber: 2,
+    title: "Algèbre Matricielle & Économétrie Financière",
+    language: "python",
+    overview:
+      "Calcul matriciel vectorisé NumPy, décomposition spectrale & PSD, PCA, Random Matrix Theory, frontière de Markowitz, modèles factoriels, GARCH(1,1) et mesures de risque (VaR / CVaR).",
+    datasetsSummary: [
+      "Imports principaux : numpy (np), statsmodels.api (sm), matplotlib.pyplot (plt)",
+      "Conventions : poids w (N,), rendements mu (N,), covariance Sigma (N x N), séries X (T lignes x N actifs)",
+    ],
+    sections: [
+      {
+        id: "py-v2-linalg",
+        title: "1. Algèbre Matricielle, Covariance & Cône PSD",
+        subtitle: "Manipuler vecteurs de poids et nettoyer des matrices de covariance bruitées",
+        entries: [
+          {
+            id: "py-v2-matmul",
+            title: "Portefeuille Vectorisé : Produit Matriciel (@ et .T)",
+            exerciseRef: "Ex. 1–2",
+            syntax: "w @ mu | w @ Sigma @ w | np.cov(X, rowvar=False)",
+            formula: r`$$\mathbb{E}[R_p] = w'\mu, \qquad \sigma_p^2 = w'\Sigma w, \qquad \sigma_p = \sqrt{w'\Sigma w}$$`,
+            description:
+              "En NumPy 1D, `w @ Sigma @ w` calcule directement la forme quadratique $w'\\Sigma w$. Pour une matrice de rendements $(T \\times N)$ où chaque colonne est un actif, passez impérativement `rowvar=False` à `np.cov` et `np.corrcoef`.",
+            exampleCode: r`import numpy as np
+
+rendement = float(w @ mu)
+variance = float(w @ Sigma @ w)
+volatilite = float(np.sqrt(variance))
+Sigma_emp = np.cov(X, rowvar=False)
+C_emp = np.corrcoef(X, rowvar=False)`,
+            tags: ["@", "matrice", "np.cov", "np.corrcoef", "rowvar"],
+          },
+          {
+            id: "py-v2-eigh-psd",
+            title: "Décomposition Spectrale (np.linalg.eigh) & Projection PSD",
+            exerciseRef: "Ex. 3–4",
+            syntax: "evals, V = np.linalg.eigh(Sigma) | V @ np.diag(np.maximum(evals, 1e-6)) @ V.T",
+            formula: r`$$\Sigma = V \Lambda V', \qquad \lambda_i^+ = \max(\lambda_i, \epsilon)$$`,
+            description:
+              "`eigh` (spécifique aux matrices symétriques) garantit des valeurs propres réelles triées en ordre **croissant**. Si une corrélation estimée présente $\\lambda_{\\min} < 0$, seuiller à $10^{-6}$ rétablit la semi-définie positivité (variance toujours $\\ge 0$).",
+            exampleCode: r`evals, V = np.linalg.eigh(Sigma_perturbee)
+evals_psd = np.maximum(evals, 1e-6)
+Sigma_psd = V @ np.diag(evals_psd) @ V.T`,
+            tags: ["eigh", "valeurs propres", "PSD", "projection", "spectrale"],
+          },
+        ],
+      },
+      {
+        id: "py-v2-rmt-lw",
+        title: "2. PCA, Random Matrix Theory & Shrinkage",
+        subtitle: "Séparer le signal économique réel du bruit d'échantillonnage",
+        entries: [
+          {
+            id: "py-v2-pca-mp",
+            title: "PCA Courbe des Taux & Borne de Marchenko-Pastur",
+            exerciseRef: "Ex. 5–6",
+            syntax: "evals_desc = evals[::-1] | lambda_plus = (1 + np.sqrt(N / T))**2",
+            formula: r`$$\lambda_+ = \left(1 + \sqrt{\frac{N}{T}}\right)^2, \qquad \text{Variance expliquée}_k = \frac{\lambda_k}{\sum_{j=1}^N \lambda_j}$$`,
+            description:
+              "En PCA sur taux OAT, les 3 premières composantes (Niveau, Pente, Courbure) expliquent $>95\\%$ de la variance. En RMT (pour $\\sigma^2=1$), seules les valeurs propres $> \\lambda_+$ portent un véritable signal factoriel.",
+            exampleCode: r`evals, _ = np.linalg.eigh(np.cov(dX, rowvar=False))
+valeurs_triees = evals[::-1]
+ratio_explique = valeurs_triees / valeurs_triees.sum()
+
+lambda_plus = (1.0 + np.sqrt(N / T))**2
+nb_signaux = int(np.sum(evals_obs > lambda_plus))`,
+            tags: ["PCA", "Marchenko-Pastur", "RMT", "variance expliquée"],
+          },
+          {
+            id: "py-v2-lw",
+            title: "Rétrécissement de Covariance : Estimateur de Ledoit-Wolf",
+            exerciseRef: "Ex. 7",
+            syntax: "F = np.eye(N) * (np.trace(S) / N); Sigma_lw = (1 - alpha) * S + alpha * F",
+            formula: r`$$\Sigma_{\text{LW}} = (1 - \alpha) S + \alpha F, \qquad F = \frac{\operatorname{Tr}(S)}{N} I_N$$`,
+            description:
+              "Stabilise l'inversion $\\Sigma^{-1}$ lors de l'optimisation de Markowitz en combinant la covariance empirique $S$ et une cible diagonale $F$ d'intensité $\\alpha \\in [0,1]$.",
+            exampleCode: r`alpha = 0.25
+N = Sigma_sample.shape[0]
+F = np.eye(N) * (np.trace(Sigma_sample) / N)
+Sigma_lw = (1.0 - alpha) * Sigma_sample + alpha * F`,
+            tags: ["Ledoit-Wolf", "shrinkage", "covariance", "trace"],
+          },
+        ],
+      },
+      {
+        id: "py-v2-markowitz",
+        title: "3. Optimisation de Portefeuille de Markowitz",
+        subtitle: "GMVP, frontière efficiente analytique et portefeuille de tangence",
+        entries: [
+          {
+            id: "py-v2-gmvp",
+            title: "Portefeuille de Variance Minimale Globale (GMVP)",
+            exerciseRef: "Ex. 8",
+            syntax: "inv_Sigma = np.linalg.inv(Sigma); w_gmvp = (inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)",
+            formula: r`$$w_{\text{GMVP}} = \frac{\Sigma^{-1}\mathbf{1}}{\mathbf{1}'\Sigma^{-1}\mathbf{1}}, \qquad \sigma_{\text{GMVP}} = \frac{1}{\sqrt{\mathbf{1}'\Sigma^{-1}\mathbf{1}}}$$`,
+            description:
+              "Solution analytique minimisant $w'\\Sigma w$ sous contrainte budgétaire $\\mathbf{1}'w = 1$, indépendante de l'estimation bruitée des rendements espérés $\\mu$.",
+            exampleCode: r`inv_Sigma = np.linalg.inv(Sigma)
+ones = np.ones(len(Sigma))
+w_gmvp = (inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)
+vol_gmvp = float(np.sqrt(1.0 / (ones @ inv_Sigma @ ones)))`,
+            tags: ["GMVP", "Markowitz", "variance minimale", "inv"],
+          },
+          {
+            id: "py-v2-frontier",
+            title: "Frontière Efficiente de Markowitz (Constantes A, B, C)",
+            exerciseRef: "Ex. 9",
+            syntax: "var_targets = (A * mu_targets**2 - 2 * B * mu_targets + C) / Delta",
+            formula: r`$$A = \mathbf{1}'\Sigma^{-1}\mathbf{1}, \quad B = \mathbf{1}'\Sigma^{-1}\mu, \quad C = \mu'\Sigma^{-1}\mu, \quad \Delta = AC - B^2$$` +
+              "\n\n" +
+              r`$$\sigma^2(\mu_p) = \frac{A\mu_p^2 - 2B\mu_p + C}{\Delta}$$`,
+            description:
+              "Décrit l'enveloppe parabolique exacte des portefeuilles optimaux dans le plan $(\\sigma, \\mu)$ sans appel à un optimiseur numérique.",
+            exampleCode: r`A = float(ones @ inv_Sigma @ ones)
+B = float(ones @ inv_Sigma @ mu)
+C = float(mu @ inv_Sigma @ mu)
+Delta = A * C - B**2
+vols = np.sqrt((A * mu_targets**2 - 2 * B * mu_targets + C) / Delta)`,
+            tags: ["frontière efficiente", "Markowitz", "hyperbole", "parabole"],
+          },
+          {
+            id: "py-v2-tangency",
+            title: "Portefeuille de Tangence & Ratio de Sharpe Maximal",
+            exerciseRef: "Ex. 10",
+            syntax: "exces = mu - rf * ones; w_T = (inv_Sigma @ exces) / (ones @ inv_Sigma @ exces)",
+            formula: r`$$w_T = \frac{\Sigma^{-1}(\mu - r_f\mathbf{1})}{\mathbf{1}'\Sigma^{-1}(\mu - r_f\mathbf{1})}, \qquad S_T = \frac{\mu_T - r_f}{\sigma_T}$$`,
+            description:
+              "Maximise la pente de la Capital Market Line (Sharpe). Combinaison de l'actif sans risque $r_f$ et du seul portefeuille risqué tangent $w_T$.",
+            exampleCode: r`exces_mu = mu - rf * ones
+w_tangence = (inv_Sigma @ exces_mu) / (ones @ inv_Sigma @ exces_mu)
+mu_T = float(w_tangence @ mu)
+vol_T = float(np.sqrt(w_tangence @ Sigma @ w_tangence))
+sharpe_opt = (mu_T - rf) / vol_T`,
+            tags: ["tangence", "Sharpe", "rf", "CML"],
+          },
+        ],
+      },
+      {
+        id: "py-v2-factors-risk",
+        title: "4. Modèles Factoriels, GARCH(1,1) & Queues Épaisses",
+        subtitle: "Décomposer la performance et quantifier les pertes extrêmes",
+        entries: [
+          {
+            id: "py-v2-capm-ff3",
+            title: "CAPM (Alpha & Bêta) et Fama-French à 3 Facteurs",
+            exerciseRef: "Ex. 11–12",
+            syntax: "X = sm.add_constant(np.column_stack([Mkt_RF, SMB, HML])); sm.OLS(Y, X).fit()",
+            formula: r`$$R_i = \alpha + \beta R_m + \varepsilon \qquad ; \qquad Y_t = \alpha + \beta_m MKT_t + \beta_s SMB_t + \beta_h HML_t + \varepsilon_t$$`,
+            description:
+              "Estime l'Alpha de Jensen (`model.params[0]`) et les expositions factorielles (`model.params[1:]`) par OLS. Utilisez `np.column_stack([...])` pour assembler plusieurs arrays 1D NumPy.",
+            exampleCode: r`import statsmodels.api as sm
+import numpy as np
+
+X_factors = sm.add_constant(np.column_stack([Mkt_RF, SMB, HML]))
+model = sm.OLS(Y_port, X_factors).fit()
+alpha, beta_m, beta_s, beta_h = model.params`,
+            tags: ["CAPM", "Fama-French", "Alpha", "Bêta", "column_stack", "OLS"],
+          },
+          {
+            id: "py-v2-garch",
+            title: "Volatilité Conditionnelle : Processus GARCH(1,1)",
+            exerciseRef: "Ex. 13",
+            syntax: "sigma2[t] = omega + alpha * (eps[t-1]**2) + beta * sigma2[t-1]",
+            formula: r`$$\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2, \qquad \sigma_{\text{LT}}^2 = \frac{\omega}{1 - (\alpha + \beta)}$$`,
+            description:
+              "Modélise le *clustering* de volatilité. La stationnarité en covariance exige $\\alpha + \\beta < 1$. Multiplier la volatilité journalière par $\\sqrt{252}$ l'annualise.",
+            exampleCode: r`var_lt = omega / (1.0 - (alpha + beta))
+sigma2[0] = var_lt
+for t in range(1, T):
+    sigma2[t] = omega + alpha * (eps[t-1]**2) + beta * sigma2[t-1]
+    eps[t] = np.sqrt(sigma2[t]) * Z[t]`,
+            tags: ["GARCH", "volatilité conditionnelle", "clustering", "variance long terme"],
+          },
+          {
+            id: "py-v2-var-cvar",
+            title: "Value-at-Risk (VaR 99%) & Expected Shortfall (CVaR)",
+            exerciseRef: "Ex. 14",
+            syntax: "pertes = -rendements; var = np.percentile(pertes, 99); cvar = pertes[pertes >= var].mean()",
+            formula: r`$$\operatorname{VaR}_\alpha(L) = q_\alpha(L), \qquad \operatorname{CVaR}_\alpha(L) = \mathbb{E}[L \mid L \ge \operatorname{VaR}_\alpha(L)]$$`,
+            description:
+              "Convertissez d'abord les rendements en pertes ($L = -R$). La CVaR (moyenne au-delà de la VaR) est une mesure cohérente de risque exigée par Bâle III / Solvabilité II.",
+            exampleCode: r`pertes = -rendements
+var_99 = float(np.percentile(pertes, 99))
+cvar_99 = float(pertes[pertes >= var_99].mean())
+print(f"VaR 99% : {var_99:.2%} | CVaR 99% : {cvar_99:.2%}")`,
+            tags: ["VaR", "CVaR", "Expected Shortfall", "percentile", "risque"],
+          },
+          {
+            id: "py-v2-jb-tails",
+            title: "Skewness, Kurtosis & Statistique Jarque-Bera NumPy",
+            exerciseRef: "Ex. 15",
+            syntax: "z = (r - np.mean(r)) / np.std(r, ddof=1); JB = len(r)/6 * (S**2 + (K-3)**2 / 4)",
+            formula: r`$$S = \frac{1}{T}\sum z_t^3, \quad K = \frac{1}{T}\sum z_t^4, \quad JB = \frac{T}{6}\left(S^2 + \frac{(K - 3)^2}{4}\right)$$`,
+            description:
+              "Un kurtosis $K > 3$ (*leptokurtique*) signale des queues épaisses (*fat tails*, ex. loi de Student) fréquentes sur les marchés. Au seuil de 5 %, on rejette la normalité dès que $JB > 5.99$.",
+            exampleCode: r`z = (r - np.mean(r)) / np.std(r, ddof=1)
+skew = float(np.mean(z**3))
+kurt = float(np.mean(z**4))
+jb_stat = float(len(r) / 6.0 * (skew**2 + ((kurt - 3.0)**2) / 4.0))`,
+            tags: ["Skewness", "Kurtosis", "Jarque-Bera", "fat tails", "ddof"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V2 — MODULE 3 : SIMULATIONS DE MONTE CARLO & MODÉLISATION STOCHASTIQUE
+  // =========================================================================
+  {
+    moduleId: "python-monte-carlo",
+    version: "V2",
+    moduleNumber: 3,
+    title: "Simulations de Monte Carlo & Modélisation Stochastique",
+    language: "python",
+    overview:
+      "Génération pseudo-aléatoire, Cholesky, mouvement brownien, pricing d'options (vanille, BSM, asiatique, barrière), réduction de variance, sauts de Merton, Vasicek et ruine de Lundberg.",
+    datasetsSummary: [
+      "Imports principaux : numpy (np), scipy.stats.norm (norm), matplotlib.pyplot (plt)",
+      "Bonne pratique : toujours initialiser np.random.seed(42) en début de simulation pour la reproductibilité",
+    ],
+    sections: [
+      {
+        id: "py-v2-mc-gen",
+        title: "1. Générateurs, Cholesky & Mouvements Browniens",
+        subtitle: "Simuler des aléas normaux, corrélés et des trajectoires continues",
+        entries: [
+          {
+            id: "py-v2-boxmuller",
+            title: "Graine Aléatoire & Algorithme de Box-Muller",
+            exerciseRef: "Ex. 1",
+            syntax: "np.random.seed(42) | Z1 = np.sqrt(-2.0 * np.log(U1)) * np.cos(2.0 * np.pi * U2)",
+            formula: r`$$R = \sqrt{-2\ln U_1}, \qquad Z_1 = R\cos(2\pi U_2) \sim \mathcal{N}(0,1)$$`,
+            description:
+              "Transforme deux variables uniformes indépendantes $U_1, U_2 \\sim \\mathcal{U}(0,1)$ en une gaussienne centrée réduite exacte. Fixez `U1` à $\\ge 10^{-10}$ pour éviter $\\ln(0)$.",
+            exampleCode: r`np.random.seed(42)
+U1 = np.random.uniform(1e-10, 1.0, N)
+U2 = np.random.uniform(0.0, 1.0, N)
+Z1 = np.sqrt(-2.0 * np.log(U1)) * np.cos(2.0 * np.pi * U2)`,
+            tags: ["seed", "Box-Muller", "uniform", "gaussienne"],
+          },
+          {
+            id: "py-v2-cholesky",
+            title: "Simulation Corrélée par Factorisation de Cholesky",
+            exerciseRef: "Ex. 2",
+            syntax: "L = np.linalg.cholesky(Sigma); X = (L @ Z).T",
+            formula: r`$$\Sigma = L L' \quad \Longrightarrow \quad X = L Z \sim \mathcal{N}(0, \Sigma)$$`,
+            description:
+              "Pour $\\Sigma \\in \\mathbb{R}^{d \\times d}$ définie positive, `cholesky` produit la matrice triangulaire inférieure $L$. Si $Z \\sim \\mathcal{N}(0, I_d)$ est de taille `(d, N)`, alors `X = (L @ Z).T` a exactement la covariance cible $\\Sigma$.",
+            exampleCode: r`L = np.linalg.cholesky(Sigma_cible)
+Z = np.random.randn(3, 50000)
+X = (L @ Z).T
+cov_emp = np.cov(X, rowvar=False)`,
+            tags: ["Cholesky", "corrélation", "linalg.cholesky", "multivariée"],
+          },
+          {
+            id: "py-v2-wiener-gbm",
+            title: "Mouvement Brownien (Wiener) & GBM Vectorisé",
+            exerciseRef: "Ex. 3–4",
+            syntax: "dW = np.sqrt(dt) * np.random.randn(M, N); W[:, 1:] = np.cumsum(dW, axis=1)",
+            formula: r`$$W_{t+\Delta t} = W_t + \sqrt{\Delta t}\, Z_t \quad ; \quad S_T = S_0 \exp\left(\left(\mu - \frac{1}{2}\sigma^2\right)T + \sigma\sqrt{T}\, Z\right)$$`,
+            description:
+              "La correction d'Itô $-\\frac{1}{2}\\sigma^2$ assure que $\\mathbb{E}[S_T] = S_0 e^{\\mu T}$. Utilisez `np.cumsum(..., axis=1)` pour générer toutes les trajectoires sans boucle `for`.",
+            exampleCode: r`# Simulation terminale exacte du GBM
+Z = np.random.randn(N)
+S_T = S0 * np.exp((mu - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)`,
+            tags: ["Wiener", "Brownien", "GBM", "Itô", "cumsum"],
+          },
+        ],
+      },
+      {
+        id: "py-v2-mc-pricing",
+        title: "2. Pricing Européen, Black-Scholes & Réduction de Variance",
+        subtitle: "Valoriser sous Q, quantifier l'erreur et accélérer la convergence",
+        entries: [
+          {
+            id: "py-v2-call-q",
+            title: "Call Européen sous Mesure Risque-Neutre Q",
+            exerciseRef: "Ex. 5",
+            syntax: "np.exp(-r * T) * np.mean(np.maximum(S_T - K, 0.0))",
+            formula: r`$$C_0 = e^{-rT}\,\mathbb{E}^{\mathbb{Q}}[\max(S_T - K, 0)]$$`,
+            description:
+              "En univers risque-neutre $\\mathbb{Q}$, on remplace la dérive réelle $\\mu$ du GBM par le taux sans risque $r$, puis on actualise la moyenne des payoffs au taux $e^{-rT}$.",
+            exampleCode: r`Z = np.random.randn(N)
+S_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)
+payoffs = np.maximum(S_T - K, 0.0)
+prix_call = float(np.exp(-r * T) * np.mean(payoffs))`,
+            tags: ["Call", "risque-neutre", "payoff", "pricing", "options"],
+          },
+          {
+            id: "py-v2-bsm",
+            title: "Formule Fermée de Black-Scholes-Merton",
+            exerciseRef: "Ex. 6",
+            syntax: "S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)",
+            formula: r`$$d_1 = \frac{\ln(S_0/K) + (r + \tfrac{1}{2}\sigma^2)T}{\sigma\sqrt{T}}, \quad d_2 = d_1 - \sigma\sqrt{T}, \quad C_{\text{BS}} = S_0 \Phi(d_1) - K e^{-rT}\Phi(d_2)$$`,
+            description:
+              "Sert de benchmark analytique exact pour valider vos estimateurs Monte Carlo via `scipy.stats.norm.cdf`.",
+            exampleCode: r`from scipy.stats import norm
+
+d1 = (np.log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+d2 = d1 - sigma * np.sqrt(T)
+prix_bs = float(S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2))`,
+            tags: ["Black-Scholes", "norm.cdf", "d1", "d2", "benchmark"],
+          },
+          {
+            id: "py-v2-ic-variance",
+            title: "Erreur Standard, IC 95% & Réduction de Variance",
+            exerciseRef: "Ex. 7–9",
+            syntax: "se = s_N / np.sqrt(N) | Y_anti = 0.5 * (Y1 + Y2) | c_star = cov[0,1] / cov[1,1]",
+            formula: r`$$SE = \frac{s_N}{\sqrt{N}}, \quad IC_{95\%} = \hat{C} \pm 1.96\, SE \qquad ; \qquad X_{\text{ctrl}} = X - c^*(Y - \mathbb{E}[Y])$$`,
+            description:
+              "La précision Monte Carlo converge lentement en $\\mathcal{O}(1/\\sqrt{N})$ : diviser l'erreur par 10 demande $100\\times$ plus de simulations. Utilisez les **variables antithétiques** ($+Z$ et $-Z$) ou une **variable de contrôle** ($Y = e^{-rT}S_T$, d'espérance connue $S_0$) avec $c^* = \\frac{\\operatorname{Cov}(X,Y)}{\\operatorname{Var}(Y)}$.",
+            exampleCode: r`# Antithétiques (+Z et -Z)
+Y_anti = 0.5 * (Y_plus_Z + Y_moins_Z)
+
+# Contrôle optimal c* avec Y = e^(-rT) * S_T (E[Y] = S0)
+cov_mat = np.cov(X, Y)
+c_star = cov_mat[0, 1] / cov_mat[1, 1]
+X_ctrl = X - c_star * (Y - S0)`,
+            tags: ["IC 95%", "erreur standard", "antithétiques", "contrôle", "convergence"],
+          },
+        ],
+      },
+      {
+        id: "py-v2-mc-exotic",
+        title: "3. Exotiques Path-Dependent, Sauts, Taux & Ruine",
+        subtitle: "Trajectoires 2D, jump-diffusion, full revaluation, Vasicek et Solvabilité II",
+        entries: [
+          {
+            id: "py-v2-asian-barrier",
+            title: "Options Path-Dependent : Asiatique & Barrière Knock-Out",
+            exerciseRef: "Ex. 10–11",
+            syntax: "S_mean = np.mean(S_paths, axis=1) | actifs_vivants = (np.min(S_paths, axis=1) > B)",
+            formula: r`$$P_{\text{Asiatique}} = \max(\bar{S} - K, 0), \qquad P_{\text{DOC}} = \max(S_T - K, 0) \cdot \mathbf{1}_{\{\min_t S_t > B\}}$$`,
+            description:
+              "Simulez une matrice de trajectoires `S_paths` de taille `(N, M+1)`. `axis=1` agrège le long de chaque trajectoire temporelle (moyenne pour l'Asiatique, minimum pour la barrière Down-and-Out).",
+            exampleCode: r`log_inc = (r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * np.random.randn(N, M)
+log_paths = np.zeros((N, M + 1))
+log_paths[:, 1:] = np.cumsum(log_inc, axis=1)
+S_paths = S0 * np.exp(log_paths)
+
+prix_doc = float(np.exp(-r * T) * np.mean(np.maximum(S_paths[:, -1] - K, 0.0) * (np.min(S_paths, axis=1) > B)))`,
+            tags: ["Asiatique", "Barrière", "Down-and-Out", "path-dependent", "axis=1"],
+          },
+          {
+            id: "py-v2-merton-fullreval",
+            title: "Sauts de Merton (Jump-Diffusion) & VaR Full Revaluation",
+            exerciseRef: "Ex. 12–13",
+            syntax: "nb_sauts = np.random.poisson(lambda_jump * T, N) | np.percentile(V0 - V_T, 99)",
+            formula: r`$$\kappa = e^{\mu_J + \tfrac{1}{2}\sigma_J^2} - 1, \quad \text{drift} = (r - \lambda\kappa - \tfrac{1}{2}\sigma^2)T$$`,
+            description:
+              "Le modèle de Merton ajoute un processus de Poisson composé générant asymétrie et queues épaisses ($K > 3$). La **VaR Full Revaluation** réévalue exactement la valeur $V_T$ d'un portefeuille optionnel non linéaire sous chaque scénario.",
+            exampleCode: r`kappa = np.exp(mu_J + 0.5 * sigma_J**2) - 1.0
+drift_corr = (r - lambda_jump * kappa - 0.5 * sigma**2) * T
+nb_sauts = np.random.poisson(lambda_jump * T, N)
+
+# Full Revaluation VaR 99% (portefeuille 10 actions - 10 calls)
+V_T = 10.0 * S_T - 10.0 * np.maximum(S_T - K, 0.0)
+var_mc_99 = float(np.percentile(V0 - V_T, 99))`,
+            tags: ["Merton", "Poisson", "Jump-Diffusion", "Full Revaluation", "VaR"],
+          },
+          {
+            id: "py-v2-vasicek-lundberg",
+            title: "Taux de Vasicek (Euler) & Processus de Ruine de Lundberg",
+            exerciseRef: "Ex. 14–15",
+            syntax: "r_paths[:, t+1] = r_paths[:, t] + kappa * (theta - r_paths[:, t]) * dt + sigma * np.sqrt(dt) * Z",
+            formula: r`$$dr_t = \kappa(\theta - r_t)\,dt + \sigma\,dW_t \qquad ; \qquad U_T = u + c - \sum_{k=1}^{N(T)} X_k$$`,
+            description:
+              "Vasicek ramène le taux court vers l'équilibre $\\theta$ à vitesse $\\kappa$. Le modèle de Cramér-Lundberg simule $N(T) \\sim \\mathcal{P}(\\lambda)$ sinistres de sévérité exponentielle : sous Solvabilité II, la probabilité de ruine $\\mathbb{P}(U_T < 0)$ doit rester $< 0.5\\%$.",
+            exampleCode: r`# Stress-Testing Ruine de Lundberg (u: capital, c: primes, lambda_sin: fréquence)
+nb_sin = np.random.poisson(lambda_sin, N_scenarios)
+charges = np.array([np.sum(np.random.exponential(cout_moyen, k)) if k > 0 else 0.0 for k in nb_sin])
+proba_ruine = float(np.mean((u + c - charges) < 0))
+print(f"Proba ruine : {proba_ruine:.4%} | Solvabilité II OK : {proba_ruine < 0.005}")`,
+            tags: ["Vasicek", "Euler", "Cramér-Lundberg", "ruine", "Solvabilité II", "Poisson"],
+          },
+        ],
+      },
+    ],
+  },
+];

@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 import {
   Sparkles,
   BookOpen,
+  BookMarked,
   Code2,
   BarChart3,
   ChevronLeft,
@@ -22,6 +23,7 @@ import { TheoryViewer } from "@/components/TheoryViewer";
 import { ResultsViewer } from "@/components/ResultsViewer";
 import { DatasetModal } from "@/components/DatasetModal";
 import { SolutionModal } from "@/components/SolutionModal";
+import { CheatSheetModal } from "@/components/CheatSheetModal";
 
 const MACRO_CSV_DATA = `periode,euribor_3m,oat_10y,spread_credit_bbb,inflation_hicp,pib_croissance,cac40_rendement
 2020-Q1,-0.42,-0.15,1.25,0.70,-5.4,-26.5
@@ -241,6 +243,9 @@ export function Workspace() {
   // Dataset modal state
   const [isDatasetModalOpen, setIsDatasetModalOpen] = useState<boolean>(false);
   const [selectedDatasetTable, setSelectedDatasetTable] = useState<string>("");
+
+  // Cheat sheet modal state
+  const [isCheatSheetOpen, setIsCheatSheetOpen] = useState<boolean>(false);
 
   // WASM Hooks
   const pythonEngine = usePython();
@@ -506,7 +511,7 @@ export function Workspace() {
                 setCurrentModuleIndex(Number(e.target.value));
                 setCurrentExerciseIndex(0);
               }}
-              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[190px] xl:max-w-[240px] truncate cursor-pointer"
+              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[115px] 2xl:max-w-[200px] truncate cursor-pointer"
             >
               {modules.map((mod, idx) => (
                 <option key={mod.id} value={idx}>
@@ -515,6 +520,17 @@ export function Workspace() {
               ))}
             </select>
           </div>
+
+          {/* Cheat Sheet Trigger Button (Desktop / Tablet Header) */}
+          <button
+            onClick={() => setIsCheatSheetOpen(true)}
+            title={`Ouvrir la Cheat Sheet — ${currentModule.title}`}
+            aria-label="Ouvrir la Cheat Sheet"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80 transition-colors cursor-pointer flex-shrink-0 whitespace-nowrap"
+          >
+            <BookMarked className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden 2xl:inline">Cheat Sheet</span>
+          </button>
         </div>
 
         {/* STEPPER : Progress & Locked/Unlocked Next Button */}
@@ -795,6 +811,28 @@ export function Workspace() {
           setCode(currentExercise.solutionCode || currentExercise.initialCode || "");
         }}
       />
+
+      {/* Cheat Sheet Modal */}
+      <CheatSheetModal
+        isOpen={isCheatSheetOpen}
+        onClose={() => setIsCheatSheetOpen(false)}
+        activeModuleId={currentModule.id}
+        currentLanguage={currentExercise.language}
+        onInsertCode={(snippet) => {
+          setCode(snippet);
+          setIsCheatSheetOpen(false);
+        }}
+      />
+
+      {/* Mobile Floating Cheat Sheet Button (< sm) */}
+      <button
+        onClick={() => setIsCheatSheetOpen(true)}
+        aria-label="Ouvrir la Cheat Sheet mobile"
+        className="sm:hidden fixed bottom-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg border border-indigo-500 text-xs font-semibold cursor-pointer transition-transform active:scale-95"
+      >
+        <BookMarked className="w-3.5 h-3.5" />
+        <span>Cheat Sheet</span>
+      </button>
     </div>
   );
 }
