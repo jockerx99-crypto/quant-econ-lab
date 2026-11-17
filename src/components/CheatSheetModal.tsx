@@ -16,7 +16,11 @@ import {
   Hash,
   Table2,
 } from "lucide-react";
-import { MODULE_CHEAT_SHEETS, ModuleCheatSheet } from "@/data/cheatsheets";
+import {
+  MODULE_CHEAT_SHEETS,
+  ModuleCheatSheet,
+  resolveCheatSheetModuleId,
+} from "@/data/cheatsheets";
 import { Language } from "@/types/course";
 
 interface CheatSheetModalProps {
@@ -64,8 +68,10 @@ export function CheatSheetModal({
   currentLanguage,
   onInsertCode,
 }: CheatSheetModalProps) {
+  const resolvedActiveModuleId = resolveCheatSheetModuleId(activeModuleId);
+
   const [selectedModuleId, setSelectedModuleId] = useState<string>(
-    activeModuleId || MODULE_CHEAT_SHEETS[0].moduleId
+    resolvedActiveModuleId || MODULE_CHEAT_SHEETS[0].moduleId
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -73,11 +79,11 @@ export function CheatSheetModal({
 
   // Sync with currently active workspace module whenever modal opens
   useEffect(() => {
-    if (isOpen && activeModuleId) {
-      setSelectedModuleId(activeModuleId);
+    if (isOpen && resolvedActiveModuleId) {
+      setSelectedModuleId(resolvedActiveModuleId);
       setSearchQuery("");
     }
-  }, [isOpen, activeModuleId]);
+  }, [isOpen, resolvedActiveModuleId]);
 
   // Close on Escape
   useEffect(() => {
@@ -216,7 +222,7 @@ export function CheatSheetModal({
           <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 lg:pb-0 no-scrollbar">
             {MODULE_CHEAT_SHEETS.map((mod) => {
               const isSelected = mod.moduleId === activeSheet.moduleId;
-              const isCurrent = mod.moduleId === activeModuleId;
+              const isCurrent = mod.moduleId === resolvedActiveModuleId;
               return (
                 <button
                   key={mod.moduleId}

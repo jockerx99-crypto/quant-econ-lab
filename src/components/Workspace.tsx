@@ -439,6 +439,7 @@ export function Workspace() {
       : sqlEngine.statusMessage;
 
   const totalExercisesInModule = currentModule.exercises.length;
+  const totalV1Exercises = COURSE_MODULES_V1.reduce((acc, m) => acc + m.exercises.length, 0);
   const progressPct = Math.round(((currentExerciseIndex + 1) / totalExercisesInModule) * 100);
 
   return (
@@ -472,7 +473,7 @@ export function Workspace() {
                   ? "bg-white text-stone-900 shadow-xs border border-stone-200/60"
                   : "text-stone-500 hover:text-stone-800"
               }`}
-              title="Version 1 : Fondations Actuariat & Data Prep (52 exercices)"
+              title={`Version 1 : Fondations Actuariat, Data Prep & Suites (${totalV1Exercises} exercices)`}
             >
               <span className="hidden md:inline">V1 : Actuariat</span>
               <span className="md:hidden">V1</span>
@@ -612,6 +613,28 @@ export function Workspace() {
           </div>
         </div>
       </header>
+
+      {/* Mobile & Tablet (< lg) Compact Module Switcher Bar */}
+      <div className="lg:hidden bg-white border-b border-stone-200 px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0">
+        <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide flex-shrink-0">
+          Module
+        </span>
+        <select
+          value={currentModuleIndex}
+          onChange={(e) => {
+            setCurrentModuleIndex(Number(e.target.value));
+            setCurrentExerciseIndex(0);
+          }}
+          aria-label="Sélectionner un module"
+          className="flex-1 min-w-0 bg-stone-50 border border-stone-200 text-xs font-medium text-stone-800 rounded-lg px-2 py-1 focus:outline-none focus:border-stone-400 truncate cursor-pointer"
+        >
+          {modules.map((mod, idx) => (
+            <option key={mod.id} value={idx}>
+              M{idx + 1} : {mod.title} ({mod.exercises.length} ex)
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Main Container */}
       <main className="flex-1 overflow-hidden p-2 sm:p-2.5 lg:p-3 relative">

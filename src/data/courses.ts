@@ -1,4 +1,6 @@
 import { CourseModule } from "@/types/course";
+import { SQL_SUITE_MODULE } from "@/data/courses_v1_suite_sql";
+import { PYTHON_SUITE_MODULE } from "@/data/courses_v1_suite_py";
 
 export const COURSE_MODULES: CourseModule[] = [
   {
@@ -1953,5 +1955,7 @@ DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout
         datasets: []
       }
     ]
-  }
+  },
+  SQL_SUITE_MODULE,
+  PYTHON_SUITE_MODULE,
 ];

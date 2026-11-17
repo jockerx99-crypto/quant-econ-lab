@@ -29,18 +29,27 @@ export interface ModuleCheatSheet {
 
 const r = String.raw;
 
+export const CHEAT_SHEET_MODULE_ALIASES: Record<string, string> = {
+  "sql-actuariat-suite": "sql-actuariat",
+  "python-econometrie-suite": "python-econometrie",
+};
+
+export function resolveCheatSheetModuleId(moduleId: string): string {
+  return CHEAT_SHEET_MODULE_ALIASES[moduleId] || moduleId;
+}
+
 export const MODULE_CHEAT_SHEETS: ModuleCheatSheet[] = [
   // =========================================================================
-  // V1 — MODULE 1 : SQL POUR L'ACTUARIAT & LA DATA PREP
+  // V1 — MODULE 1 & MODULE 3 : SQL POUR L'ACTUARIAT & LA DATA PREP
   // =========================================================================
   {
     moduleId: "sql-actuariat",
     version: "V1",
     moduleNumber: 1,
-    title: "SQL pour l'Actuariat & la Data Prep",
+    title: "SQL pour l'Actuariat & la Data Prep (M1 & M3)",
     language: "sql",
     overview:
-      "Toutes les clauses SQL (SQLite) essentielles pour extraire, nettoyer, joindre des polices d'assurance, calculer des ratios S/P et appliquer des fonctions de fenêtrage.",
+      "Toutes les clauses SQL (SQLite) des Modules 1 et 3 (Suite) pour extraire, nettoyer, joindre des polices d'assurance, calculer des ratios S/P et appliquer des fonctions de fenêtrage.",
     datasetsSummary: [
       "assures : police_id, assure_id, age, sexe, region, type_contrat, bonus_malus, anciennete_permis, type_vehicule, puissance_fiscale, usage, prime_annuelle",
       "sinistres : sinistre_id, police_id, date_survenance, date_declaration, nature_sinistre, cout_dommages_materiels, cout_corporel, cout_total, responsabilite_pct, statut_dossier",
@@ -79,16 +88,16 @@ WHERE region = 'IDF'
           },
           {
             id: "sql-v1-in-between",
-            title: "Liste de Valeurs (IN) & Intervalle Continu (BETWEEN)",
-            exerciseRef: "Ex. 7–8",
-            syntax: "WHERE col IN ('A', 'B') | WHERE col BETWEEN a AND b",
+            title: "Liste (IN), Intervalle (BETWEEN), Motifs (LIKE) & NULL",
+            exerciseRef: "M1 Ex. 7–8 · M3 Ex. 8–11",
+            syntax: "WHERE col IN ('A', 'B') | BETWEEN a AND b | LIKE '2022-%' | IS NOT NULL",
             description:
-              "`IN` remplace une suite de `OR` sur une même colonne. `BETWEEN a AND b` inclut les deux bornes (`a <= col <= b`).",
-            exampleCode: r`SELECT police_id, age, type_vehicule
-FROM assures
-WHERE type_vehicule IN ('Citadine', 'Berline')
-  AND age BETWEEN 25 AND 45;`,
-            tags: ["IN", "BETWEEN", "intervalle", "liste"],
+              "`IN` remplace une suite de `OR`. `BETWEEN a AND b` inclut les deux bornes. `LIKE '2022-%'` filtre par motif textuel (`%` = 0+ caractères). Testez toujours les champs vides via `IS NULL` ou `IS NOT NULL` (jamais `= NULL`).",
+            exampleCode: r`SELECT sinistre_id, date_survenance, nature_sinistre, cout_corporel
+FROM sinistres
+WHERE date_survenance LIKE '2022-%'
+  AND cout_corporel IS NOT NULL;`,
+            tags: ["IN", "BETWEEN", "LIKE", "IS NULL", "IS NOT NULL", "intervalle", "motif"],
           },
           {
             id: "sql-v1-order-limit",
@@ -143,19 +152,15 @@ ORDER BY prime_moyenne DESC;`,
           },
           {
             id: "sql-v1-case-when",
-            title: "Discrétisation Conditionnelle (CASE WHEN)",
-            exerciseRef: "Ex. 17",
-            syntax: "CASE WHEN cond THEN val1 ELSE val2 END AS col",
+            title: "Discrétisation & Comptage Conditionnel (CASE WHEN)",
+            exerciseRef: "M1 Ex. 17 · M3 Ex. 18–19",
+            syntax: "SUM(CASE WHEN cond THEN 1 ELSE 0 END) AS nb_cas",
             description:
-              "Permet de créer des classes tarifaires ou tranches d'âge directement en SQL (équivalent d'un `if / elif / else`).",
-            exampleCode: r`SELECT police_id, prime_annuelle,
-       CASE
-         WHEN prime_annuelle > 1000 THEN 'Élevée'
-         WHEN prime_annuelle >= 600 THEN 'Intermédiaire'
-         ELSE 'Standard'
-       END AS categorie_prime
-FROM assures;`,
-            tags: ["CASE", "WHEN", "ELSE", "END", "catégorie", "segmentation"],
+              "Crée des classes tarifaires ou compte en une seule passe la fréquence d'un événement cible (`1` si la condition est vraie, `0` sinon).",
+            exampleCode: r`SELECT COUNT(*) AS total_dossiers,
+       SUM(CASE WHEN cout_total >= 5000 THEN 1 ELSE 0 END) AS nb_sinistres_graves
+FROM sinistres;`,
+            tags: ["CASE", "WHEN", "ELSE", "END", "SUM", "catégorie", "comptage conditionnel"],
           },
           {
             id: "sql-v1-coalesce",
@@ -180,18 +185,19 @@ FROM sinistres;`,
         entries: [
           {
             id: "sql-v1-inner-vs-left",
-            title: "INNER JOIN vs LEFT JOIN + COALESCE (Exposition)",
-            exerciseRef: "Ex. 19–21",
-            syntax: "FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id",
+            title: "INNER JOIN, LEFT JOIN, COUNT(col) & Anti-Jointure (IS NULL)",
+            exerciseRef: "M1 Ex. 19–21 · M3 Ex. 21–23",
+            syntax: "LEFT JOIN sinistres s ON a.police_id = s.police_id | COUNT(s.sinistre_id)",
             description:
-              "`INNER JOIN` ne retourne que les assurés ayant au moins un sinistre (biais de sélection !). `LEFT JOIN` conserve **100 % du portefeuille assuré** ; combiné à `COALESCE(s.cout_total, 0.0)`, une police sans sinistre compte pour `0.0`.",
+              "`INNER JOIN` ne garde que les assurés sinistrés. `LEFT JOIN` préserve **100 % de l'exposition** : utilisez `COUNT(s.sinistre_id)` (et non `COUNT(*)`) pour obtenir `0` sans sinistre, ou `WHERE s.sinistre_id IS NULL` pour isoler les contrats indemnes (anti-jointure).",
             exampleCode: r`SELECT a.police_id,
-       a.region,
        a.prime_annuelle,
-       COALESCE(s.cout_total, 0.0) AS cout_charge
+       COUNT(s.sinistre_id) AS nb_sinistres,
+       ROUND(SUM(COALESCE(s.cout_total, 0.0)), 2) AS cout_total_police
 FROM assures a
-LEFT JOIN sinistres s ON a.police_id = s.police_id;`,
-            tags: ["INNER JOIN", "LEFT JOIN", "ON", "exposition", "COALESCE"],
+LEFT JOIN sinistres s ON a.police_id = s.police_id
+GROUP BY a.police_id, a.prime_annuelle;`,
+            tags: ["INNER JOIN", "LEFT JOIN", "ON", "exposition", "COALESCE", "IS NULL", "COUNT"],
           },
           {
             id: "sql-v1-subqueries",
@@ -267,18 +273,19 @@ ORDER BY rang_cout ASC;`,
   },
 
   // =========================================================================
-  // V1 — MODULE 2 : PYTHON POUR L'ÉCONOMÉTRIE, RISQUE & PRICING
+  // V1 — MODULE 2 & MODULE 4 : PYTHON POUR L'ÉCONOMÉTRIE, RISQUE & PRICING
   // =========================================================================
   {
     moduleId: "python-econometrie",
     version: "V1",
     moduleNumber: 2,
-    title: "Python pour l'Économétrie, Risque & Pricing",
+    title: "Python pour l'Économétrie, Risque & Pricing (M2 & M4)",
     language: "python",
     overview:
-      "Mémento complet de statistiques descriptives Pandas, estimation MCO / OLS (Statsmodels & NumPy), diagnostics de Gauss-Markov, séries temporelles (ADF, HAC) et risque de taux ALM.",
+      "Mémento complet des Modules 2 et 4 (Suite) : Pandas, estimation MCO / OLS (Statsmodels & NumPy), prévision, diagnostics de Gauss-Markov, séries temporelles (ADF, HAC) et VaR / Duration ALM.",
     datasetsSummary: [
-      "df (DataFrame pandas préchargé = macro_taux) : periode, euribor_3m, oat_10y, spread_credit_bbb, inflation_hicp, pib_croissance, cac40_rendement",
+      "df (macro_taux préchargé) : periode, euribor_3m, oat_10y, spread_credit_bbb, inflation_hicp, pib_croissance, cac40_rendement",
+      "df_actifs (portefeuilles_actifs préchargé) : ticker, nom, secteur, classe_actif, rendement_espere, volatilite, beta_marche, score_esg, ratio_sharpe",
       "Imports principaux : pandas (pd), numpy (np), statsmodels.api (sm), matplotlib.pyplot (plt)",
     ],
     sections: [
@@ -289,15 +296,15 @@ ORDER BY rang_cout ASC;`,
         entries: [
           {
             id: "py-v1-inspect",
-            title: "Aperçu & Dimensions (.head, .shape, colonne dérivée)",
-            exerciseRef: "Ex. 1–2, 5",
-            syntax: "df.head(n) | df.shape | df['nouvelle'] = df['a'] - df['b']",
+            title: "Exploration, Filtrage Booléen & GroupBy (.head, .describe, &)",
+            exerciseRef: "M2 Ex. 1–2, 5 · M4 Ex. 1–3, 6, 9",
+            syntax: "df.describe() | df[(cond1) & (cond2)] | df_actifs.groupby('col').mean()",
             description:
-              "`df.shape` renvoie le tuple `(N_lignes, K_colonnes)` donnant directement la taille d'échantillon $N$. On crée une nouvelle variable par simple soustraction vectorisée (ex. pente des taux).",
-            exampleCode: r`print("Dimensions (N, K) :", df.shape)
-df['pente_taux'] = df['oat_10y'] - df['euribor_3m']
-print(df[['periode', 'euribor_3m', 'oat_10y', 'pente_taux']].head(3))`,
-            tags: ["pandas", "head", "shape", "pente", "spread"],
+              "`df.shape` donne `(N, K)` et `df.describe()` résume quartiles, moyenne et écart-type. Pour filtrer en Pandas, entourez chaque condition de parenthèses et combinez avec `&` (ET) ou `|` (OU).",
+            exampleCode: r`print(df[['euribor_3m', 'oat_10y', 'spread_credit_bbb']].describe().round(2))
+df_stress = df[(df['inflation_hicp'] > 5.0) & (df['cac40_rendement'] < 0)]
+print(df_actifs.groupby('classe_actif')[['rendement_espere', 'beta_marche']].mean())`,
+            tags: ["pandas", "head", "shape", "describe", "filtre", "groupby", "df_actifs"],
           },
           {
             id: "py-v1-moments",
@@ -356,17 +363,17 @@ print(model.summary())`,
           },
           {
             id: "py-v1-student",
-            title: "Coefficients, Statistique de Student & P-valeur",
-            exerciseRef: "Ex. 10–11",
-            syntax: "model.params, model.tvalues, model.pvalues['var']",
-            formula: r`$$t_j = \frac{\hat{\beta}_j}{\operatorname{SE}(\hat{\beta}_j)} \quad (\text{Test } H_0 : \beta_j = 0)$$`,
+            title: "Paramètres, Student, Intervalles (.conf_int) & Prévision (.predict)",
+            exerciseRef: "M2 Ex. 10–11 · M4 Ex. 11–13, 16",
+            syntax: "model.params, model.pvalues, model.conf_int(alpha=0.05), model.predict([1.0, x1])",
+            formula: r`$$t_j = \frac{\hat{\beta}_j}{\operatorname{SE}(\hat{\beta}_j)}, \qquad \hat{Y}^* = \hat{\beta}_0 \cdot 1 + \hat{\beta}_1 x_1^* + \dots + \hat{\beta}_K x_K^*$$`,
             description:
-              "Si `pvalues[var] < 0.05` (ou $|t| > 2$ approximativement), on rejette $H_0$ au seuil de 5 % : la variable a un effet statistiquement significatif.",
-            exampleCode: r`print("Coefficients :\n", model.params)
-print("Statistiques t :\n", model.tvalues)
-p_val = model.pvalues['euribor_3m']
-print(f"P-valeur Euribor : {p_val:.4e}")`,
-            tags: ["params", "pvalues", "tvalues", "Student", "significativité"],
+              "Rejet de $H_0 : \\beta_j = 0$ si `pvalues[var] < 0.05` (équivalent à `0` hors de `model.conf_int()`). Lors d'une prévision avec `.predict([...])`, passez impérativement `1.0` en première position pour la constante.",
+            exampleCode: r`print(model.conf_int(alpha=0.05).round(4))
+# Prévision OAT 10Y si Euribor = 3.0% et Inflation = 2.5% (dans un modèle à 2 régresseurs)
+# prev = float(model_alm.predict([1.0, 3.0, 2.5])[0])
+print("P-val Euribor :", f"{model.pvalues['euribor_3m']:.4e}")`,
+            tags: ["params", "pvalues", "tvalues", "conf_int", "predict", "Student"],
           },
           {
             id: "py-v1-r2-fstat",
@@ -422,12 +429,12 @@ print(f"VIF Euribor : {vif_euribor:.3f}")`,
           },
           {
             id: "py-v1-bp-white",
-            title: "Hétéroscédasticité : Breusch-Pagan & Correction de White (HC1)",
-            exerciseRef: "Ex. 18–19",
-            syntax: "het_breuschpagan(resid, X) | .fit(cov_type='HC1')",
+            title: "Hétéroscédasticité : Breusch-Pagan & Robustesse White (HC1 / HC3)",
+            exerciseRef: "M2 Ex. 18–19 · M4 Ex. 19–20",
+            syntax: "het_breuschpagan(resid, X) | .fit(cov_type='HC1') | .fit(cov_type='HC3')",
             formula: r`$$LM = N \cdot R^2_{\text{aux}} \sim \chi^2(K)$$`,
             description:
-              "Si la p-valeur de Breusch-Pagan est $< 0.05$, la variance des résidus n'est pas constante. Utilisez `cov_type='HC1'` (White) pour corriger les écarts-types `.bse` et `.pvalues` sans biaiser $\\hat{\\beta}$.",
+              "Si la p-valeur de Breusch-Pagan est $< 0.05$, corrigez les écarts-types `.bse` via White (`HC1` ou **`HC3`**, recommandé sur petits échantillons $N < 50$ car il corrige par l'effet de levier $(1 - h_{tt})^2$). Les coefficients $\\hat{\\beta}$ restent inchangés.",
             exampleCode: r`from statsmodels.stats.diagnostic import het_breuschpagan
 import statsmodels.api as sm
 
@@ -436,9 +443,9 @@ model = sm.OLS(df['oat_10y'], X).fit()
 lm_stat, p_bp, _, _ = het_breuschpagan(model.resid, X)
 print(f"Breusch-Pagan p-val : {p_bp:.4e}")
 
-model_hc1 = sm.OLS(df['oat_10y'], X).fit(cov_type='HC1')
-print("SE robustes HC1 :\n", model_hc1.bse)`,
-            tags: ["Breusch-Pagan", "hétéroscédasticité", "HC1", "White", "bse"],
+model_hc3 = sm.OLS(df['oat_10y'], X).fit(cov_type='HC3')
+print("SE robustes HC3 :\n", model_hc3.bse)`,
+            tags: ["Breusch-Pagan", "hétéroscédasticité", "HC1", "HC3", "White", "bse"],
           },
           {
             id: "py-v1-jb",
@@ -494,17 +501,21 @@ print(model_hac.summary())`,
           },
           {
             id: "py-v1-plot-alm",
-            title: "Graphique Observé vs Prédit & Sensibilité de Duration (ALM)",
-            exerciseRef: "Ex. 25–26",
-            syntax: "model.fittedvalues | plt.plot(...) | perte = -D_mod * delta_y * V0",
-            formula: r`$$\Delta V \approx -D^* \cdot \Delta y \cdot V_0$$`,
+            title: "Graphiques, Duration ALM & VaR Paramétrique 95 %",
+            exerciseRef: "M2 Ex. 25–26 · M4 Ex. 25–26",
+            syntax: "plt.scatter(...) / model.fittedvalues | -D_mod * dy * V0 | -(mu - 1.645 * sigma)",
+            formula: r`$$\Delta V \approx -D^* \cdot \Delta y \cdot V_0 \qquad ; \qquad \operatorname{VaR}_{95\%} = -(\mu - 1.645\,\sigma)$$`,
             description:
-              "`model.fittedvalues` extrait $\\hat{y}$. En gestion actif-passif (ALM), la duration modifiée $D^*$ mesure la perte relative d'un portefeuille obligataire pour un choc de taux $\\Delta y$.",
-            exampleCode: r`# Sensibilité obligataire (choc de taux +200 bps = +0.02)
+              "`plt.scatter(x, y)` + `plt.plot(x, model.fittedvalues)` visualise la droite MCO. En risque bilanciel : la duration $D^*$ estime le choc de taux obligataire, et la VaR paramétrique normale chiffre la perte au quantile $5\\%$.",
+            exampleCode: r`# 1. Sensibilité obligataire (choc +200 bps = +0.02)
 V0, D_mod, dy = 100_000_000, 7.0, 0.02
-perte_estimee = -D_mod * dy * V0
-print(f"Perte en capital ALM : {perte_estimee:,.2f} EUR")`,
-            tags: ["matplotlib", "fittedvalues", "duration", "ALM", "choc de taux"],
+print(f"Perte ALM : {-D_mod * dy * V0:,.2f} EUR")
+
+# 2. VaR paramétrique 95% sur le CAC 40
+mu, sigma = df['cac40_rendement'].mean(), df['cac40_rendement'].std()
+var_95 = -(mu - 1.645 * sigma)
+print(f"VaR 95% CAC 40 : {var_95:.2f}%")`,
+            tags: ["matplotlib", "scatter", "fittedvalues", "duration", "ALM", "VaR"],
           },
         ],
       },
