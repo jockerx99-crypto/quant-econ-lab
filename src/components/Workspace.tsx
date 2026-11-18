@@ -92,95 +92,17 @@ const TAUX_CSV_DATA = `date,taux_1y,taux_2y,taux_5y,taux_10y,taux_20y,taux_30y
 2023-12-31,3.45,2.85,2.50,2.55,2.85,2.88`;
 
 export function Workspace() {
+  // Hydration guard so SSR and initial client render match 100% (avoids React #418/#423 on ?ex= or localStorage)
+  const [hasMounted, setHasMounted] = useState<boolean>(false);
+
   // Curriculum Version (V1 = Fondations Actuariat, V2 = Quantitative Finance & Monte Carlo)
-  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2">(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const exParam = params.get("ex");
-      if (exParam) {
-        if (COURSE_MODULES_V1.some((m) => m.exercises.some((e) => e.id === exParam))) return "v1";
-        if (COURSE_MODULES_V2.some((m) => m.exercises.some((e) => e.id === exParam))) return "v2";
-      }
-      const saved = localStorage.getItem("quantecon_version");
-      if (saved === "v1" || saved === "v2") return saved;
-    }
-    return "v1";
-  });
+  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2">("v1");
 
   // Track state independently for V1 and V2
-  const [moduleIndexV1, setModuleIndexV1] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const exParam = params.get("ex");
-      if (exParam) {
-        for (let i = 0; i < COURSE_MODULES_V1.length; i++) {
-          if (COURSE_MODULES_V1[i].exercises.some((e) => e.id === exParam)) return i;
-        }
-      }
-      const saved = localStorage.getItem("quantecon_v1_module_idx") || localStorage.getItem("quantecon_module_idx");
-      if (saved !== null) {
-        const parsed = Number(saved);
-        if (!isNaN(parsed) && parsed >= 0 && parsed < COURSE_MODULES_V1.length) return parsed;
-      }
-    }
-    return 0;
-  });
-
-  const [exerciseIndexV1, setExerciseIndexV1] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const exParam = params.get("ex");
-      if (exParam) {
-        for (const m of COURSE_MODULES_V1) {
-          const idx = m.exercises.findIndex((e) => e.id === exParam);
-          if (idx !== -1) return idx;
-        }
-      }
-      const saved = localStorage.getItem("quantecon_v1_exercise_idx") || localStorage.getItem("quantecon_exercise_idx");
-      if (saved !== null) {
-        const parsed = Number(saved);
-        if (!isNaN(parsed) && parsed >= 0) return parsed;
-      }
-    }
-    return 13; // Retain Exercise 14 (GROUP BY region)
-  });
-
-  const [moduleIndexV2, setModuleIndexV2] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const exParam = params.get("ex");
-      if (exParam) {
-        for (let i = 0; i < COURSE_MODULES_V2.length; i++) {
-          if (COURSE_MODULES_V2[i].exercises.some((e) => e.id === exParam)) return i;
-        }
-      }
-      const saved = localStorage.getItem("quantecon_v2_module_idx");
-      if (saved !== null) {
-        const parsed = Number(saved);
-        if (!isNaN(parsed) && parsed >= 0 && parsed < COURSE_MODULES_V2.length) return parsed;
-      }
-    }
-    return 0;
-  });
-
-  const [exerciseIndexV2, setExerciseIndexV2] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const exParam = params.get("ex");
-      if (exParam) {
-        for (const m of COURSE_MODULES_V2) {
-          const idx = m.exercises.findIndex((e) => e.id === exParam);
-          if (idx !== -1) return idx;
-        }
-      }
-      const saved = localStorage.getItem("quantecon_v2_exercise_idx");
-      if (saved !== null) {
-        const parsed = Number(saved);
-        if (!isNaN(parsed) && parsed >= 0) return parsed;
-      }
-    }
-    return 0;
-  });
+  const [moduleIndexV1, setModuleIndexV1] = useState<number>(0);
+  const [exerciseIndexV1, setExerciseIndexV1] = useState<number>(13); // Retain Exercise 14 (GROUP BY region)
+  const [moduleIndexV2, setModuleIndexV2] = useState<number>(0);
+  const [exerciseIndexV2, setExerciseIndexV2] = useState<number>(0);
 
   const modules: CourseModule[] = curriculumVersion === "v1" ? COURSE_MODULES_V1 : COURSE_MODULES_V2;
   const currentModuleIndex = curriculumVersion === "v1" ? moduleIndexV1 : moduleIndexV2;
@@ -220,19 +142,10 @@ export function Workspace() {
   // Code state: starts empty or with generic comment (never exercise.initialCode)
   const [code, setCode] = useState<string>(() => getDefaultEditorCode(currentExercise.language));
 
-  // Completed exercises tracking (persisted in localStorage)
-  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("quantecon_completed_ids");
-        if (saved) return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    // Pre-mark exercises 1 to 13 as completed since user was already at 14
-    return COURSE_MODULES_V1[0].exercises.slice(0, 13).map((e) => e.id);
-  });
+  // Completed exercises tracking (persisted in localStorage after mount)
+  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>(() =>
+    COURSE_MODULES_V1[0].exercises.slice(0, 13).map((e) => e.id)
+  );
 
   // Mobile stacked view active tab ('theory' | 'editor' | 'results')
   const [mobileTab, setMobileTab] = useState<"theory" | "editor" | "results">("editor");
@@ -272,22 +185,53 @@ export function Workspace() {
 
   // Persist current exercise and module to LocalStorage per version
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (curriculumVersion === "v1") {
-        localStorage.setItem("quantecon_v1_exercise_idx", String(currentExerciseIndex));
-        localStorage.setItem("quantecon_v1_module_idx", String(currentModuleIndex));
-        localStorage.setItem("quantecon_exercise_idx", String(currentExerciseIndex));
-        localStorage.setItem("quantecon_module_idx", String(currentModuleIndex));
-      } else {
-        localStorage.setItem("quantecon_v2_exercise_idx", String(currentExerciseIndex));
-        localStorage.setItem("quantecon_v2_module_idx", String(currentModuleIndex));
-      }
+    if (!hasMounted || typeof window === "undefined") return;
+    if (curriculumVersion === "v1") {
+      localStorage.setItem("quantecon_v1_exercise_idx", String(currentExerciseIndex));
+      localStorage.setItem("quantecon_v1_module_idx", String(currentModuleIndex));
+      localStorage.setItem("quantecon_exercise_idx", String(currentExerciseIndex));
+      localStorage.setItem("quantecon_module_idx", String(currentModuleIndex));
+    } else {
+      localStorage.setItem("quantecon_v2_exercise_idx", String(currentExerciseIndex));
+      localStorage.setItem("quantecon_v2_module_idx", String(currentModuleIndex));
     }
-  }, [currentExerciseIndex, currentModuleIndex, curriculumVersion]);
+  }, [hasMounted, currentExerciseIndex, currentModuleIndex, curriculumVersion]);
 
-  // Handle direct URL navigation via ?ex=py-12 on mount
+  // Restore LocalStorage & handle direct URL navigation via ?ex=py-12 on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    try {
+      const savedCompleted = localStorage.getItem("quantecon_completed_ids");
+      if (savedCompleted) setCompletedExerciseIds(JSON.parse(savedCompleted));
+    } catch (e) {
+      console.error(e);
+    }
+
+    const savedVer = localStorage.getItem("quantecon_version");
+    if (savedVer === "v1" || savedVer === "v2") setCurriculumVersion(savedVer);
+
+    const savedV1Mod = localStorage.getItem("quantecon_v1_module_idx") || localStorage.getItem("quantecon_module_idx");
+    if (savedV1Mod !== null) {
+      const p = Number(savedV1Mod);
+      if (!isNaN(p) && p >= 0 && p < COURSE_MODULES_V1.length) setModuleIndexV1(p);
+    }
+    const savedV1Ex = localStorage.getItem("quantecon_v1_exercise_idx") || localStorage.getItem("quantecon_exercise_idx");
+    if (savedV1Ex !== null) {
+      const p = Number(savedV1Ex);
+      if (!isNaN(p) && p >= 0) setExerciseIndexV1(p);
+    }
+    const savedV2Mod = localStorage.getItem("quantecon_v2_module_idx");
+    if (savedV2Mod !== null) {
+      const p = Number(savedV2Mod);
+      if (!isNaN(p) && p >= 0 && p < COURSE_MODULES_V2.length) setModuleIndexV2(p);
+    }
+    const savedV2Ex = localStorage.getItem("quantecon_v2_exercise_idx");
+    if (savedV2Ex !== null) {
+      const p = Number(savedV2Ex);
+      if (!isNaN(p) && p >= 0) setExerciseIndexV2(p);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const exId = params.get("ex");
     if (exId) {
@@ -297,6 +241,7 @@ export function Workspace() {
           setCurriculumVersion("v1");
           setModuleIndexV1(mIdx);
           setExerciseIndexV1(eIdx);
+          setHasMounted(true);
           return;
         }
       }
@@ -306,29 +251,29 @@ export function Workspace() {
           setCurriculumVersion("v2");
           setModuleIndexV2(mIdx);
           setExerciseIndexV2(eIdx);
+          setHasMounted(true);
           return;
         }
       }
     }
+    setHasMounted(true);
   }, []);
 
   // Synchronize URL with active exercise (?ex=...)
   useEffect(() => {
-    if (typeof window !== "undefined" && currentExercise?.id) {
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("ex") !== currentExercise.id) {
-        url.searchParams.set("ex", currentExercise.id);
-        window.history.replaceState({}, "", url.toString());
-      }
+    if (!hasMounted || typeof window === "undefined" || !currentExercise?.id) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("ex") !== currentExercise.id) {
+      url.searchParams.set("ex", currentExercise.id);
+      window.history.replaceState({}, "", url.toString());
     }
-  }, [currentExercise?.id]);
+  }, [hasMounted, currentExercise?.id]);
 
   // Persist completed exercise IDs to LocalStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("quantecon_completed_ids", JSON.stringify(completedExerciseIds));
-    }
-  }, [completedExerciseIds]);
+    if (!hasMounted || typeof window === "undefined") return;
+    localStorage.setItem("quantecon_completed_ids", JSON.stringify(completedExerciseIds));
+  }, [hasMounted, completedExerciseIds]);
 
   // Pre-seed Python DataFrames ('df', 'df_marche', 'df_actifs', 'df_taux') whenever Pyodide is ready
   useEffect(() => {

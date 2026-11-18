@@ -295,6 +295,19 @@ ORDER BY rang_cout ASC;`,
         subtitle: "Décrire la distribution empirique et détecter les valeurs aberrantes",
         entries: [
           {
+            id: "py-v1-tvm",
+            title: "Valeur Temps de l'Argent (Actualisation & Capitalisation)",
+            exerciseRef: "M2 Ex. 1 · M4 Ex. 1",
+            syntax: "V0 = CF / ((1 + r) ** T) | VT = V0 * ((1 + r) ** T)",
+            formula: r`$$V_T = V_0 (1 + r)^T \qquad ; \qquad V_0 = \frac{CF_T}{(1 + r)^T} \quad (\text{continu : } CF_T e^{-rT})$$`,
+            description:
+              "Un euro futur vaut moins qu'un euro immédiat : l'actualisation ramène un flux futur $CF_T$ à sa valeur présente $V_0$ au taux sans risque $r$ (vérifiez toujours si la colonne est en pourcentage `3.10` ou en décimal `0.031`).",
+            exampleCode: r`flux, r_ann, T = 10_000.0, 0.031, 10
+va = flux / ((1.0 + r_ann) ** T)
+print(f"Valeur actuelle : {va:,.2f} EUR")`,
+            tags: ["valeur temps", "actualisation", "capitalisation", "ALM", "taux"],
+          },
+          {
             id: "py-v1-inspect",
             title: "Exploration, Filtrage Booléen & GroupBy (.head, .describe, &)",
             exerciseRef: "M2 Ex. 1–2, 5 · M4 Ex. 1–3, 6, 9",
@@ -501,21 +514,25 @@ print(model_hac.summary())`,
           },
           {
             id: "py-v1-plot-alm",
-            title: "Graphiques, Duration ALM & VaR Paramétrique 95 %",
+            title: "Graphiques, Duration, Convexité (Taylor Ordre 2) & VaR ALM",
             exerciseRef: "M2 Ex. 25–26 · M4 Ex. 25–26",
-            syntax: "plt.scatter(...) / model.fittedvalues | -D_mod * dy * V0 | -(mu - 1.645 * sigma)",
-            formula: r`$$\Delta V \approx -D^* \cdot \Delta y \cdot V_0 \qquad ; \qquad \operatorname{VaR}_{95\%} = -(\mu - 1.645\,\sigma)$$`,
+            syntax: "plt.scatter(...) / model.fittedvalues | -D_mod * dy * V0 + 0.5 * C * (dy**2) * V0",
+            formula: r`$$\frac{\Delta V}{V_0} \approx -D^* \Delta y + \frac{1}{2} C (\Delta y)^2 \qquad ; \qquad \operatorname{VaR}_{95\%} = -(\mu - 1.645\,\sigma)$$` +
+              "\n\n" +
+              r`$$\operatorname{VaR}_{99.5\%} \text{ (Solvabilité II)} : z_{0.995} \approx 2.576 \implies \Delta V_{\text{SCR}} \approx -D^* \cdot (2.576\,\sigma_{\text{ann}}) \cdot V_0$$`,
             description:
-              "`plt.scatter(x, y)` + `plt.plot(x, model.fittedvalues)` visualise la droite MCO. En risque bilanciel : la duration $D^*$ estime le choc de taux obligataire, et la VaR paramétrique normale chiffre la perte au quantile $5\\%$.",
-            exampleCode: r`# 1. Sensibilité obligataire (choc +200 bps = +0.02)
-V0, D_mod, dy = 100_000_000, 7.0, 0.02
-print(f"Perte ALM : {-D_mod * dy * V0:,.2f} EUR")
+              "`plt.scatter(x, y)` + `plt.plot(x, model.fittedvalues)` visualise la droite MCO. En risque bilanciel : le développement de Taylor à l'ordre 2 combine la **duration modifiée** $D^*$ et la **convexité** $C > 0$ (qui amortit la perte lors d'une hausse de taux $\\Delta y > 0$), tandis que la VaR paramétrique chiffre le quantile de perte à $95\\%$ ($z = 1.645$) ou $99.5\\%$ (SCR Solvabilité II).",
+            exampleCode: r`# 1. Taylor ordre 1 & ordre 2 sur portefeuille obligataire (+200 bps = +0.02)
+V0, D_mod, C, dy = 100_000_000, 7.0, 60.0, 0.02
+perte_ord1 = -D_mod * dy * V0
+perte_ord2 = perte_ord1 + 0.5 * C * (dy ** 2) * V0
+print(f"Ordre 1 : {perte_ord1:,.2f} EUR | Ordre 2 (avec convexité) : {perte_ord2:,.2f} EUR")
 
 # 2. VaR paramétrique 95% sur le CAC 40
 mu, sigma = df['cac40_rendement'].mean(), df['cac40_rendement'].std()
 var_95 = -(mu - 1.645 * sigma)
 print(f"VaR 95% CAC 40 : {var_95:.2f}%")`,
-            tags: ["matplotlib", "scatter", "fittedvalues", "duration", "ALM", "VaR"],
+            tags: ["matplotlib", "scatter", "fittedvalues", "duration", "convexité", "Taylor", "ALM", "VaR", "Solvabilité II"],
           },
         ],
       },

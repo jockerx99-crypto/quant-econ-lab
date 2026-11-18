@@ -190,6 +190,14 @@ blockquote ol {
   margin: 0.35rem 0 !important;
 }
 
+blockquote ul {
+  list-style-type: disc !important;
+}
+
+blockquote ol {
+  list-style-type: decimal !important;
+}
+
 blockquote li {
   margin: 0.2rem 0 !important;
   word-break: break-word;
@@ -258,6 +266,77 @@ blockquote pre {
   max-width: 100%;
   height: auto;
   background-color: #ffffff;
+}
+
+/* Editorial prose typography rules (since @tailwindcss/typography is not enabled) */
+.prose h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c1917;
+  margin-top: 1.1rem;
+  margin-bottom: 0.45rem;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.prose h3:first-child {
+  margin-top: 0;
+}
+
+.prose h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #292524;
+  margin-top: 0.9rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+.prose > p {
+  margin: 0.5rem 0;
+  color: #44403c;
+  line-height: 1.62;
+}
+
+.prose > ul {
+  list-style-type: disc;
+  padding-left: 1.35rem;
+  margin: 0.45rem 0;
+}
+
+.prose > ol {
+  list-style-type: decimal;
+  padding-left: 1.35rem;
+  margin: 0.45rem 0;
+}
+
+.prose > ul li,
+.prose > ol li {
+  margin: 0.25rem 0;
+  color: #44403c;
+  line-height: 1.58;
+}
+
+.prose ul ul,
+.prose ol ul {
+  list-style-type: circle;
+  padding-left: 1.25rem;
+  margin: 0.2rem 0;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid #e7e5e4;
+  margin: 1rem 0;
+}
+
+.prose :not(pre) > code {
+  background-color: #f5f5f4;
+  color: #0369a1;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  font-size: 0.84em;
+  border: 1px solid #e7e5e4;
 }
 
 /* Explicit Tailwind Preflight protection for KaTeX fractions & display equations */
