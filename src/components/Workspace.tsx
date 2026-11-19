@@ -169,6 +169,15 @@ export function Workspace() {
     setCode(getDefaultEditorCode(currentExercise.language));
   }, [currentExercise.language]);
 
+  // Load step-by-step guided skeleton into editor (scaffolding without spoiling solution)
+  const handleLoadGuidedCode = useCallback(() => {
+    const scaffold =
+      currentExercise.guide?.guidedCode ||
+      currentExercise.initialCode ||
+      getDefaultEditorCode(currentExercise.language);
+    setCode(scaffold);
+  }, [currentExercise.guide, currentExercise.initialCode, currentExercise.language]);
+
   // Reveal solution: inject solutionCode directly into Monaco editor AND open the explanation modal
   const handleShowSolution = useCallback(() => {
     const solution = currentExercise.solutionCode || currentExercise.initialCode || "";
@@ -605,6 +614,7 @@ export function Workspace() {
                 onRun={handleRunCode}
                 onValidate={handleValidateCode}
                 onReset={handleResetCode}
+                onRequestGuidedCode={handleLoadGuidedCode}
                 onRequestShowSolution={handleShowSolution}
                 isRunning={isCurrentRunning}
                 isReady={isCurrentLanguageReady}
@@ -661,10 +671,13 @@ export function Workspace() {
           <div className="flex-1 h-full overflow-hidden">
             {mobileTab === "theory" && (
               <TheoryViewer
-              exercise={currentExercise}
-              onOpenDatasetModal={handleOpenDataset}
-              onInsertCode={(snippet) => setCode(snippet)}
-            />
+                exercise={currentExercise}
+                onOpenDatasetModal={handleOpenDataset}
+                onInsertCode={(snippet) => {
+                  setCode(snippet);
+                  setMobileTab("editor");
+                }}
+              />
             )}
             {mobileTab === "editor" && (
               <CodeEditor
@@ -674,6 +687,7 @@ export function Workspace() {
                 onRun={handleRunCode}
                 onValidate={handleValidateCode}
                 onReset={handleResetCode}
+                onRequestGuidedCode={handleLoadGuidedCode}
                 onRequestShowSolution={handleShowSolution}
                 isRunning={isCurrentRunning}
                 isReady={isCurrentLanguageReady}

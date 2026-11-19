@@ -74,7 +74,54 @@ sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, age FROM assures;",
         validationQuery: "SELECT police_id, age FROM assures;",
         hints: ["Remplacez '...' par 'police_id, age'."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Dans le cours, la **projection** $\\pi_{A_1, \\dots, A_k}(R)$ extrait uniquement les attributs nécessaires d'une relation. Ici, $R$ est la table `assures` (13 colonnes, 12 polices) et vous appliquez $\\pi_{\\text{police\\_id},\\ \\text{age}}(\\text{assures})$ : `SELECT` isole strictement la clé de contrat (`police_id`) et la variable tarifaire (`age`) au lieu d'un `SELECT *` coûteux, tout en conservant les 12 lignes (algèbre multi-ensemble SQL, $|\\pi^{\\text{SQL}}(\\text{assures})| = 12$).",
+          stepByStepPlan: [
+            "**Désigner la table source (`FROM`)** : écrivez `FROM assures` pour charger le portefeuille des 12 contrats d'assurance.",
+            "**Lister les colonnes projetées (`SELECT`)** : inscrivez `police_id, age` dans cet ordre exact juste après `SELECT`, séparées par une virgule et sans virgule traînante avant `FROM`.",
+            "**Clôturer l'instruction** : terminez la requête par un point-virgule `;` pour marquer la fin de la commande SQL.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de projection ($\\pi$) qui sélectionne uniquement les colonnes listées (`police_id` et `age`) pour le tableau de résultat.",
+            },
+            {
+              symbol: "police_id",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne clé primaire (`INTEGER`) de la table `assures` identifiant de manière unique chaque contrat.",
+            },
+            {
+              symbol: "age",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne numérique (`INTEGER`) de `assures` donnant l'âge du conducteur principal en années.",
+            },
+            {
+              symbol: "FROM",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause exécutée en premier par le moteur SQL pour identifier et ouvrir la table source à lire.",
+            },
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table principale du portefeuille auto contenant les 12 polices souscrites et leurs 13 attributs.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter uniquement police_id puis age (sans virgule avant FROM)
+SELECT
+    ___,
+    ___
+-- Étape 2 : Indiquer la table source du portefeuille
+FROM ___;`,
+        }
       },
       {
         id: "sql-2",
@@ -142,7 +189,60 @@ sinistre_id  charge_ultime  part_resp
         solutionCode: "SELECT police_id, prime_annuelle AS prime_nette FROM assures;",
         validationQuery: "SELECT police_id, prime_annuelle AS prime_nette FROM assures;",
         hints: ["Utilisez 'prime_annuelle AS prime_nette'."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "L'opérateur relationnel de **renommage** $\\rho_{b \\leftarrow a}(R)$ change l'intitulé d'un attribut dans le schéma de sortie sans modifier les données stockées sur disque. Ici, $\\rho_{\\text{prime\\_nette} \\leftarrow \\text{prime\\_annuelle}}(\\text{assures})$ se traduit directement par `prime_annuelle AS prime_nette` dans la clause `SELECT` : la colonne technique `prime_annuelle` reste intacte dans `assures`, mais l'extraction expose l'alias actuariel `prime_nette`.",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : indiquez `FROM assures` pour accéder aux primes des 12 contrats.",
+            "**Projeter l'identifiant et renommer la prime (`SELECT ... AS`)** : sélectionnez `police_id`, puis ajoutez une virgule et `prime_annuelle AS prime_nette`.",
+            "**Vérifier l'exactitude et clore** : contrôlez l'orthographe exacte de l'alias `prime_nette` (sans espace ni accent) et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de projection évaluée après `FROM` ; c'est à cette étape que l'alias `prime_nette` est créé.",
+            },
+            {
+              symbol: "police_id",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne clé de `assures` projetée sans renommage en première position.",
+            },
+            {
+              symbol: "prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne physique (`REAL`) de la table `assures` contenant le montant de cotisation annuelle en EUR.",
+            },
+            {
+              symbol: "AS",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Mot-clé explicite de renommage ($\\rho$) reliant la colonne source (`prime_annuelle`) à son nom d'affichage (`prime_nette`).",
+            },
+            {
+              symbol: "prime_nette",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie éphémère (identifiant en `snake_case`) utilisé comme en-tête de la 2e colonne du résultat.",
+            },
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source lue par `FROM assures` ; sa structure sur disque demeure inchangée.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id et renommer prime_annuelle avec AS
+SELECT
+    ___,
+    ___ AS ___
+-- Étape 2 : Spécifier la table source
+FROM ___;`,
+        }
       },
       {
         id: "sql-3",
@@ -208,7 +308,61 @@ sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, prime_annuelle FROM assures WHERE prime_annuelle > 800;",
         validationQuery: "SELECT police_id, prime_annuelle FROM assures WHERE prime_annuelle > 800;",
         hints: ["WHERE prime_annuelle > 800;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "La **restriction** $\\sigma_P(R) = \\{ t \\in R \\mid P(t) = \\text{TRUE} \\}$ s'implémente en SQL via `WHERE`. Ici, le prédicat $P$ est l'inégalité stricte `prime_annuelle > 800` appliquée sur `assures` : le moteur évalue chaque contrat (12 lignes), rejette les lignes évaluées à `FALSE` ou `UNKNOWN` (logique ternaire de Kleene) et ne transmet au `SELECT` que les 7 polices dont la prime dépasse strictement $800\\text{ EUR}$ (en gardant la colonne brute à gauche de `>` pour préserver l'usage éventuel d'un index).",
+          stepByStepPlan: [
+            "**Charger la source (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les colonnes (`SELECT`)** : demandez `police_id, prime_annuelle`.",
+            "**Filtrer les lignes (`WHERE`)** : ajoutez `WHERE prime_annuelle > 800` en utilisant l'inégalité stricte `>`.",
+            "**Finaliser** : vérifiez l'absence d'espace ou de devise dans `800` et clôturez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Projette les deux colonnes demandées (`police_id`, `prime_annuelle`) uniquement sur les lignes validées par `WHERE`.",
+            },
+            {
+              symbol: "police_id, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` identifiant le contrat (`INTEGER`) et donnant la prime annuelle testée (`REAL`).",
+            },
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 contrats réduite à 7 lignes après application du filtre numérique.",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de restriction ($\\sigma$) évaluée avant `SELECT` ; ne retient que les tuples pour lesquels le prédicat vaut `TRUE`.",
+            },
+            {
+              symbol: ">",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur d'inégalité stricte : une prime égale à `800.0` serait exclue (contrairement à `>=`).",
+            },
+            {
+              symbol: "800",
+              kind: "Paramètre",
+              roleInExercise:
+                "Seuil numérique de référence (en EUR) comparé à `prime_annuelle` sur chaque ligne.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Sélectionner l'identifiant et la prime annuelle
+SELECT ___, ___
+-- Étape 2 : Lire la table assures
+FROM ___
+-- Étape 3 : Conserver uniquement les primes strictement supérieures à 800
+WHERE ___ > ___;`,
+        }
       },
       {
         id: "sql-4",
@@ -271,7 +425,61 @@ sinistre_id  police_id  cout_total
         solutionCode: "SELECT police_id, region, prime_annuelle FROM assures WHERE region = 'IDF';",
         validationQuery: "SELECT police_id, region, prime_annuelle FROM assures WHERE region = 'IDF';",
         hints: ["N'oubliez pas les guillemets simples : 'IDF'."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "En tarification par zonier, isoler une modalité qualitative $c \\in \\mathcal{D}$ correspond à la restriction $\\sigma_{\\text{region} = \\text{'IDF'}}(\\text{assures})$. En SQLite, la comparaison `=` sur du texte compare exactement les octets : le littéral `'IDF'` doit impérativement être encadré par des **guillemets simples** et respecter les majuscules exactes stockées dans `assures.region` pour extraire les 4 contrats franciliens (`1001`, `1004`, `1007`, `1011`).",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les trois attributs (`SELECT`)** : listez `police_id, region, prime_annuelle`.",
+            "**Filtrer la modalité textuelle (`WHERE`)** : ajoutez `WHERE region = 'IDF'` avec des guillemets simples `'...'`.",
+            "**Terminer** : vérifiez la casse exacte `'IDF'` et clôturez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Projette les trois colonnes demandées pour chaque contrat retenu par le filtre géographique.",
+            },
+            {
+              symbol: "police_id, region, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` donnant la clé contrat, la région administrative (`TEXT`) et la prime annuelle (`REAL`).",
+            },
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source des 12 contrats répartis sur 9 régions françaises.",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de restriction ($\\sigma$) appliquée avant `SELECT` pour ne garder que le zonier francilien.",
+            },
+            {
+              symbol: "=",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur d'égalité stricte sensible à la casse (`'IDF' = 'idf'` renverrait `FALSE`).",
+            },
+            {
+              symbol: "'IDF'",
+              kind: "Paramètre",
+              roleInExercise:
+                "Constante textuelle entre guillemets simples (norme SQL ANSI pour les chaînes, à ne pas confondre avec `\"IDF\"`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id, region et prime_annuelle
+SELECT ___, ___, ___
+-- Étape 2 : Sélectionner la table assures
+FROM ___
+-- Étape 3 : Filtrer la modalité exacte entre guillemets simples
+WHERE ___ = 'A_COMPLETER';`,
+        }
       },
       {
         id: "sql-5",
@@ -340,7 +548,68 @@ periode  euribor_3m  inflation_hicp
         solutionCode: "SELECT police_id, age, bonus_malus FROM assures WHERE age < 30 AND bonus_malus > 0.8;",
         validationQuery: "SELECT police_id, age, bonus_malus FROM assures WHERE age < 30 AND bonus_malus > 0.8;",
         hints: ["WHERE age < 30 AND bonus_malus > 0.8;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "En algèbre relationnelle, croiser deux facteurs de risque s'écrit comme une **intersection** de restrictions : $\\sigma_{\\text{age} < 30 \\land \\text{bonus\\_malus} > 0.8}(\\text{assures}) = \\sigma_{\\text{age} < 30}(\\text{assures}) \\cap \\sigma_{\\text{bonus\\_malus} > 0.8}(\\text{assures})$. Selon la table de vérité de Kleene, l'opérateur `AND` ne renvoie `TRUE` que si les deux comparaisons sont vraies sur la *même* ligne de `assures`, isolant les 4 jeunes conducteurs malussés ou peu bonifiés (`1001`, `1003`, `1007`, `1011`).",
+          stepByStepPlan: [
+            "**Ouvrir la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les variables de profil (`SELECT`)** : sélectionnez `police_id, age, bonus_malus`.",
+            "**Poser la condition d'âge (`WHERE`)** : écrivez `WHERE age < 30`.",
+            "**Croiser avec le CRM (`AND`)** : complétez par `AND bonus_malus > 0.8;` (avec un point décimal `.` et non une virgule).",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 contrats dont on évalue conjointement l'âge et le coefficient bonus-malus.",
+            },
+            {
+              symbol: "police_id, age, bonus_malus",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` : clé du contrat, âge (`INTEGER`) et coefficient CRM (`REAL` entre `0.50` et `1.15`).",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause évaluant la conjonction logique sur chaque ligne avant la projection `SELECT`.",
+            },
+            {
+              symbol: "AND",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur de conjonction ($\\land$) exigeant que les deux prédicats soient simultanément `TRUE` sur la ligne.",
+            },
+            {
+              symbol: "< et >",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Inégalités strictes excluant les bornes exactes (`age = 30` ou `bonus_malus = 0.8` sont rejetés).",
+            },
+            {
+              symbol: "30",
+              kind: "Paramètre",
+              roleInExercise:
+                "Seuil maximal d'âge (en années) définissant ici le segment jeune conducteur.",
+            },
+            {
+              symbol: "0.8",
+              kind: "Paramètre",
+              roleInExercise:
+                "Seuil minimal de bonus-malus (notation anglo-saxonne avec point `.`) ciblant les conducteurs insuffisamment bonifiés.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id, age et bonus_malus
+SELECT ___, ___, ___
+-- Étape 2 : Indiquer la table source
+FROM ___
+-- Étape 3 : Combiner les deux conditions avec AND
+WHERE ___ < ___
+  AND ___ > ___;`,
+        }
       },
       {
         id: "sql-6",
@@ -408,7 +677,67 @@ sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, type_vehicule FROM assures WHERE type_vehicule = 'SUV' OR type_vehicule = 'Sportive';",
         validationQuery: "SELECT police_id, type_vehicule FROM assures WHERE type_vehicule = 'SUV' OR type_vehicule = 'Sportive';",
         hints: ["Complétez avec : type_vehicule = 'Sportive'"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Réunir deux segments de véhicules à forte valeur dans une même extraction correspond à l'**union ensembliste** $\\sigma_{P \\lor Q}(\\text{assures}) = \\sigma_{\\text{type\\_vehicule} = \\text{'SUV'}}(\\text{assures}) \\cup \\sigma_{\\text{type\\_vehicule} = \\text{'Sportive'}}(\\text{assures})$. Contrairement à `AND` sur la même colonne (qui renverrait 0 ligne car un véhicule n'a qu'un seul type), `OR` conserve chaque contrat satisfaisant au moins une des deux égalités (les polices `1004` et `1007`).",
+          stepByStepPlan: [
+            "**Désigner la table (`FROM`)** : écrivez `FROM assures`.",
+            "**Projeter les deux colonnes (`SELECT`)** : sélectionnez `police_id, type_vehicule`.",
+            "**Écrire le premier test (`WHERE`)** : posez `WHERE type_vehicule = 'SUV'`.",
+            "**Ajouter la seconde modalité (`OR`)** : écrivez `OR type_vehicule = 'Sportive';` en répétant explicitement `type_vehicule =` après `OR`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT ... FROM assures",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Structure de base chargeant la table `assures` et projetant les colonnes retenues après filtrage.",
+            },
+            {
+              symbol: "police_id, type_vehicule",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` fournissant la clé contrat et la catégorie de véhicule (`TEXT`).",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause testant la disjonction logique ligne par ligne sur les 12 contrats.",
+            },
+            {
+              symbol: "=",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur d'égalité textuelle exacte, qui doit être réécrit complet de part et d'autre de `OR`.",
+            },
+            {
+              symbol: "OR",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur de disjonction ($\\lor$) conservant la ligne dès qu'au moins une des deux comparaisons vaut `TRUE`.",
+            },
+            {
+              symbol: "'SUV'",
+              kind: "Paramètre",
+              roleInExercise:
+                "Premier littéral textuel (entre guillemets simples) ciblant les véhicules SUV (`1004`).",
+            },
+            {
+              symbol: "'Sportive'",
+              kind: "Paramètre",
+              roleInExercise:
+                "Second littéral textuel ciblant les voitures sportives (`1007`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id et type_vehicule depuis assures
+SELECT ___, ___
+FROM ___
+-- Étape 2 : Relier les deux égalités complètes par OR
+WHERE ___ = 'A_COMPLETER'
+   OR ___ = 'A_COMPLETER';`,
+        }
       },
       {
         id: "sql-7",
@@ -475,7 +804,61 @@ sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, type_vehicule FROM assures WHERE type_vehicule IN ('Citadine', 'Berline');",
         validationQuery: "SELECT police_id, type_vehicule FROM assures WHERE type_vehicule IN ('Citadine', 'Berline');",
         hints: ["IN ('Citadine', 'Berline')"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "L'opérateur `IN` formalise l'appartenance à un ensemble discret fini $E = \\{\\text{'Citadine'}, \\text{'Berline'}\\}$ : $x \\in E \\iff (x = \\text{'Citadine'}) \\lor (x = \\text{'Berline'})$. Appliqué à `assures.type_vehicule`, il remplace avantageusement une chaîne de `OR` tout en permettant au moteur d'optimiser la recherche sur les 12 contrats (pour extraire 5 `Citadine` et 4 `Berline`, soit 9 polices).",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les colonnes (`SELECT`)** : sélectionnez `police_id, type_vehicule`.",
+            "**Introduire le test d'appartenance (`WHERE ... IN`)** : écrivez `WHERE type_vehicule IN`.",
+            "**Fournir la liste entre parenthèses** : complétez par `('Citadine', 'Berline');` en respectant les guillemets simples et la majuscule initiale.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT ... FROM assures",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Lit la table `assures` (12 lignes) et projette les deux colonnes demandées pour les lignes retenues.",
+            },
+            {
+              symbol: "police_id, type_vehicule",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` : identifiant du contrat et modalité de carrosserie testée dans l'ensemble $E$.",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Applique la restriction ensembliste sur chaque police avant projection.",
+            },
+            {
+              symbol: "IN",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur d'appartenance ($\\in$) équivalent à une disjonction d'égalités `=`, plus lisible et maintenable.",
+            },
+            {
+              symbol: "(...)",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Parenthèses obligatoires délimitant l'ensemble discret des valeurs autorisées séparées par des virgules.",
+            },
+            {
+              symbol: "'Citadine', 'Berline'",
+              kind: "Paramètre",
+              roleInExercise:
+                "Les deux modalités textuelles exactes acceptées par le filtre (5 `Citadine` et 4 `Berline`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Sélectionner police_id et type_vehicule
+SELECT ___, ___
+-- Étape 2 : Lire la table assures
+FROM ___
+-- Étape 3 : Tester l'appartenance à la liste entre parenthèses
+WHERE ___ IN ('A_COMPLETER', 'A_COMPLETER');`,
+        }
       },
       {
         id: "sql-8",
@@ -541,7 +924,60 @@ sinistre_id  date_survenance  cout_total
         solutionCode: "SELECT police_id, age FROM assures WHERE age BETWEEN 25 AND 45;",
         validationQuery: "SELECT police_id, age FROM assures WHERE age BETWEEN 25 AND 45;",
         hints: ["WHERE age BETWEEN 25 AND 45;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Le test d'**intervalle fermé** $x \\in [a, b] \\iff (x \\ge a) \\land (x \\le b)$ se traduit en SQL par `BETWEEN a AND b`. Appliqué à `assures.age` avec $a = 25$ et $b = 45$, le moteur inclut les deux bornes : la police `1002` (exactement `45` ans) est donc conservée parmi les 6 assurés de la tranche $[25, 45]$. Attention à toujours placer la borne inférieure (`25`) avant la borne supérieure (`45`).",
+          stepByStepPlan: [
+            "**Désigner la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les colonnes (`SELECT`)** : sélectionnez `police_id, age`.",
+            "**Construire le filtre d'intervalle (`BETWEEN ... AND ...`)** : écrivez `WHERE age BETWEEN 25 AND 45`.",
+            "**Vérifier l'ordre des bornes** : assurez-vous que `25` précède `45` (sinon 0 ligne est retournée) et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT ... FROM assures",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Lit les 12 contrats de `assures` et projette les deux colonnes demandées après filtrage de la tranche d'âge.",
+            },
+            {
+              symbol: "police_id, age",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` : identifiant du contrat et âge entier (`INTEGER`) compris entre `22` et `67` ans dans le portefeuille.",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause appliquant la restriction d'intervalle sur chaque conducteur.",
+            },
+            {
+              symbol: "BETWEEN ... AND ...",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur d'intervalle fermé $[a, b]$ traduit par le moteur en `age >= 25 AND age <= 45` (bornes inclusives).",
+            },
+            {
+              symbol: "25",
+              kind: "Paramètre",
+              roleInExercise:
+                "Borne inférieure inclusive de la classe d'âge ; doit impérativement figurer en première position.",
+            },
+            {
+              symbol: "45",
+              kind: "Paramètre",
+              roleInExercise:
+                "Borne supérieure inclusive : inclut notamment le contrat `1002` dont le conducteur a exactement `45` ans.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id et age depuis assures
+SELECT ___, ___
+FROM ___
+-- Étape 2 : Filtrer l'intervalle fermé [25, 45] (borne basse d'abord)
+WHERE ___ BETWEEN ___ AND ___;`,
+        }
       },
       {
         id: "sql-9",
@@ -605,7 +1041,54 @@ sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, prime_annuelle FROM assures ORDER BY prime_annuelle DESC;",
         validationQuery: "SELECT police_id, prime_annuelle FROM assures ORDER BY prime_annuelle DESC;",
         hints: ["ORDER BY prime_annuelle DESC;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Dans le modèle relationnel, une table comme `assures` est un multi-ensemble non ordonné. L'opérateur $\\tau_{\\text{prime\\_annuelle}^{\\text{DESC}}}(\\text{assures})$ impose un ordre déterministe via `ORDER BY prime_annuelle DESC` : évalué après `SELECT`, il trie les 12 contrats de la cotisation la plus élevée (`2100.0` EUR pour `1007`) jusqu'à la plus faible (`490.0` EUR pour `1006`).",
+          stepByStepPlan: [
+            "**Lire la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Projeter les colonnes (`SELECT`)** : sélectionnez `police_id, prime_annuelle`.",
+            "**Ordonner la sortie (`ORDER BY`)** : ajoutez `ORDER BY prime_annuelle DESC` en toute fin de requête.",
+            "**Contrôler le sens de tri** : vérifiez `DESC` (décroissant, car le défaut `ASC` trierait du plus petit au plus grand) et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT ... FROM assures",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Extrait les 12 polices de `assures` avant que la séquence ne soit triée en sortie.",
+            },
+            {
+              symbol: "police_id, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` : clé du contrat et prime annuelle (`REAL`) servant également de clé de tri.",
+            },
+            {
+              symbol: "ORDER BY",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause finale de tri ($\\tau$) transformant la relation non ordonnée en liste séquentielle déterministe ($\\mathcal{O}(N \\log N)$).",
+            },
+            {
+              symbol: "prime_annuelle (clé de tri)",
+              kind: "Paramètre",
+              roleInExercise:
+                "Critère numérique passé à `ORDER BY` selon lequel les 12 lignes sont classées.",
+            },
+            {
+              symbol: "DESC",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Modificateur de tri décroissant (du maximum `2100.0` au minimum `490.0`), par opposition au tri croissant implicite `ASC`.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id et prime_annuelle
+SELECT ___, ___
+FROM ___
+-- Étape 2 : Trier de la prime la plus élevée à la plus faible
+ORDER BY ___ ___;`,
+        }
       },
       {
         id: "sql-10",
@@ -667,7 +1150,62 @@ sinistre_id  police_id  nature_sinistre  cout_total
         solutionCode: "SELECT police_id, prime_annuelle FROM assures ORDER BY prime_annuelle DESC LIMIT 3;",
         validationQuery: "SELECT police_id, prime_annuelle FROM assures ORDER BY prime_annuelle DESC LIMIT 3;",
         hints: ["LIMIT 3;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Extraire le Top-3 des plus grosses primes réalise la composition $\\text{Limit}_3(\\tau_{\\text{prime\\_annuelle}^{\\text{DESC}}}(\\text{assures}))$. L'étape `ORDER BY prime_annuelle DESC` classe d'abord les contrats par prime décroissante (via un tas borné en $\\mathcal{O}(N \\log 3)$), puis `LIMIT 3` tronque strictement la séquence aux 3 premières lignes (`1007` à `2100.0`, `1004` à `1340.2`, `1003` à `1150.0`). Sans `ORDER BY`, `LIMIT 3` renverrait 3 lignes arbitraires.",
+          stepByStepPlan: [
+            "**Projeter depuis la source** : écrivez `SELECT police_id, prime_annuelle FROM assures`.",
+            "**Trier en sens décroissant (`ORDER BY ... DESC`)** : ajoutez `ORDER BY prime_annuelle DESC` pour placer les primes maximales en tête.",
+            "**Tronquer la sortie (`LIMIT`)** : ajoutez `LIMIT 3` en dernière clause.",
+            "**Finaliser** : vérifiez l'ordre `ORDER BY` avant `LIMIT` et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 contrats dont on audite les 3 expositions tarifaires les plus élevées.",
+            },
+            {
+              symbol: "police_id, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes projetées identifiant le contrat et le montant de cotisation servant au classement.",
+            },
+            {
+              symbol: "ORDER BY",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause indispensable précédant `LIMIT` pour garantir un classement Top-$N$ déterministe.",
+            },
+            {
+              symbol: "DESC",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Sens décroissant plaçant les primes les plus chères aux rangs 1, 2 et 3.",
+            },
+            {
+              symbol: "LIMIT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause finale de troncature s'exécutant tout en dernier après `ORDER BY`.",
+            },
+            {
+              symbol: "3",
+              kind: "Paramètre",
+              roleInExercise:
+                "Nombre maximal $k = 3$ de lignes renvoyées en sortie (ici `1007`, `1004` et `1003`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id et prime_annuelle depuis assures
+SELECT ___, ___
+FROM ___
+-- Étape 2 : Ordonner par prime décroissante pour un Top-3 déterministe
+ORDER BY ___ ___
+-- Étape 3 : Ne conserver que les 3 premiers contrats
+LIMIT ___;`,
+        }
       },
       {
         id: "sql-11",
@@ -729,7 +1267,58 @@ nb_sinistres  nb_corporels  nb_polices_sinistrees
         solutionCode: "SELECT COUNT(*) AS nb_total_polices FROM assures;",
         validationQuery: "SELECT COUNT(*) AS nb_total_polices FROM assures;",
         hints: ["SELECT COUNT(*) AS nb_total_polices FROM assures;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Le calcul de l'exposition totale $E$ du portefeuille applique l'agrégateur de cardinalité $\\gamma_{\\text{COUNT}(*)}(\\text{assures})$. Contrairement à `COUNT(col)` qui ignore les `NULL` ou `COUNT(DISTINCT col)` qui dédoublonne, `COUNT(*)` compte chaque ligne entière de `assures` (`12` lignes, aucune compression par `GROUP BY` donc une seule ligne en sortie) et ne renvoie jamais `NULL`, même sur une table vide.",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : spécifiez `FROM assures`.",
+            "**Agréger la cardinalité (`COUNT(*)`)** : appelez `COUNT(*)` dans le `SELECT` pour compresser les 12 lignes en un effectif unique.",
+            "**Renommer le résultat (`AS`)** : attribuez l'alias exact `AS nb_total_polices` et clôturez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "SELECT ... FROM assures",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Lit l'ensemble de la table `assures` et renvoie exactement 1 ligne agrégée en l'absence de `GROUP BY`.",
+            },
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table du portefeuille contenant 1 ligne par contrat souscrit (`police_id` clé primaire, donc 12 polices).",
+            },
+            {
+              symbol: "COUNT(*)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Fonction d'agrégation ($\gamma_{\\text{COUNT}}$) mesurant le nombre total de lignes de la table.",
+            },
+            {
+              symbol: "*",
+              kind: "Paramètre",
+              roleInExercise:
+                "Jeton passé à `COUNT` signifiant « compter chaque ligne complète » (sans filtrer sur les `NULL` d'une colonne précise).",
+            },
+            {
+              symbol: "AS",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Attribue un nom de colonne explicite au scalaire calculé par `COUNT(*)`.",
+            },
+            {
+              symbol: "nb_total_polices",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie stockant l'exposition globale calculée (`12`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Dénombrer toutes les lignes et nommer la colonne de sortie
+SELECT COUNT(___) AS ___
+-- Étape 2 : Spécifier la table source
+FROM ___;`,
+        }
       },
       {
         id: "sql-12",
@@ -792,7 +1381,67 @@ charge_totale  severite_moyenne  moy_corp_non_null  moy_corp_tous
         solutionCode: "SELECT ROUND(SUM(prime_annuelle), 2) AS total_primes, ROUND(AVG(prime_annuelle), 2) AS prime_moyenne FROM assures;",
         validationQuery: "SELECT ROUND(SUM(prime_annuelle), 2) AS total_primes, ROUND(AVG(prime_annuelle), 2) AS prime_moyenne FROM assures;",
         hints: ["Complétez avec 'prime_annuelle' dans SUM et AVG."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Les deux agrégats $\\text{SUM}(X) = \\sum_{i} x_i$ et $\\text{AVG}(X) = \\frac{\\text{SUM}(X)}{\\text{COUNT}(X)}$ sont appliqués ici à `assures.prime_annuelle`. Comme la colonne est déclarée `NOT NULL` dans `assures`, les 12 primes participent au dénominateur (`11306.8 / 12 = 942.2333...`). La fonction `ROUND(..., 2)` enveloppe l'extérieur de `SUM` et de `AVG` (jamais l'intérieur) afin d'éviter toute dérive d'arrondi avant sommation.",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Calculer la masse totale arrondie** : écrivez `ROUND(SUM(prime_annuelle), 2) AS total_primes`.",
+            "**Calculer la prime moyenne arrondie** : ajoutez une virgule, puis `ROUND(AVG(prime_annuelle), 2) AS prime_moyenne`.",
+            "**Finaliser** : vérifiez la position extérieure de `ROUND(..., 2)` et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source dont les 12 lignes sont réduites en une seule ligne de synthèse financière.",
+            },
+            {
+              symbol: "prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne `REAL NOT NULL` de `assures` passée en argument à `SUM` et `AVG`.",
+            },
+            {
+              symbol: "SUM(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Agrégateur additionnant toutes les valeurs non nulles de `prime_annuelle` (`11306.8` EUR).",
+            },
+            {
+              symbol: "AVG(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Agrégateur calculant la moyenne empirique $\\text{SUM}/\\text{COUNT}$ (renvoie un `REAL` : `942.2333...`).",
+            },
+            {
+              symbol: "ROUND(..., 2)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Fonction scalaire appliquée *après* chaque agrégation pour arrondir le résultat financier.",
+            },
+            {
+              symbol: ", 2",
+              kind: "Paramètre",
+              roleInExercise:
+                "Second argument de `ROUND` fixant le nombre de décimales conservées après la virgule (2 centimes).",
+            },
+            {
+              symbol: "total_primes, prime_moyenne",
+              kind: "Variable",
+              roleInExercise:
+                "Alias des deux colonnes calculées retournées dans le résultat (`11306.8` et `942.23`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Imbriquer SUM et AVG à l'intérieur de ROUND(..., 2)
+SELECT
+    ROUND(SUM(___), ___) AS ___,
+    ROUND(AVG(___), ___) AS ___
+-- Étape 2 : Désigner la table assures
+FROM ___;`,
+        }
       },
       {
         id: "sql-13",
@@ -855,7 +1504,61 @@ euribor_min  euribor_max  oat_min  oat_max
         solutionCode: "SELECT MIN(prime_annuelle) AS prime_min, MAX(prime_annuelle) AS prime_max FROM assures;",
         validationQuery: "SELECT MIN(prime_annuelle) AS prime_min, MAX(prime_annuelle) AS prime_max FROM assures;",
         hints: ["MIN(prime_annuelle) AS prime_min, MAX(prime_annuelle) AS prime_max"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Auditer les bornes du support empirique consiste à extraire les statistiques d'ordre $x_{(1)} = \\text{MIN}(X)$ et $x_{(n)} = \\text{MAX}(X)$ de `assures.prime_annuelle`. En une seule passe, `MIN(prime_annuelle)` confirme l'absence de prime nulle ou négative (`490.0` EUR) et `MAX(prime_annuelle)` révèle le tarif plafond du portefeuille (`2100.0` EUR), mesurant une étendue de $1\\,610\\text{ EUR}$.",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Calculer le minimum (`MIN`)** : écrivez `MIN(prime_annuelle) AS prime_min`.",
+            "**Calculer le maximum (`MAX`)** : ajoutez une virgule, puis `MAX(prime_annuelle) AS prime_max`.",
+            "**Finaliser** : vérifiez les alias exacts (`prime_min`, `prime_max`) et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table des 12 contrats dont la requête compresse les primes en 1 ligne contenant les deux extrêmes.",
+            },
+            {
+              symbol: "prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne numérique (`REAL`) passée en argument à `MIN` et `MAX` pour contrôler la cohérence tarifaire.",
+            },
+            {
+              symbol: "MIN(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Agrégateur retournant la plus petite valeur non nulle $x_{(1)}$ observée (`490.0`).",
+            },
+            {
+              symbol: "MAX(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Agrégateur retournant la plus grande valeur non nulle $x_{(n)}$ observée (`2100.0`).",
+            },
+            {
+              symbol: "AS",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Mot-clé attribuant un nom lisible aux deux colonnes calculées.",
+            },
+            {
+              symbol: "prime_min, prime_max",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie identifiant respectivement le tarif plancher et le tarif plafond du portefeuille.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Extraire la prime minimale et maximale avec leurs alias
+SELECT
+    MIN(___) AS ___,
+    MAX(___) AS ___
+-- Étape 2 : Spécifier la table assures
+FROM ___;`,
+        }
       },
       {
         id: "sql-14",
@@ -936,7 +1639,63 @@ Bris de Glace    2             800.0
         solutionCode: "SELECT region, COUNT(*) AS nb_polices FROM assures GROUP BY region;",
         validationQuery: "SELECT region, COUNT(*) AS nb_polices FROM assures GROUP BY region;",
         hints: ["GROUP BY region;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Le paradigme *Split - Apply - Combine* et l'opérateur $\\,_{\\text{region}}\\gamma_{\\text{COUNT}(*)}(\\text{assures})$ partitionnent d'abord les 12 contrats en $K = 9$ sous-ensembles disjoints $R_g$ selon `assures.region` (`GROUP BY region`), puis comptent les contrats de chaque bloc (`COUNT(*)`). Conformément à la règle d'intégrité fonctionnelle, `region` est la seule colonne non agrégée projetée dans `SELECT` car elle figure exactement dans `GROUP BY`.",
+          stepByStepPlan: [
+            "**Désigner la table (`FROM`)** : indiquez `FROM assures`.",
+            "**Partitionner par zone (`GROUP BY`)** : ajoutez `GROUP BY region` pour créer un groupe distinct par région.",
+            "**Projeter clé et effectif (`SELECT`)** : écrivez `SELECT region, COUNT(*) AS nb_polices`.",
+            "**Vérifier l'alignement** : confirmez que `region` figure à l'identique dans `SELECT` et `GROUP BY`, puis terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 polices compressée en 9 lignes régionales par le regroupement.",
+            },
+            {
+              symbol: "region",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Attribut catégoriel (`TEXT`) utilisé comme clé de partition dans `GROUP BY` et affiché dans `SELECT`.",
+            },
+            {
+              symbol: "GROUP BY",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de partitionnement ($\\gamma$) rassemblant les lignes partageant la même région avant tout calcul d'agrégat.",
+            },
+            {
+              symbol: "COUNT(*)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Compte l'effectif à l'intérieur de chaque groupe $R_g$ (retourne `4` pour `IDF`, `1` pour chacune des 8 autres régions).",
+            },
+            {
+              symbol: "*",
+              kind: "Paramètre",
+              roleInExercise:
+                "Indique à `COUNT` de compter toutes les lignes appartenant au groupe régional courant.",
+            },
+            {
+              symbol: "nb_polices",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de la colonne calculée mesurant l'exposition (nombre de contrats) par région.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter la clé de groupe (region) et le décompte par groupe
+SELECT
+    ___,
+    COUNT(___) AS ___
+-- Étape 2 : Lire la table assures
+FROM ___
+-- Étape 3 : Partitionner les contrats par région
+GROUP BY ___;`,
+        }
       },
       {
         id: "sql-15",
@@ -1004,7 +1763,69 @@ Tiers Étendu  3           585.0      0.51
         solutionCode: "SELECT type_vehicule, ROUND(AVG(prime_annuelle), 2) AS prime_moyenne FROM assures GROUP BY type_vehicule;",
         validationQuery: "SELECT type_vehicule, ROUND(AVG(prime_annuelle), 2) AS prime_moyenne FROM assures GROUP BY type_vehicule;",
         hints: ["GROUP BY type_vehicule;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Dans le cours, la segmentation tarifaire estime l'espérance conditionnelle $\\hat{\\mu}(v) = \\widehat{\\mathbb{E}}[\\text{prime} \\mid \\text{type\\_vehicule} = v]$ issue du théorème de décomposition de la variance de Huygens. Ici, `GROUP BY type_vehicule` découpe `assures` en 5 strates de véhicules et `AVG(prime_annuelle)` calcule $\\hat{\\mu}(v)$ dans chaque strate (de `696.45` EUR pour les `Berline` à `2100.0` EUR pour la `Sportive`), avec `ROUND(..., 2)` placé à l'extérieur de `AVG` pour préserver la précision numérique.",
+          stepByStepPlan: [
+            "**Cibler la table (`FROM`)** : spécifiez `FROM assures`.",
+            "**Regrouper par véhicule (`GROUP BY`)** : écrivez `GROUP BY type_vehicule` pour créer 5 segments tarifaires.",
+            "**Estimer la moyenne arrondie (`SELECT`)** : projetez `type_vehicule, ROUND(AVG(prime_annuelle), 2) AS prime_moyenne`.",
+            "**Vérifier l'imbrication** : assurez-vous que `ROUND` encadre `AVG(...)` (et non l'inverse) et clôturez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 contrats regroupés en 5 lignes (une par modalité de `type_vehicule`).",
+            },
+            {
+              symbol: "type_vehicule",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Variable explicative catégorielle de `assures` servant simultanément de clé dans `GROUP BY` et d'étiquette dans `SELECT`.",
+            },
+            {
+              symbol: "prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Variable cible (`REAL`) de `assures` dont on calcule la moyenne conditionnelle par catégorie.",
+            },
+            {
+              symbol: "GROUP BY",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause partitionnant le portefeuille par `type_vehicule` avant d'évaluer `AVG` sur chaque groupe.",
+            },
+            {
+              symbol: "AVG(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Calcule l'espérance empirique $\\frac{1}{n_v}\\sum \\text{prime}_i$ à l'intérieur de chaque catégorie de véhicule.",
+            },
+            {
+              symbol: "ROUND(..., 2) et , 2",
+              kind: "Paramètre",
+              roleInExercise:
+                "`ROUND` arrondit le flottant renvoyé par `AVG` ; son second paramètre `, 2` impose une précision à 2 décimales.",
+            },
+            {
+              symbol: "prime_moyenne",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie représentant le tarif moyen observé pour chaque segment de véhicule.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter type_vehicule et la moyenne arrondie à 2 décimales
+SELECT
+    ___,
+    ROUND(AVG(___), ___) AS ___
+-- Étape 2 : Lire la table assures
+FROM ___
+-- Étape 3 : Regrouper par catégorie de véhicule
+GROUP BY ___;`,
+        }
       },
       {
         id: "sql-16",
@@ -1073,7 +1894,70 @@ Collision        4            20250.0
         solutionCode: "SELECT region, COUNT(*) AS nb_polices FROM assures GROUP BY region HAVING COUNT(*) >= 2;",
         validationQuery: "SELECT region, COUNT(*) AS nb_polices FROM assures GROUP BY region HAVING COUNT(*) >= 2;",
         hints: ["HAVING COUNT(*) >= 2;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Le filtrage de crédibilité de Bühlmann s'exprime algébriquement par $\\sigma_{\\text{COUNT}(*) \\ge 2}(\\,_{\\text{region}}\\gamma_{\\text{COUNT}(*)}(\\text{assures}))$. Parce que `WHERE` s'exécute *avant* `GROUP BY`, il ne peut pas tester `COUNT(*)`. Il faut donc regrouper d'abord par `region` (`GROUP BY region`), puis filtrer les groupes formés via `HAVING COUNT(*) >= 2` (en répétant `COUNT(*)` plutôt que l'alias `nb_polices` pour rester portable en SQL ANSI). Seule `'IDF'` (`4` polices) franchit ce seuil.",
+          stepByStepPlan: [
+            "**Charger et regrouper** : écrivez `FROM assures GROUP BY region` pour calculer les effectifs régionaux.",
+            "**Projeter la région et son compteur** : sélectionnez `region, COUNT(*) AS nb_polices`.",
+            "**Filtrer les groupes crédibles (`HAVING`)** : ajoutez `HAVING COUNT(*) >= 2` après `GROUP BY region`.",
+            "**Finaliser** : vérifiez l'inégalité large `>=` (« au moins 2 ») et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table source de 12 contrats répartis dans 9 régions (dont 8 ne comptent qu'une seule police).",
+            },
+            {
+              symbol: "region",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Clé de groupement (`TEXT`) définissant les strates régionales évaluées par `HAVING`.",
+            },
+            {
+              symbol: "GROUP BY",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Agrège les lignes par région en 9 groupes *avant* que la clause `HAVING` ne les filtre.",
+            },
+            {
+              symbol: "COUNT(*)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Mesure l'effectif de chaque région ; utilisée dans `SELECT` pour l'affichage et répétée dans `HAVING` pour le seuil.",
+            },
+            {
+              symbol: "HAVING",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de restriction post-agrégation filtrant des *groupes* selon le résultat d'une fonction d'agrégat (impossible avec `WHERE`).",
+            },
+            {
+              symbol: ">= et 2",
+              kind: "Paramètre",
+              roleInExercise:
+                "Inégalité large `>=` et seuil `2` imposant un volume minimal d'exposition d'au moins 2 polices par région.",
+            },
+            {
+              symbol: "nb_polices",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de l'effectif projeté dans le résultat (`4` pour `IDF`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter la région et son nombre de contrats
+SELECT
+    ___,
+    COUNT(___) AS ___
+-- Étape 2 : Lire assures et regrouper par région
+FROM ___
+GROUP BY ___
+-- Étape 3 : Filtrer les groupes formés (après GROUP BY, jamais dans WHERE)
+HAVING COUNT(___) >= ___;`,
+        }
       },
       {
         id: "sql-17",
@@ -1143,7 +2027,72 @@ sinistre_id  cout_total  tranche_gravite
         solutionCode: "SELECT police_id, prime_annuelle, CASE WHEN prime_annuelle > 1000 THEN 'Élevée' ELSE 'Standard' END AS categorie_prime FROM assures;",
         validationQuery: "SELECT police_id, prime_annuelle, CASE WHEN prime_annuelle > 1000 THEN 'Élevée' ELSE 'Standard' END AS categorie_prime FROM assures;",
         hints: ["THEN 'Élevée' ELSE 'Standard' END AS categorie_prime"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Discrétiser une variable continue comme `assures.prime_annuelle` revient à construire la fonction en escalier $f(P) = \\text{'Élevée'}\\,\\mathbf{1}_{P > 1000} + \\text{'Standard'}\\,\\mathbf{1}_{P \\le 1000}$. En SQL, le bloc `CASE WHEN prime_annuelle > 1000 THEN 'Élevée' ELSE 'Standard' END` évalue chaque contrat séquentiellement : les 3 polices dépassant $1\\,000\\text{ EUR}$ (`1003`, `1004`, `1007`) reçoivent `'Élevée'` et les 9 autres basculent dans la branche `ELSE 'Standard'` (qui évite tout retour `NULL`), sous l'alias `categorie_prime`.",
+          stepByStepPlan: [
+            "**Projeter les colonnes existantes** : commencez par `SELECT police_id, prime_annuelle,`.",
+            "**Ouvrir le bloc conditionnel (`CASE WHEN ... THEN`)** : écrivez `CASE WHEN prime_annuelle > 1000 THEN 'Élevée'`.",
+            "**Traiter le complémentaire et fermer (`ELSE ... END AS`)** : ajoutez `ELSE 'Standard' END AS categorie_prime`.",
+            "**Indiquer la table source** : complétez par `FROM assures;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table des 12 contrats dont chaque ligne reçoit une étiquette de tranche tarifaire.",
+            },
+            {
+              symbol: "police_id, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` : clé du contrat et prime annuelle (`REAL`) comparée au seuil de discrétisation.",
+            },
+            {
+              symbol: "CASE ... WHEN ... THEN ... ELSE ... END",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Structure conditionnelle complète évaluant le prédicat dans `WHEN`, renvoyant `THEN` si vrai ou `ELSE` sinon, et fermée obligatoirement par `END`.",
+            },
+            {
+              symbol: ">",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Comparateur strict séparant les primes strictement supérieures à `1000` des autres.",
+            },
+            {
+              symbol: "1000",
+              kind: "Paramètre",
+              roleInExercise:
+                "Seuil numérique (en EUR) déclenchant la classification `'Élevée'`.",
+            },
+            {
+              symbol: "'Élevée', 'Standard'",
+              kind: "Paramètre",
+              roleInExercise:
+                "Constantes textuelles exactes (entre guillemets simples, avec accent sur `'Élevée'`) renvoyées par `CASE`.",
+            },
+            {
+              symbol: "categorie_prime",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de la nouvelle colonne catégorielle calculée par l'expression `CASE ... END`.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id, prime_annuelle et ouvrir CASE
+SELECT
+    ___,
+    ___,
+    CASE
+        -- Étape 2 : Tester la condition > 1000
+        WHEN ___ > ___ THEN 'A_COMPLETER'
+        -- Étape 3 : Définir le repli ELSE et nommer la colonne après END
+        ELSE 'A_COMPLETER'
+    END AS ___
+FROM ___;`,
+        }
       },
       {
         id: "sql-18",
@@ -1213,7 +2162,62 @@ sinistre_id  cout_dommages_materiels  cout_corporel  somme_naive  somme_corrigee
         solutionCode: "SELECT sinistre_id, cout_dommages_materiels, COALESCE(cout_corporel, 0.0) AS corporel_impute FROM sinistres;",
         validationQuery: "SELECT sinistre_id, cout_dommages_materiels, COALESCE(cout_corporel, 0.0) AS corporel_impute FROM sinistres;",
         hints: ["COALESCE(cout_corporel, 0.0) AS corporel_impute"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Dans `sinistres`, 6 dossiers sur 8 sont purement matériels et contiennent `cout_corporel = NULL` (seuls `503` et `505` valent `1200.0` et `4500.0`). Or en arithmétique SQL de Kleene, `NULL` est absorbant ($x + \\text{NULL} = \\text{NULL}$). La fonction standard `COALESCE(cout_corporel, 0.0)` évalue ses arguments de gauche à droite et remplace ces 6 `NULL` structurels par le flottant `0.0` (`REAL`), rendant la colonne `corporel_impute` sûre pour tout cumul comptable.",
+          stepByStepPlan: [
+            "**Changer de table (`FROM`)** : interrogez la table `sinistres` (qui contient les coûts matériels et corporels).",
+            "**Projeter les colonnes de base** : écrivez `SELECT sinistre_id, cout_dommages_materiels,`.",
+            "**Imputer `cout_corporel` avec `COALESCE`** : ajoutez `COALESCE(cout_corporel, 0.0) AS corporel_impute`.",
+            "**Vérifier le type décimal** : conservez `0.0` (flottant) en second paramètre et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "sinistres",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table des 8 dossiers sinistres où `cout_corporel` est la seule colonne autorisant `NULL`.",
+            },
+            {
+              symbol: "sinistre_id, cout_dommages_materiels",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Clé primaire du sinistre et montant des dégâts matériels (`REAL NOT NULL`) de `sinistres`.",
+            },
+            {
+              symbol: "cout_corporel",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonne nullable (`REAL`) de `sinistres` valant `NULL` sur 6 dossiers sans dommage corporel.",
+            },
+            {
+              symbol: "COALESCE(..., 0.0)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Fonction SQL ANSI retournant le premier argument non nul de gauche à droite (`cout_corporel` s'il existe, sinon `0.0`).",
+            },
+            {
+              symbol: ", 0.0",
+              kind: "Paramètre",
+              roleInExercise:
+                "Second argument de `COALESCE` servant de valeur d'imputation flottante (`REAL`) lorsque `cout_corporel IS NULL`.",
+            },
+            {
+              symbol: "corporel_impute",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de la colonne nettoyée affichant `0.0` au lieu de `NULL` pour les sinistres matériels.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter les champs de sinistres et imputer les NULL par 0.0
+SELECT
+    ___,
+    ___,
+    COALESCE(___, ___) AS ___
+-- Étape 2 : Cibler la table des sinistres
+FROM ___;`,
+        }
       },
       {
         id: "sql-19",
@@ -1287,7 +2291,71 @@ police_id  age  sinistre_id  nature_sinistre  cout_total
         solutionCode: "SELECT a.police_id, a.type_vehicule, s.cout_total FROM assures a INNER JOIN sinistres s ON a.police_id = s.police_id;",
         validationQuery: "SELECT a.police_id, a.type_vehicule, s.cout_total FROM assures a INNER JOIN sinistres s ON a.police_id = s.police_id;",
         hints: ["ON a.police_id = s.police_id;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "L'équijointure interne $\\text{assures} \\bowtie_{a.\\text{police\\_id} = s.\\text{police\\_id}} \\text{sinistres}$ relie chaque contrat à ses sinistres via la clé étrangère `police_id`. En raison de la cardinalité $1\\text{-}N$, `INNER JOIN` exclut les 5 contrats sains (sans sinistre) et répète la police `1003` sur ses 2 dossiers (`502` et `503`), produisant exactement 8 lignes — le périmètre de modélisation de la sévérité conditionnelle $\\mathbb{E}[C \\mid N \\ge 1, X]$. Comme `police_id` existe dans les deux tables, les alias `a` et `s` lèvent toute ambiguïté.",
+          stepByStepPlan: [
+            "**Déclarer la table de gauche et son alias** : écrivez `FROM assures a`.",
+            "**Joindre `sinistres` (`INNER JOIN ... ON`)** : ajoutez `INNER JOIN sinistres s ON a.police_id = s.police_id`.",
+            "**Préfixer chaque colonne dans `SELECT`** : sélectionnez `a.police_id, a.type_vehicule, s.cout_total` (`a.police_id` est obligatoire pour éviter `ambiguous column name`).",
+            "**Clôturer** : vérifiez les alias `a` et `s` puis terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures, sinistres",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Les deux tables reliées en $1\\text{-}N$ : 12 polices dans `assures` et 8 sinistres rattachés dans `sinistres`.",
+            },
+            {
+              symbol: "a, s",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de tables (`a` pour `assures`, `s` pour `sinistres`) servant à qualifier sans ambiguïté l'origine de chaque colonne.",
+            },
+            {
+              symbol: "INNER JOIN",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Jointure interne ($\\bowtie$) ne conservant que les paires `(a, s)` qui concordent dans les deux tables (8 lignes sinistrées).",
+            },
+            {
+              symbol: "ON",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause ANSI spécifiant le prédicat d'équijointure `a.police_id = s.police_id` (évite tout produit cartésien accidentel).",
+            },
+            {
+              symbol: "a.police_id",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Clé commune de jointure : le préfixe `a.` est indispensable car `police_id` appartient aux deux tables.",
+            },
+            {
+              symbol: "a.type_vehicule",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Caractéristique du véhicule extraite de `assures` (alias `a`) pour chaque sinistre survenu.",
+            },
+            {
+              symbol: "s.cout_total",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Coût total du dossier sinistre (`REAL`) extrait de `sinistres` (alias `s`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Préfixer chaque colonne avec l'alias de sa table (a ou s)
+SELECT
+    a.___,
+    a.___,
+    s.___
+-- Étape 2 : Associer assures (a) et sinistres (s) par INNER JOIN
+FROM assures a
+INNER JOIN sinistres s
+    -- Étape 3 : Égaler la clé primaire de a et la clé étrangère de s
+    ON a.___ = s.___;`,
+        }
       },
       {
         id: "sql-20",
@@ -1357,7 +2425,65 @@ nb_lignes  nb_polices_distinctes  nb_sinistres
         solutionCode: "SELECT a.police_id, a.region, s.cout_total FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id;",
         validationQuery: "SELECT a.police_id, a.region, s.cout_total FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id;",
         hints: ["ON a.police_id = s.police_id;"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Pour éviter le biais de sélection qui effacerait les 5 assurés sans sinistre, le `LEFT JOIN` implémente $\\text{assures} \\bowtie^{\\text{left}}_{\\text{police\\_id}} \\text{sinistres} = (\\text{assures} \\bowtie \\text{sinistres}) \\cup \\{(r, \\text{NULL}) \\mid r \\text{ sans sinistre}\\}$. Toutes les 12 polices de la table de gauche (`assures a`) sont intégralement conservées (donnant 13 lignes avec le double sinistre de `1003`), tandis que les polices saines reçoivent `s.cout_total = NULL` afin de préserver le dénominateur complet d'exposition.",
+          stepByStepPlan: [
+            "**Placer la table d'exposition à gauche** : écrivez `FROM assures a` pour conserver les 12 contrats.",
+            "**Joindre à gauche (`LEFT JOIN ... ON`)** : ajoutez `LEFT JOIN sinistres s ON a.police_id = s.police_id`.",
+            "**Projeter les colonnes préfixées (`SELECT`)** : sélectionnez `a.police_id, a.region, s.cout_total`.",
+            "**Vérifier l'absence de `WHERE` destructeur** : aucun filtre `WHERE` sur `s.*` ne doit rejeter les lignes `NULL`, puis terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures, sinistres",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "`assures` est la table maîtresse à gauche (12 polices préservées) ; `sinistres` est la table rattachée à droite.",
+            },
+            {
+              symbol: "a, s",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de tables distinguant la source préservée (`a` pour `assures`) et la source optionnelle (`s` pour `sinistres`).",
+            },
+            {
+              symbol: "LEFT JOIN",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Jointure externe gauche ($\\bowtie^{\\text{left}}$) gardant toutes les lignes de `a`, en complétant `s` par `NULL` si aucun sinistre n'existe.",
+            },
+            {
+              symbol: "ON a.police_id = s.police_id",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Condition de correspondance sur la clé contrat évaluée pendant l'appariement des deux tables.",
+            },
+            {
+              symbol: "a.police_id, a.region",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` toujours renseignées pour les 13 lignes en sortie (même pour les 5 contrats sains).",
+            },
+            {
+              symbol: "s.cout_total",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Charge du sinistre issue de `sinistres` ; vaut `NULL` sur les 5 lignes correspondant aux assurés sans sinistre.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Sélectionner l'identifiant, la région et le coût éventuel
+SELECT
+    a.___,
+    a.___,
+    s.___
+-- Étape 2 : Préserver tous les assurés à gauche via LEFT JOIN
+FROM assures a
+LEFT JOIN sinistres s
+    -- Étape 3 : Relier sur police_id
+    ON a.___ = s.___;`,
+        }
       },
       {
         id: "sql-21",
@@ -1437,7 +2563,69 @@ police_id  prime_annuelle  nb_sin  cout_police
         solutionCode: "SELECT a.police_id, COALESCE(s.cout_total, 0.0) AS cout_charge FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id;",
         validationQuery: "SELECT a.police_id, COALESCE(s.cout_total, 0.0) AS cout_charge FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id;",
         hints: ["COALESCE(s.cout_total, 0.0) AS cout_charge"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Cet exercice combine la préservation d'exposition par jointure externe gauche ($\\text{assures} \\bowtie^{\\text{left}}_{\\text{police\\_id}} \\text{sinistres}$) et l'imputation des valeurs manquantes par `COALESCE`. Sur les 5 contrats sans sinistre, le `LEFT JOIN` génère `s.cout_total = NULL` ; `COALESCE(s.cout_total, 0.0)` remplace immédiatement ces `NULL` structurels par `0.0` EUR (`REAL`) tandis que les 8 montants de sinistres restent intacts sur les 13 lignes produites (en gardant en tête l'effet fan-out $1\\text{-}N$ sur `1003` si l'on sommait les primes).",
+          stepByStepPlan: [
+            "**Construire la jointure externe (`LEFT JOIN`)** : écrivez `FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id`.",
+            "**Projeter la clé contrat** : débutez le `SELECT` par `a.police_id,`.",
+            "**Imputer `s.cout_total` (`COALESCE`)** : ajoutez `COALESCE(s.cout_total, 0.0) AS cout_charge`.",
+            "**Contrôler types et alias** : vérifiez la constante flottante `0.0`, l'alias `cout_charge` et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures, sinistres",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "`assures` conserve toutes les polices à gauche ; `sinistres` apporte `cout_total` lorsqu'un sinistre existe.",
+            },
+            {
+              symbol: "a, s",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de tables permettant de distinguer `a.police_id` de `s.police_id` et d'accéder à `s.cout_total`.",
+            },
+            {
+              symbol: "LEFT JOIN ... ON",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Jointure externe gauche produisant 13 lignes où les 5 contrats sains héritent de `s.cout_total = NULL`.",
+            },
+            {
+              symbol: "a.police_id, s.cout_total",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Clé du contrat (`INTEGER`) et coût du sinistre (`REAL`, `NULL` si aucun dossier rattaché).",
+            },
+            {
+              symbol: "COALESCE(..., 0.0)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Substitue `0.0` à chaque `NULL` généré par le `LEFT JOIN` sans altérer les 8 sinistres réels.",
+            },
+            {
+              symbol: ", 0.0",
+              kind: "Paramètre",
+              roleInExercise:
+                "Valeur flottante par défaut imputée aux contrats à sinistralité nulle.",
+            },
+            {
+              symbol: "cout_charge",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de la colonne nettoyée utilisable directement dans des calculs actuariels ultérieurs.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter a.police_id et imputer 0.0 sur les NULL de s.cout_total
+SELECT
+    a.___,
+    COALESCE(s.___, ___) AS ___
+-- Étape 2 : Joindre assures (a) et sinistres (s) par LEFT JOIN
+FROM assures a
+LEFT JOIN sinistres s
+    ON a.___ = s.___;`,
+        }
       },
       {
         id: "sql-22",
@@ -1504,7 +2692,63 @@ sinistre_id  nature_sinistre  cout_total  cout_moyen
         solutionCode: "SELECT police_id, prime_annuelle FROM assures WHERE prime_annuelle > (SELECT AVG(prime_annuelle) FROM assures);",
         validationQuery: "SELECT police_id, prime_annuelle FROM assures WHERE prime_annuelle > (SELECT AVG(prime_annuelle) FROM assures);",
         hints: ["(SELECT AVG(prime_annuelle) FROM assures)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Dans le cycle logique (`FROM` $\\to$ `WHERE` $\\to$ `GROUP BY` $\\to$ `SELECT`), `WHERE` est évalué ligne par ligne *avant* toute agrégation, ce qui interdit d'écrire `WHERE prime_annuelle > AVG(prime_annuelle)`. La sous-requête scalaire non corrélée `(SELECT AVG(prime_annuelle) FROM assures)` contourne cette barrière en calculant d'abord le scalaire $\\bar{x} = \\frac{1}{12}\\sum_{j=1}^{12} x_j \\approx 942.23\\text{ EUR}$ (table $1 \\times 1$), puis en l'injectant dans la restriction $\\sigma_{x_i > \\bar{x}}(\\text{assures})$, qui ne retient que 3 polices (`1003`, `1004`, `1007`).",
+          stepByStepPlan: [
+            "**Construire la sous-requête scalaire** : préparez `(SELECT AVG(prime_annuelle) FROM assures)` retournant 1 ligne et 1 colonne (la moyenne globale).",
+            "**Écrire la requête externe** : sélectionnez `SELECT police_id, prime_annuelle FROM assures`.",
+            "**Insérer le filtre dynamique (`WHERE >`)** : ajoutez `WHERE prime_annuelle > (SELECT AVG(prime_annuelle) FROM assures)`.",
+            "**Vérifier les parenthèses** : assurez-vous que la sous-requête est bien entourée de parenthèses et clôturez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table lue à deux niveaux : dans la sous-requête pour calculer la moyenne du portefeuille, puis dans la requête externe pour comparer chaque contrat.",
+            },
+            {
+              symbol: "police_id, prime_annuelle",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` projetées et comparées à la moyenne dynamique.",
+            },
+            {
+              symbol: "WHERE",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause de restriction comparant chaque ligne au benchmark scalaire sans coder de seuil fixe en dur.",
+            },
+            {
+              symbol: ">",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Opérateur de comparaison scalaire exigeant que la sous-requête à droite renvoie exactement 1 valeur.",
+            },
+            {
+              symbol: "(SELECT ... FROM assures)",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Sous-requête scalaire non corrélée entre parenthèses, évaluée une seule fois avant le filtrage externe.",
+            },
+            {
+              symbol: "AVG(prime_annuelle)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Calcule la prime moyenne exacte (~`942.2333` EUR) servant de seuil dynamique.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Requête externe sur assures
+SELECT ___, ___
+FROM ___
+-- Étape 2 : Filtrer à l'aide d'une sous-requête scalaire (1 ligne x 1 colonne)
+WHERE ___ > (
+    SELECT AVG(___)
+    FROM ___
+);`,
+        }
       },
       {
         id: "sql-23",
@@ -1570,7 +2814,57 @@ Sinistre       7           1147.29        33.3
         solutionCode: "SELECT police_id, age, region FROM assures WHERE police_id IN (SELECT DISTINCT police_id FROM sinistres);",
         validationQuery: "SELECT police_id, age, region FROM assures WHERE police_id IN (SELECT DISTINCT police_id FROM sinistres);",
         hints: ["police_id IN (SELECT DISTINCT police_id FROM sinistres)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Pour isoler les assurés sinistrés sans dupliquer les polices multi-sinistrées (`1003` a 2 sinistres dans `sinistres`), l'exercice implémente la **semi-jointure** $\\text{assures} \\ltimes_{\\text{police\\_id}} \\text{sinistres} = \\{ r \\in \\text{assures} \\mid \\exists s \\in \\text{sinistres},\\ r.\\text{police\\_id} = s.\\text{police\\_id} \\}$. La sous-requête `(SELECT DISTINCT police_id FROM sinistres)` extrait la liste dédoublonnée des 7 contrats touchés, et `WHERE police_id IN (...)` préserve strictement le grain « 1 ligne = 1 police » dans `assures` (7 lignes en sortie, contre 8 avec `INNER JOIN`).",
+          stepByStepPlan: [
+            "**Extraire les clés sinistrées (`SELECT DISTINCT`)** : formulez la sous-requête `(SELECT DISTINCT police_id FROM sinistres)`.",
+            "**Projeter depuis le portefeuille (`assures`)** : écrivez `SELECT police_id, age, region FROM assures`.",
+            "**Appliquer la semi-jointure (`WHERE ... IN`)** : ajoutez `WHERE police_id IN (SELECT DISTINCT police_id FROM sinistres)`.",
+            "**Clôturer** : vérifiez les parenthèses encadrant la sous-requête et terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "assures, sinistres",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "`assures` fournit les 7 lignes uniques retournées ; `sinistres` sert uniquement d'ensemble de filtrage via `police_id`.",
+            },
+            {
+              symbol: "police_id, age, region",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Colonnes de `assures` projetées pour caractériser chaque assuré ayant sinistré au moins une fois.",
+            },
+            {
+              symbol: "WHERE ... IN (...)",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Implémente la semi-jointure ($\\ltimes$) : garde chaque ligne de `assures` dont la clé apparaît au moins une fois dans la sous-requête.",
+            },
+            {
+              symbol: "SELECT DISTINCT",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Dédoublonne les `police_id` dans `sinistres` (ramenant les 8 sinistres aux 7 contrats distincts, sans répéter `1003`).",
+            },
+            {
+              symbol: "(SELECT DISTINCT police_id FROM sinistres)",
+              kind: "Paramètre",
+              roleInExercise:
+                "Sous-requête filtrante fournissant dynamiquement l'ensemble des identifiants de polices sinistrées.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter police_id, age et region depuis assures
+SELECT ___, ___, ___
+FROM ___
+-- Étape 2 : Filtrer par semi-jointure IN sur les police_id uniques de sinistres
+WHERE ___ IN (
+    SELECT DISTINCT ___
+    FROM ___
+);`,
+        }
       },
       {
         id: "sql-24",
@@ -1659,7 +2953,71 @@ Berline        4           2785.8  0.0        0.0
         solutionCode: "SELECT a.region, ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id GROUP BY a.region;",
         validationQuery: "SELECT a.region, ROUND(SUM(COALESCE(s.cout_total, 0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id GROUP BY a.region;",
         hints: ["SUM(a.prime_annuelle) au dénominateur et GROUP BY a.region."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "L'exercice traduit directement l'équation du **Loss Ratio régional** $\\text{Ratio } S/P = \\frac{\\sum_{i} S_i}{\\sum_{i} P_i} \\times 100$ sur un `LEFT JOIN` direct groupé par `a.region`. Le `LEFT JOIN` préserve les régions sans sinistre (qui gardent $S/P = 0.0\\%$), `COALESCE(s.cout_total, 0)` empêche les `NULL` de corrompre `SUM(...)`, `SUM(a.prime_annuelle)` forme le dénominateur des primes (`REAL`, évitant la division entière), puis `* 100` convertit en pourcentage avant l'arrondi `ROUND(..., 2)` (gardez en tête la note du cours sur la duplication de prime en `PACA` lors d'un `LEFT JOIN` direct).",
+          stepByStepPlan: [
+            "**Conserver toutes les régions (`LEFT JOIN`)** : reliez `FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id`.",
+            "**Regrouper par territoire (`GROUP BY`)** : ajoutez `GROUP BY a.region`.",
+            "**Calculer le numérateur $S$ et le dénominateur $P$** : divisez `SUM(COALESCE(s.cout_total, 0))` par `SUM(a.prime_annuelle)`.",
+            "**Convertir en % et arrondir (`* 100`, `ROUND`)** : multipliez par `100`, encadrez par `ROUND(..., 2) AS ratio_sp` après `a.region,`, puis terminez par `;`.",
+          ],
+          concepts: [
+            {
+              symbol: "a, s",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de `assures` (`a`, portant `a.region` et `a.prime_annuelle`) et `sinistres` (`s`, portant `s.cout_total`).",
+            },
+            {
+              symbol: "LEFT JOIN ... ON a.police_id = s.police_id",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Préserve les 9 régions de `assures` dans le calcul, y compris celles à 0 sinistre (`Auvergne-Rhône-Alpes`, `Bretagne`, etc.).",
+            },
+            {
+              symbol: "GROUP BY a.region",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Partitionne les lignes jointes par région (`a.region`) afin d'agréger $S$ et $P$ pour chacun des 9 territoires.",
+            },
+            {
+              symbol: "COALESCE(s.cout_total, 0) et , 0",
+              kind: "Paramètre",
+              roleInExercise:
+                "`COALESCE` remplace `s.cout_total` par le second paramètre `, 0` pour les polices saines avant la somme.",
+            },
+            {
+              symbol: "SUM(...) / SUM(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Calcule le ratio agrégé $\\sum S_i / \\sum P_i$ par région (les deux `SUM` portent sur des colonnes `REAL`).",
+            },
+            {
+              symbol: "* 100 et ROUND(..., 2)",
+              kind: "Paramètre",
+              roleInExercise:
+                "`* 100` exprime le ratio en pourcentage ($S/P$ en \\%) et `ROUND(..., 2)` avec le paramètre `, 2` arrondit à 2 décimales.",
+            },
+            {
+              symbol: "ratio_sp",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie contenant le Loss Ratio régional en pourcentage (ex. `1055.82` en `Grand Est`, `0.0` en `Bretagne`).",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter a.region et le ratio S/P arrondi en pourcentage
+SELECT
+    a.___,
+    ROUND(SUM(COALESCE(s.___, ___)) / SUM(a.___) * ___, ___) AS ___
+-- Étape 2 : Joindre assures (a) et sinistres (s) en préservant les contrats sains
+FROM assures a
+LEFT JOIN sinistres s
+    ON a.___ = s.___
+-- Étape 3 : Regrouper les sommes par région
+GROUP BY a.___;`,
+        }
       },
       {
         id: "sql-25",
@@ -1730,7 +3088,68 @@ periode  oat_10y  oat_prev  delta_oat
         solutionCode: "SELECT periode, euribor_3m, LAG(euribor_3m, 1) OVER (ORDER BY periode) AS euribor_prev FROM macro_taux;",
         validationQuery: "SELECT periode, euribor_3m, LAG(euribor_3m, 1) OVER (ORDER BY periode) AS euribor_prev FROM macro_taux;",
         hints: ["LAG(euribor_3m, 1) OVER (ORDER BY periode)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "L'opérateur économétrique de retard (*Backshift*) $L^1 x_t = x_{t-1}$ se traduit en SQL par la fonction de fenêtre `LAG(euribor_3m, 1) OVER (ORDER BY periode)` sur la table ALM `macro_taux` (16 trimestres de `'2020-Q1'` à `'2023-Q4'`). Contrairement à `GROUP BY`, la fenêtre `OVER (...)` conserve intactes les 16 lignes trimestrielles ; le tri interne `ORDER BY periode` exploite l'ordre lexicographique ISO `'YYYY-Qn'` et `LAG(..., 1)` lit la valeur du trimestre précédent (renvoyant logiquement `NULL` sur `'2020-Q1'`).",
+          stepByStepPlan: [
+            "**Cibler la série macroéconomique (`FROM`)** : indiquez `FROM macro_taux`.",
+            "**Projeter la date et le taux courant** : écrivez `SELECT periode, euribor_3m,`.",
+            "**Décaler la série d'un pas (`LAG`)** : appelez `LAG(euribor_3m, 1)`.",
+            "**Définir la fenêtre chronologique (`OVER`) et l'alias** : ajoutez `OVER (ORDER BY periode) AS euribor_prev;`.",
+          ],
+          concepts: [
+            {
+              symbol: "macro_taux",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Table ALM contenant les 16 trimestres macroéconomiques de `2020-Q1` à `2023-Q4`.",
+            },
+            {
+              symbol: "periode, euribor_3m",
+              kind: "Colonne / Table",
+              roleInExercise:
+                "Clé temporelle (`TEXT`, format `'YYYY-Qn'` triable chronologiquement) et taux Euribor 3 mois (`REAL`) dont on récupère la valeur retardée.",
+            },
+            {
+              symbol: "LAG(..., 1)",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Fonction de fenêtre ($L^k$) accédant à une ligne antérieure de la fenêtre sans compresser les lignes de la table.",
+            },
+            {
+              symbol: ", 1",
+              kind: "Paramètre",
+              roleInExercise:
+                "Décalage (`offset`) de 1 trimestre en arrière ($x_{t-1}$) ; renvoie `NULL` pour la toute première période `2020-Q1`.",
+            },
+            {
+              symbol: "OVER (...)",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Clause obligatoire transformant `LAG` en fonction analytique de fenêtre évaluée ligne par ligne.",
+            },
+            {
+              symbol: "ORDER BY periode",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Ordre chronologique interne à la fenêtre `OVER` définissant quel trimestre précède immédiatement le trimestre courant.",
+            },
+            {
+              symbol: "euribor_prev",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de la colonne contenant le taux du trimestre $t-1$ aligné face au trimestre $t$.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter periode, euribor_3m et le retard d'un trimestre via LAG
+SELECT
+    ___,
+    ___,
+    LAG(___, ___) OVER (ORDER BY ___) AS ___
+-- Étape 2 : Lire la table macro_taux
+FROM ___;`,
+        }
       },
       {
         id: "sql-26",
@@ -1804,7 +3223,74 @@ sinistre_id  nature_sinistre  responsabilite_pct  rn  rnk  dense_rnk
         solutionCode: "SELECT a.region, ROUND(SUM(COALESCE(s.cout_total, 0)), 2) AS total_cout, DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id GROUP BY a.region ORDER BY rang_cout ASC;",
         validationQuery: "SELECT a.region, ROUND(SUM(COALESCE(s.cout_total, 0)), 2) AS total_cout, DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id GROUP BY a.region ORDER BY rang_cout ASC;",
         hints: ["Donnez l'alias 'rang_cout' à la fonction DENSE_RANK."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink:
+            "Ce cas de synthèse mobilise la chaîne complète du cycle SQL : `FROM assures a LEFT JOIN sinistres s` préserve toutes les régions, `GROUP BY a.region` calcule la charge régionale `SUM(COALESCE(s.cout_total, 0))` sur les 9 groupes, puis la phase `WINDOW` (exécutée *après* `GROUP BY`) autorise `DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC)` à classer les agrégats déjà calculés. Contrairement à `RANK()`, `DENSE_RANK()` évite les sauts de rang : les 4 régions sinistrées prennent les rangs `1` à `4` (`IDF` à `Grand Est` à `PACA` à `Hauts-de-France`) et les 5 régions à `0.0` EUR partagent toutes le rang `5`, triées ensuite via `ORDER BY rang_cout ASC`.",
+          stepByStepPlan: [
+            "**Joindre en préservant l'exposition (`LEFT JOIN`)** : écrivez `FROM assures a LEFT JOIN sinistres s ON a.police_id = s.police_id`.",
+            "**Agréger par région (`GROUP BY`)** : ajoutez `GROUP BY a.region`.",
+            "**Projeter région et coût total arrondi** : sélectionnez `a.region, ROUND(SUM(COALESCE(s.cout_total, 0)), 2) AS total_cout,`.",
+            "**Calculer le rang dense sur l'agrégat (`DENSE_RANK() OVER`)** : ajoutez `DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.cout_total, 0)) DESC) AS rang_cout`.",
+            "**Trier la sortie finale (`ORDER BY`)** : terminez par `ORDER BY rang_cout ASC;`.",
+          ],
+          concepts: [
+            {
+              symbol: "a, s",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de `assures` (`a`, garantissant les 9 régions via `a.region`) et `sinistres` (`s`, fournissant `s.cout_total`).",
+            },
+            {
+              symbol: "LEFT JOIN ... GROUP BY a.region",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Conserve les 5 régions sans sinistre et compresse le résultat à 9 lignes régionales *avant* l'exécution de `DENSE_RANK()`.",
+            },
+            {
+              symbol: "COALESCE(s.cout_total, 0) et , 0",
+              kind: "Paramètre",
+              roleInExercise:
+                "`COALESCE` remplace les `NULL` des contrats sains par le paramètre `, 0` afin que les régions vierges valent `0.0` dans `SUM`.",
+            },
+            {
+              symbol: "ROUND(..., 2) et , 2",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Arrondit la somme régionale `SUM(COALESCE(s.cout_total, 0))` à 2 décimales (paramètre `, 2`) pour produire `total_cout`.",
+            },
+            {
+              symbol: "DENSE_RANK()",
+              kind: "Fonction / Méthode",
+              roleInExercise:
+                "Fonction de fenêtre attribuant un rang continu sans trou face aux ex-aequo (les 5 régions à `0.0` EUR reçoivent toutes `5`).",
+            },
+            {
+              symbol: "OVER (ORDER BY SUM(...) DESC)",
+              kind: "Syntaxe",
+              roleInExercise:
+                "Fenêtre post-`GROUP BY` classant les 9 régions par charge totale décroissante pour attribuer `rang_cout`.",
+            },
+            {
+              symbol: "total_cout, rang_cout",
+              kind: "Variable",
+              roleInExercise:
+                "Alias de sortie ; `rang_cout` est ensuite réutilisé dans la clause finale `ORDER BY rang_cout ASC`.",
+            },
+          ],
+          guidedCode: `-- Étape 1 : Projeter a.region, la charge totale arrondie et le rang dense
+SELECT
+    a.___,
+    ROUND(SUM(COALESCE(s.___, ___)), ___) AS ___,
+    DENSE_RANK() OVER (ORDER BY SUM(COALESCE(s.___, ___)) DESC) AS ___
+-- Étape 2 : Préserver toutes les régions par LEFT JOIN
+FROM assures a
+LEFT JOIN sinistres s
+    ON a.___ = s.___
+-- Étape 3 : Regrouper par région puis trier par rang croissant
+GROUP BY a.___
+ORDER BY ___ ASC;`,
+        }
       }
     ]
   };

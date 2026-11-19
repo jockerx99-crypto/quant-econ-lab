@@ -8,6 +8,24 @@ export interface ExerciseDataset {
   sampleRows?: Record<string, string | number | null>[];
 }
 
+export interface CodeConceptExplanation {
+  symbol: string;
+  kind:
+    | "Variable"
+    | "Fonction / Méthode"
+    | "Paramètre"
+    | "Syntaxe"
+    | "Colonne / Table";
+  roleInExercise: string;
+}
+
+export interface ExerciseGuide {
+  theoryToPracticeLink: string;
+  stepByStepPlan: string[];
+  concepts: CodeConceptExplanation[];
+  guidedCode: string;
+}
+
 export interface Exercise {
   id: string;
   title: string;
@@ -33,6 +51,7 @@ export interface Exercise {
   // For Python validation (assertions code)
   testPythonCode?: string;
   hints: string[];
+  guide?: ExerciseGuide;
 }
 
 export interface CourseModule {

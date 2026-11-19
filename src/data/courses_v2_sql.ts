@@ -152,6 +152,75 @@ On vérifie à la 6e décimale que $\\sum r_t = \\ln(62.60/61.80) = 0.012862$, a
         "N'oubliez pas le filtre WHERE ticker = 'TTE'.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En théorie, le rendement logarithmique $r_t = \\ln(P_t / P_{t-1}) = \\ln(P_t) - \\ln(P_{t-1})$ assure l'additivité temporelle exacte ($\\sum_{t=1}^T r_t = \\ln(P_T / P_0)$) et intègre l'ajustement de convexité $-\\frac{1}{2}\\sigma^2$. En SQL, comme $P_t$ et $P_{t-1}$ vivent sur deux lignes successives de `marche_actions`, la fonction de fenêtre `LAG(prix_cloture, 1) OVER (ORDER BY date)` aligne $P_{t-1}$ sur la ligne courante $P_t$, permettant d'évaluer directement `LN(prix_cloture / LAG(...)) AS rendement_log` après avoir isolé l'actif via `WHERE ticker = 'TTE'`.",
+        stepByStepPlan: [
+          "Sélectionner `date` et `prix_cloture` depuis `marche_actions` en filtrant `WHERE ticker = 'TTE'` pour que la fenêtre ne mélange pas plusieurs titres.",
+          "Extraire le cours de clôture de la séance précédente $P_{t-1}$ avec `LAG(prix_cloture, 1) OVER (ORDER BY date)`.",
+          "Calculer le rapport $P_t / P_{t-1}$ puis son logarithme népérien `LN(prix_cloture / LAG(prix_cloture, 1) OVER (ORDER BY date))` sous l'alias `rendement_log`.",
+          "Trier la série chronologiquement avec `ORDER BY date;` (la première ligne renverra `NULL` pour `rendement_log`).",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table source des cotations quotidiennes (`id`, `date`, `ticker`, `prix_cloture`, `volume`, `rendement_journalier`) dont on extrait l'historique d'un titre.",
+          },
+          {
+            symbol: "date",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Date de séance (`YYYY-MM-DD`) servant à la fois à projeter l'axe temporel, à ordonner le décalage dans `OVER (ORDER BY date)` et à trier la sortie finale.",
+          },
+          {
+            symbol: "prix_cloture",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Cours de clôture officiel $P_t$ (`REAL`, strictement positif) utilisé au numérateur et décalé d'un rang au dénominateur.",
+          },
+          {
+            symbol: "ticker = 'TTE'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre `WHERE` exécuté **avant** la fenêtre `OVER (...)` pour isoler exclusivement TotalEnergies (`'TTE'`).",
+          },
+          {
+            symbol: "LAG(prix_cloture, 1)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Fonction de fenêtre qui récupère la valeur de `prix_cloture` située `1` ligne avant la séance courante ($P_{t-1}$), et renvoie `NULL` à la toute première date.",
+          },
+          {
+            symbol: "OVER (ORDER BY date)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Clause de fenêtrage qui définit l'ordre chronologique dans lequel `LAG` recule d'un pas sans écraser les lignes individuelles.",
+          },
+          {
+            symbol: "LN(...)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Logarithme népérien $\\ln(\\cdot)$ (enregistré dans le moteur SQLite WASM) transformant le facteur de prix $P_t / P_{t-1}$ en log-rendement continu $r_t$.",
+          },
+          {
+            symbol: "rendement_log",
+            kind: "Variable",
+            roleInExercise:
+              "Alias de la colonne calculée représentant $r_t = \\ln(P_t / P_{t-1})$ (`NULL` au jour 1 faute de séance antérieure).",
+          },
+        ],
+        guidedCode: `-- 1. Isoler l'action TTE et aligner P_t avec P_{t-1} via LAG
+SELECT
+    date,
+    prix_cloture,
+    -- 2. Calculer ln(P_t / P_{t-1}) en remontant de 1 ligne selon la date
+    LN(prix_cloture / LAG(___, 1) OVER (ORDER BY ___)) AS ___
+FROM marche_actions
+WHERE ticker = 'A_COMPLETER'
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-2",
@@ -278,6 +347,71 @@ On observe que la volatilité annualisée 3 jours de BNP Paribas passe de $17.26
         "Utilisez AVG(rendement_journalier) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En économétrie financière, la moyenne mobile sur $n = 3$ séances $\\bar{r}_{t,3} = \\frac{1}{3} \\sum_{i=0}^{2} r_{t-i}$ capture la dérive locale et constitue le premier moment indispensable à la variance glissante de Koenig-Huygens $s_{t,3}^2 = \\frac{3}{2}(\\mathbb{E}[r^2] - \\bar{r}_{t,3}^2)$. En SQL, cette somme glissante sur les 3 dernières séances cotées (sans biais de week-end ni de jours fériés) se traduit exactement par la fenêtre physique `AVG(rendement_journalier) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moyenne_mobile_3j`.",
+        stepByStepPlan: [
+          "Sélectionner `date` et `rendement_journalier` depuis `marche_actions` en filtrant `WHERE ticker = 'BNP'`.",
+          "Construire une fenêtre glissante chronologique avec `OVER (ORDER BY date ...)` afin de préserver toutes les lignes journalières.",
+          "Fixer les bornes physiques à 3 séances via `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` dans `AVG(rendement_journalier) OVER (...) AS moyenne_mobile_3j`.",
+          "Ordonner le résultat final par `ORDER BY date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table contenant les séries journalières de rendements discrets et de cours pour chaque action du portefeuille.",
+          },
+          {
+            symbol: "date",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Date de bourse (`YYYY-MM-DD`) ordonnant les lignes dans la fenêtre temporelle et dans le tri final.",
+          },
+          {
+            symbol: "rendement_journalier",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Rendement arithmétique journalier $R_t = P_t / P_{t-1} - 1$ (`REAL`) sur lequel on évalue la moyenne mobile $\\bar{r}_{t,3}$.",
+          },
+          {
+            symbol: "ticker = 'BNP'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Prédicat `WHERE` isolant exclusivement BNP Paribas (`'BNP'`) avant le découpage des fenêtres mobiles.",
+          },
+          {
+            symbol: "AVG(rendement_journalier)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Fonction d'agrégation évaluée en mode fenêtre pour calculer $\\bar{r}_{t,n}$ sur les lignes encadrées (avec $n = 1, 2$ aux bords puis $3$).",
+          },
+          {
+            symbol: "ROWS BETWEEN 2 PRECEDING AND CURRENT ROW",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Cadre de fenêtre (*Window Frame*) physique incluant les 2 séances précédentes et la séance courante (soit 3 observations effectives, contrairement à `RANGE`).",
+          },
+          {
+            symbol: "moyenne_mobile_3j",
+            kind: "Variable",
+            roleInExercise:
+              "Alias de sortie contenant la moyenne mobile à 3 séances $\\bar{r}_{t,3}$ calculée pour chaque date.",
+          },
+        ],
+        guidedCode: `-- Calculer la moyenne mobile sur 3 séances (t-2, t-1, t) pour BNP Paribas
+SELECT
+    date,
+    rendement_journalier,
+    AVG(___) OVER (
+        ORDER BY ___
+        ROWS BETWEEN ___ PRECEDING AND CURRENT ROW
+    ) AS moyenne_mobile_3j
+FROM marche_actions
+WHERE ticker = 'A_COMPLETER'
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-3",
@@ -419,6 +553,88 @@ Sur \`BNP\`, le repli initial fait passer \`sma_2\` ($62.40$) sous \`sma_4\` ($6
         "Les moyennes se calculent avec AVG(prix_cloture) OVER (...).",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En traitement du signal financier, la moyenne mobile $SMA_k(t) = \\frac{1}{k} \\sum_{i=0}^{k-1} P_{t-i}$ agit comme un filtre passe-bas qui divise la variance du bruit par $k$ au prix d'un retard de phase $(k-1)/2$. Le signal de **Golden Cross** compare la différence $\\Delta_t = SMA_2(t) - SMA_4(t) \\ge 0$. En SQL, on calcule ces deux horizons sur la même table `marche_actions` via deux clauses `OVER` distinctes (`ROWS BETWEEN 1 PRECEDING AND CURRENT ROW` pour $k=2$ et `3 PRECEDING` pour $k=4$), puis on génère `'ACHAT'` ou `'ATTENTE'` avec `CASE WHEN`.",
+        stepByStepPlan: [
+          "Isoler LVMH (`WHERE ticker = 'MC'`) dans `marche_actions` et préparer l'axe chronologique `ORDER BY date`.",
+          "Calculer la moyenne rapide `sma_2` avec `AVG(prix_cloture) OVER (ORDER BY date ROWS BETWEEN 1 PRECEDING AND CURRENT ROW)` et la moyenne lente `sma_4` avec `ROWS BETWEEN 3 PRECEDING AND CURRENT ROW`.",
+          "Encapsuler ces deux colonnes dans une CTE `smas` (ou répéter les expressions) pour comparer `sma_2 >= sma_4` via `CASE WHEN ... THEN 'ACHAT' ELSE 'ATTENTE' END AS signal`.",
+          "Projeter `date`, `prix_cloture`, `sma_2`, `sma_4`, `signal` et trier par `ORDER BY date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table des cours journaliers contenant `date`, `ticker` et `prix_cloture` pour LVMH (`'MC'`).",
+          },
+          {
+            symbol: "prix_cloture",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Série de prix bruts $P_t$ (`REAL`) lissée simultanément sur deux horizons temporels.",
+          },
+          {
+            symbol: "ticker = 'MC'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre `WHERE` restreignant le calcul de tendance à l'action LVMH (`'MC'`).",
+          },
+          {
+            symbol: "AVG(prix_cloture) OVER (...)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Évalue la moyenne mobile simple $SMA_k(t)$ sur le nombre exact de séances défini par le cadre `ROWS BETWEEN`.",
+          },
+          {
+            symbol: "ROWS BETWEEN 1 PRECEDING AND CURRENT ROW",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Fenêtre rapide de $k = 2$ séances ($t-1$ et $t$) produisant `sma_2`, très réactive aux retournements de prix.",
+          },
+          {
+            symbol: "ROWS BETWEEN 3 PRECEDING AND CURRENT ROW",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Fenêtre lente de $k = 4$ séances ($t-3$ à $t$) produisant la tendance de fond `sma_4` (égale à `sma_2` aux deux premières dates).",
+          },
+          {
+            symbol: "CASE WHEN ... THEN 'ACHAT' ELSE 'ATTENTE' END",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Expression conditionnelle traduisant la condition mathématique $SMA_2(t) \\ge SMA_4(t)$ en signal opérationnel discret.",
+          },
+          {
+            symbol: "sma_2, sma_4, signal",
+            kind: "Variable",
+            roleInExercise:
+              "Alias des colonnes attendues en sortie : moyenne rapide, moyenne lente et décision tactique `'ACHAT'` / `'ATTENTE'`.",
+          },
+        ],
+        guidedCode: `-- 1. Calculer sma_2 (2 séances) et sma_4 (4 séances) dans une CTE lisible
+WITH smas AS (
+    SELECT
+        date,
+        prix_cloture,
+        AVG(prix_cloture) OVER (ORDER BY date ROWS BETWEEN ___ PRECEDING AND CURRENT ROW) AS sma_2,
+        AVG(prix_cloture) OVER (ORDER BY date ROWS BETWEEN ___ PRECEDING AND CURRENT ROW) AS sma_4
+    FROM marche_actions
+    WHERE ticker = 'A_COMPLETER'
+)
+-- 2. Comparer les deux moyennes mobiles pour émettre le signal Golden Cross
+SELECT
+    date,
+    prix_cloture,
+    sma_2,
+    sma_4,
+    CASE
+        WHEN ___ >= ___ THEN 'ACHAT'
+        ELSE 'A_COMPLETER'
+    END AS signal
+FROM smas
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-4",
@@ -540,6 +756,86 @@ Le sommet monte de $61.80$ à $62.40$ puis $63.00\\text{ EUR}$. Le pire repli ($
         "MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) donne le plus haut historique.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Le Drawdown est une mesure de risque *path-dependent* définie à partir du *High Watermark* cumulatif $M_t = \\max_{0 \\le s \\le t} P_s$ et de son écart relatif $DD_t = \\frac{P_t - M_t}{M_t} \\le 0$ (exigeant un rebond $R_{\\text{rec}} = d / (1 - d)$ pour effacer une perte $d$). En SQL, ce maximum depuis l'origine $s = 0$ s'obtient via `MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS sommet_cumule`, puis le repli en pourcentage s'écrit `((prix_cloture - sommet_cumule) / sommet_cumule) * 100 AS drawdown_pct`.",
+        stepByStepPlan: [
+          "Isoler TotalEnergies (`WHERE ticker = 'TTE'`) depuis `marche_actions` en ordonnant la série chronologiquement par `date`.",
+          "Calculer le sommet historique cumulatif `sommet_cumule` grâce à `MAX(prix_cloture) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`.",
+          "Calculer la profondeur du repli en pourcentage `((prix_cloture - sommet_cumule) / sommet_cumule) * 100 AS drawdown_pct` (à l'aide d'une CTE `peaks` ou directement).",
+          "Afficher `date`, `prix_cloture`, `sommet_cumule`, `drawdown_pct` triés par `ORDER BY date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table source des cours quotidiens contenant `date` et `prix_cloture` pour l'action `'TTE'`.",
+          },
+          {
+            symbol: "prix_cloture",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Cours de clôture $P_t$ (`REAL`) dont on suit le sommet historique et l'écart relatif courant.",
+          },
+          {
+            symbol: "ticker = 'TTE'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre `WHERE` garantissant que le *High Watermark* cumulé porte uniquement sur TotalEnergies.",
+          },
+          {
+            symbol: "MAX(prix_cloture) OVER (...)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Fonction de fenêtre non décroissante calculant $M_t = \\max_{0 \\le s \\le t} P_s$ à chaque séance.",
+          },
+          {
+            symbol: "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Cadre cumulatif balayant de la toute première ligne (`UNBOUNDED PRECEDING`) jusqu'à la ligne courante (`CURRENT ROW`), évitant les ambiguïtés du `RANGE` par défaut.",
+          },
+          {
+            symbol: "ORDER BY date",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Indispensable à l'intérieur de `OVER (...)` pour définir l'ordre du chemin temporel, et en fin de requête pour l'affichage.",
+          },
+          {
+            symbol: "sommet_cumule",
+            kind: "Variable",
+            roleInExercise:
+              "Alias du plus haut historique atteint jusqu'à la date courante ($M_t$).",
+          },
+          {
+            symbol: "drawdown_pct",
+            kind: "Variable",
+            roleInExercise:
+              "Alias du drawdown journalier en pourcentage $((P_t - M_t) / M_t) \\times 100$, égal à `0` lors de chaque nouveau record.",
+          },
+        ],
+        guidedCode: `-- 1. Calculer le sommet historique cumulatif (High Watermark) dans une CTE
+WITH peaks AS (
+    SELECT
+        date,
+        prix_cloture,
+        MAX(___) OVER (
+            ORDER BY date
+            ROWS BETWEEN ___ PRECEDING AND CURRENT ROW
+        ) AS sommet_cumule
+    FROM marche_actions
+    WHERE ticker = 'A_COMPLETER'
+)
+-- 2. Calculer le drawdown relatif en pourcentage (<= 0)
+SELECT
+    date,
+    prix_cloture,
+    sommet_cumule,
+    ((prix_cloture - ___) / ___) * 100 AS drawdown_pct
+FROM peaks
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-5",
@@ -653,6 +949,68 @@ Remarquez comment \`RANK()\` saute directement de \`1\` à \`5\` pour \`BNP\`, a
         "Utilisez NTILE(2) OVER (ORDER BY rendement_journalier DESC) AS groupe_perf.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Dans les stratégies factorielles en coupe transversale (*cross-section*), on trie à une date $t$ les $N$ actifs selon leurs statistiques d'ordre $r_{(1),t} \\ge \\dots \\ge r_{(N),t}$ puis on les répartit en $k$ quantiles ($Q_1$ vs $Q_k$) pour former un portefeuille *Long/Short*. Comme $N = 5$ et $k = 2$, SQLite place $\\lceil 5/2 \\rceil = 3$ actifs dans le bucket `1` et $\\lfloor 5/2 \\rfloor = 2$ dans le bucket `2` via `NTILE(2) OVER (ORDER BY rendement_journalier DESC) AS groupe_perf` après filtrage sur la date `'2024-01-02'`.",
+        stepByStepPlan: [
+          "Cibler la table `marche_actions` et figer la coupe transversale d'un seul jour avec `WHERE date = '2024-01-02'`.",
+          "Appliquer la fonction de partitionnement `NTILE(2) OVER (ORDER BY rendement_journalier DESC) AS groupe_perf` pour classer du meilleur au pire rendement.",
+          "Sélectionner `ticker`, `nom_societe`, `rendement_journalier`, `groupe_perf` et trier l'affichage final avec `ORDER BY rendement_journalier DESC;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table multi-actifs contenant les 5 titres (`MC`, `AI`, `TTE`, `CW8`, `BNP`) pour la séance du `'2024-01-02'`.",
+          },
+          {
+            symbol: "ticker, nom_societe, rendement_journalier",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Identifiants de l'actif et son rendement discret $R_t$ utilisé comme score factoriel de classement.",
+          },
+          {
+            symbol: "date = '2024-01-02'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre `WHERE` imposant une analyse en coupe transversale sur une seule séance (sans mélanger plusieurs dates).",
+          },
+          {
+            symbol: "NTILE(2)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Fonction de fenêtre qui découpe les $N$ lignes triées en $k$ compartiments de taille aussi égale que possible (ici 3 titres dans le groupe `1` et 2 dans le groupe `2`).",
+          },
+          {
+            symbol: "2",
+            kind: "Paramètre",
+            roleInExercise:
+              "Nombre entier de quantiles demandé en argument de `NTILE(...)` (bipartition en deux moitiés : Top vs Bottom).",
+          },
+          {
+            symbol: "OVER (ORDER BY rendement_journalier DESC)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Clause de fenêtre obligatoire qui classe les rendements par ordre décroissant avant l'affectation aux buckets.",
+          },
+          {
+            symbol: "groupe_perf",
+            kind: "Variable",
+            roleInExercise:
+              "Alias entier (`1` pour les meilleurs rendements, `2` pour les plus faibles) attribué à chaque actif.",
+          },
+        ],
+        guidedCode: `-- Segmenter les 5 titres du 2024-01-02 en 2 quantiles de rendement décroissant
+SELECT
+    ticker,
+    nom_societe,
+    rendement_journalier,
+    NTILE(___) OVER (ORDER BY ___ DESC) AS groupe_perf
+FROM marche_actions
+WHERE date = 'A_COMPLETER'
+ORDER BY rendement_journalier DESC;`,
+      },
     },
     {
       id: "v2-sql-6",
@@ -749,6 +1107,81 @@ Toutes les séances de début janvier 2024 héritent proprement de la clôture O
         "Utilisez une sous-requête scalaire dans le SELECT avec WHERE date <= m.date ORDER BY date DESC LIMIT 1.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Lorsque les fréquences de marché sont asynchrones (actions quotidiennes $\\mathcal{T}_A$ en janvier 2024 vs courbe OAT mensuelle $\\mathcal{T}_M$ publiée en fin de mois de 2023), un `INNER JOIN` sur l'égalité exacte renvoie $0$ ligne. L'opérateur **ASOF Join** causal associe à toute séance $t \\in \\mathcal{T}_A$ la date disponible la plus récente $\\tau(t) = \\max \\{ s \\in \\mathcal{T}_M : s \\le t \\}$, garantissant la $\\mathcal{F}_t$-mesurabilité sans biais d'anticipation. En SQLite, cette règle se traduit directement par la sous-requête scalaire corrélée `(SELECT taux_10y FROM courbe_taux_oat WHERE date <= m.date ORDER BY date DESC LIMIT 1)`.",
+        stepByStepPlan: [
+          "Parcourir `marche_actions` sous l'alias `m` et filtrer sur Air Liquide avec `WHERE m.ticker = 'AI'`.",
+          "Ajouter dans le `SELECT` une sous-requête scalaire sur `courbe_taux_oat` filtrée par `WHERE date <= m.date` pour exclure toute publication future.",
+          "Trier les dates admissibles avec `ORDER BY date DESC` et extraire la plus récente avec `LIMIT 1` sur `taux_10y`, aliasée `AS dernier_taux_10y`.",
+          "Trier les séances finales par `ORDER BY m.date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions m",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table externe des cotations journalières aliasée `m` afin que la sous-requête interne puisse référencer explicitement `m.date`.",
+          },
+          {
+            symbol: "courbe_taux_oat",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table de référence mensuelle contenant les taux souverains français (`date`, `taux_1y` à `taux_30y`).",
+          },
+          {
+            symbol: "m.date, m.ticker, m.prix_cloture",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Colonnes de la table externe qualifiées par `m.` pour lever toute ambiguïté avec la colonne `date` de `courbe_taux_oat`.",
+          },
+          {
+            symbol: "m.ticker = 'AI'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre isolant les séances de janvier 2024 de l'action Air Liquide (`'AI'`).",
+          },
+          {
+            symbol: "WHERE date <= m.date",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Prédicat de corrélation causal ($s \\le t$) qui relie chaque ligne de `courbe_taux_oat` à la ligne courante `m` tout en bloquant tout *look-ahead bias*.",
+          },
+          {
+            symbol: "ORDER BY date DESC LIMIT 1",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Trie les dates macro antérieures de la plus récente à la plus ancienne et ne retient qu'une seule valeur (le $\\max \\{ s \\le t \\}$, en $\\mathcal{O}(\\log N_M)$ via la PK `date`).",
+          },
+          {
+            symbol: "taux_10y",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Taux souverain OAT à 10 ans (`REAL`, en %) sélectionné à l'intérieur de la sous-requête scalaire.",
+          },
+          {
+            symbol: "dernier_taux_10y",
+            kind: "Variable",
+            roleInExercise:
+              "Alias du taux OAT 10 ans propagé par *forward-fill* (LOCF) sur chaque séance d'Air Liquide (vaut `2.55` issu du `2023-12-31`).",
+          },
+        ],
+        guidedCode: `-- Jointure temporelle asynchrone (ASOF / LOCF) entre cotations journalières et courbe OAT mensuelle
+SELECT
+    m.date,
+    m.ticker,
+    m.prix_cloture,
+    (
+        SELECT ___
+        FROM courbe_taux_oat
+        WHERE date <= ___
+        ORDER BY date ___
+        LIMIT 1
+    ) AS dernier_taux_10y
+FROM marche_actions m
+WHERE m.ticker = 'A_COMPLETER'
+ORDER BY m.date;`,
+      },
     },
     {
       id: "v2-sql-7",
@@ -848,6 +1281,62 @@ Sans surprise économique, l'ETF mondial \`CW8\` est fortement corrélé ($0.55$
         "ORDER BY correlation DESC",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En théorie de Markowitz ($\\sigma_p^2 = \\sum w_i^2 \\sigma_i^2 + 2\\sum_{i<j} w_i w_j \\sigma_i \\sigma_j \\rho_{ij}$) comme pour les matrices de transition markoviennes de crédit $P = (P_{ij})$, la dépendance bilatérale est stockée sous forme relationnelle $(i, j, M_{ij})$. Pour détecter les concentrations de risque hors diagonale ($i \\ne j$) où la corrélation dépasse un seuil critique ($\\rho_{ij} > 0.50$), la requête filtre `matrice_correlations` par `WHERE actif_a != actif_b AND correlation > 0.50` puis trie les dépendances par ordre décroissant.",
+        stepByStepPlan: [
+          "Sélectionner `actif_a`, `actif_b` et `correlation` depuis la table `matrice_correlations`.",
+          "Exclure les termes diagonaux ($\\rho_{ii} = 1$) et imposer le seuil critique avec `WHERE actif_a != actif_b AND correlation > 0.50`.",
+          "Classer les paires de la plus corrélée à la moins corrélée avec `ORDER BY correlation DESC;`.",
+        ],
+        concepts: [
+          {
+            symbol: "matrice_correlations",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table normalisée contenant les $5 \\times 5 = 25$ paires orientées entre `TTE`, `BNP`, `MC`, `AI` et `CW8`.",
+          },
+          {
+            symbol: "actif_a, actif_b",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Identifiants formant la clé primaire composite `(actif_a, actif_b)` de la matrice relationnelle.",
+          },
+          {
+            symbol: "correlation",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Coefficient de corrélation de Pearson $\\rho_{ij} \\in [-1, 1]$ (`REAL`) mesurant le co-mouvement linéaire entre `actif_a` et `actif_b`.",
+          },
+          {
+            symbol: "actif_a != actif_b",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Prédicat d'exclusion retirant la diagonale unitaire ($\\rho_{ii} = 1.0$) ; noter que `actif_a < actif_b` dédoublonnerait en plus les couples symétriques $(A,B)$ et $(B,A)$.",
+          },
+          {
+            symbol: "0.50",
+            kind: "Paramètre",
+            roleInExercise:
+              "Seuil strict de forte corrélation (`correlation > 0.50`) isolant les expositions à faible bénéfice de diversification.",
+          },
+          {
+            symbol: "ORDER BY correlation DESC",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Trie le résultat en plaçant en tête les couples présentant la co-dépendance maximale ($0.70$ entre `MC` et `CW8`).",
+          },
+        ],
+        guidedCode: `-- Isoler les paires hors diagonale dont la corrélation dépasse 0.50
+SELECT
+    actif_a,
+    actif_b,
+    correlation
+FROM matrice_correlations
+WHERE ___ != ___
+  AND correlation > ___
+ORDER BY correlation DESC;`,
+      },
     },
     {
       id: "v2-sql-8",
@@ -962,6 +1451,73 @@ On retrouve exactement les $\\frac{4 \\times 5}{2} = 10$ nœuds du treillis reco
         "UNION ALL SELECT n + 1, prix * 1.05 FROM arbre WHERE n < 3",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Dans le modèle discret de Cox-Ross-Rubinstein (1979), le sous-jacent évolue sur $N$ pas selon des facteurs $u = e^{\\sigma\\sqrt{\\Delta t}}$ et $d = 1/u$, donnant sur la branche purement haussière la récurrence $S_{0,0} = 100$ et $S_{n+1} = S_n \\cdot u = 100 \\times 1.05^{n+1}$. SQL implémente cette induction sans boucle impérative via une **CTE récursive** `WITH RECURSIVE arbre(n, prix)` : un membre d'ancrage initialise `(0, 100.0)`, `UNION ALL` empile les générations suivantes, et `WHERE n < 3` arrête l'itération au pas $n = 3$.",
+        stepByStepPlan: [
+          "Déclarer la CTE récursive et sa signature de colonnes `WITH RECURSIVE arbre(n, prix) AS (`.",
+          "Écrire le membre d'ancrage `SELECT 0, 100.0` puis le relier par `UNION ALL`.",
+          "Écrire le membre récursif `SELECT n + 1, prix * 1.05 FROM arbre WHERE n < 3)` afin de calculer le pas suivant jusqu'à `n = 3`.",
+          "Projeter `SELECT n, prix FROM arbre ORDER BY n;`.",
+        ],
+        concepts: [
+          {
+            symbol: "WITH RECURSIVE arbre(n, prix) AS (...)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Déclare une Common Table Expression récursive nommée `arbre` et fixe explicitement le nom de ses deux colonnes (`n`, `prix`).",
+          },
+          {
+            symbol: "SELECT 0, 100.0",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Membre d'ancrage (*Anchor*) amorçant la récurrence au nœud racine ($n = 0$, spot $S_0 = 100.0$ en flottant `REAL`).",
+          },
+          {
+            symbol: "UNION ALL",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Opérateur ensembliste obligatoire séparant l'ancrage du membre récursif pour accumuler chaque pas temporel sans déduplication superflue.",
+          },
+          {
+            symbol: "SELECT n + 1, prix * 1.05 FROM arbre",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Membre récursif auto-référençant `arbre` pour incrémenter le pas temporel et multiplier le cours précédent par $u = 1.05$.",
+          },
+          {
+            symbol: "WHERE n < 3",
+            kind: "Paramètre",
+            roleInExercise:
+              "Condition d'arrêt critique : lorsque `n = 2`, une dernière ligne `n = 3` est produite, puis la condition échoue pour `n = 3` et termine la récursion.",
+          },
+          {
+            symbol: "1.05",
+            kind: "Paramètre",
+            roleInExercise:
+              "Facteur multiplicatif haussier $u$ appliqué à chaque pas de temps ($100 \\to 105 \\to 110.25 \\to 115.7625$).",
+          },
+          {
+            symbol: "n, prix",
+            kind: "Variable",
+            roleInExercise:
+              "Colonnes de sortie représentant l'indice du pas de temps ($0, 1, 2, 3$) et la valeur du sous-jacent $S_{n,n}$.",
+          },
+        ],
+        guidedCode: `-- Générer la branche haussière de l'arbre CRR pour n = 0, 1, 2, 3 avec u = 1.05
+WITH RECURSIVE arbre(n, prix) AS (
+    -- 1. Ancre : état initial à n = 0 et S_0 = 100.0
+    SELECT 0, ___
+    UNION ALL
+    -- 2. Étape récursive : incrémenter n et multiplier prix par u tant que n < 3
+    SELECT n + 1, ___ * ___
+    FROM arbre
+    WHERE n < ___
+)
+SELECT n, prix
+FROM arbre
+ORDER BY n;`,
+      },
     },
     {
       id: "v2-sql-9",
@@ -1057,6 +1613,73 @@ Les 4 anomalies convergent sur la même date du \`2024-01-05\`, avec des Z-score
         "Enveloppez la fenêtre dans une sous-requête : FROM (SELECT ..., AVG(volume) OVER (...) AS vol_moyen FROM marche_actions) WHERE volume > 1.15 * vol_moyen",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Comme la liquidité moyenne $\\mu_{V,i}$ varie fortement d'un titre à l'autre (`CW8` vs `BNP`), la détection des chocs de volume repose sur le ratio normalisé par actif $\\text{Ratio}_{i,t} = V_{i,t} / \\mu_{V,i} > 1.15$. En SQL, `AVG(volume) OVER (PARTITION BY ticker)` calcule $\\mu_{V,i}$ sur chaque actif tout en conservant les lignes journalières (à l'inverse de `GROUP BY`). Et comme le moteur évalue `WHERE` *avant* les fonctions de fenêtre, il faut calculer `vol_moyen` dans une sous-requête puis filtrer `WHERE volume > 1.15 * vol_moyen` à l'extérieur.",
+        stepByStepPlan: [
+          "Écrire une sous-requête sur `marche_actions` sélectionnant `date`, `ticker`, `volume` et `AVG(volume) OVER (PARTITION BY ticker) AS vol_moyen`.",
+          "Encapsuler cette sous-requête dans le `FROM (...)` d'une requête englobante qui projette `date, ticker, volume, vol_moyen`.",
+          "Filtrer les séances anormales dans la requête externe avec `WHERE volume > 1.15 * vol_moyen`.",
+          "Trier les pics détectés par `ORDER BY date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table des cotations journalières incluant le nombre de titres échangés `volume` pour chacun des 5 actifs.",
+          },
+          {
+            symbol: "date, ticker, volume",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Granularité séance-actif conservée intacte grâce au fenêtrage (contrairement à un `GROUP BY ticker`).",
+          },
+          {
+            symbol: "AVG(volume)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Calcule la moyenne arithmétique $\\mu_{V,i}$ des volumes échangés sur l'ensemble des séances du ticker.",
+          },
+          {
+            symbol: "OVER (PARTITION BY ticker)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Segmente le calcul de `AVG(volume)` par valeur distincte de `ticker` et projette la moyenne propre de chaque actif sur toutes ses séances.",
+          },
+          {
+            symbol: "vol_moyen",
+            kind: "Variable",
+            roleInExercise:
+              "Alias de $\\mu_{V,i}$ exposé par la sous-requête pour pouvoir être comparé à `volume` dans le `WHERE` externe.",
+          },
+          {
+            symbol: "FROM (SELECT ...)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Sous-requête indispensable en SQL car `WHERE` est exécuté *avant* `WINDOW (OVER)` et ne peut donc jamais contenir directement une fonction de fenêtre.",
+          },
+          {
+            symbol: "volume > 1.15 * vol_moyen",
+            kind: "Paramètre",
+            roleInExercise:
+              "Règle de déclenchement d'anomalie retenant uniquement les séances où le volume excède de $+15\\%$ la moyenne du titre.",
+          },
+        ],
+        guidedCode: `-- 2. Filtrer les séances anormales APRÈS l'évaluation de la fonction de fenêtre
+SELECT date, ticker, volume, vol_moyen
+FROM (
+    -- 1. Projeter la moyenne du ticker sur chaque séance sans écraser les lignes
+    SELECT
+        date,
+        ticker,
+        volume,
+        AVG(___) OVER (PARTITION BY ___) AS vol_moyen
+    FROM marche_actions
+)
+WHERE volume > ___ * ___
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-10",
@@ -1147,6 +1770,71 @@ Seuls \`MC\` ($SR=0.40, \\text{ESG}=86$), \`CW8\` ($SR=0.35, \\text{ESG}=80$) et
         "ORDER BY ratio_sharpe DESC",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En gestion quantitative et ISR (*Best-in-Class*), le ratio de Sharpe $SR_i = (\\mathbb{E}[R_i] - r_f)/\\sigma_i$ mesure la pente de la *Capital Allocation Line* (rendement excédentaire par unité de risque total), tandis que le score ESG borne le risque extra-financier. L'univers éligible correspond à l'intersection de ces deux contraintes ($SR_i \\ge 0.30 \\cap \\text{ESG}_i \\ge 80$), traduite en SQL par une conjonction `WHERE score_esg >= 80 AND ratio_sharpe >= 0.30` suivie d'un classement par efficience décroissante `ORDER BY ratio_sharpe DESC`.",
+        stepByStepPlan: [
+          "Sélectionner les 6 colonnes demandées (`ticker, nom, rendement_espere, volatilite, ratio_sharpe, score_esg`) depuis `portefeuilles_actifs`.",
+          "Imposer simultanément les deux seuils d'éligibilité avec `WHERE score_esg >= 80 AND ratio_sharpe >= 0.30`.",
+          "Trier les actifs retenus du meilleur au moins bon ratio de Sharpe avec `ORDER BY ratio_sharpe DESC;`.",
+        ],
+        concepts: [
+          {
+            symbol: "portefeuilles_actifs",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table de référence des 5 actifs financiers regroupant leurs paramètres Markowitz/CAPM et leur notation extra-financière.",
+          },
+          {
+            symbol: "ticker, nom",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Code boursier (clé primaire) et dénomination complète de chaque actif analysé.",
+          },
+          {
+            symbol: "rendement_espere, volatilite",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Espérance de rendement annualisé $\\mathbb{E}[R_i]$ et écart-type $\\sigma_i$ (exprimés en décimal, ex. `0.21` pour 21 %).",
+          },
+          {
+            symbol: "ratio_sharpe",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Ratio rendement/risque $SR_i$ servant à la fois de critère d'éligibilité (`>= 0.30`) et de clé de classement décroissant.",
+          },
+          {
+            symbol: "score_esg",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Note extra-financière entière sur 100 mesurant la qualité Environnementale, Sociale et de Gouvernance.",
+          },
+          {
+            symbol: "score_esg >= 80 AND ratio_sharpe >= 0.30",
+            kind: "Paramètre",
+            roleInExercise:
+              "Double contrainte conjonctive (`AND`) exigeant la satisfaction simultanée du seuil ISR (`80`) et du seuil d'efficience (`0.30`).",
+          },
+          {
+            symbol: "ORDER BY ratio_sharpe DESC",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Clause de tri finale exécutée après filtrage pour placer en tête l'actif le plus rémunérateur par unité de volatilité (`MC`).",
+          },
+        ],
+        guidedCode: `-- Screening multi-critères ESG (>= 80) et Sharpe (>= 0.30)
+SELECT
+    ticker,
+    nom,
+    rendement_espere,
+    volatilite,
+    ratio_sharpe,
+    score_esg
+FROM portefeuilles_actifs
+WHERE score_esg >= ___
+  AND ratio_sharpe >= ___
+ORDER BY ___ DESC;`,
+      },
     },
     {
       id: "v2-sql-11",
@@ -1241,6 +1929,72 @@ Vérification au \`2024-01-02\` : $0.60 \\times 738.0 + 0.40 \\times 61.8 = 442.
         "Filtrez WHERE m.ticker = 'MC' AND t.ticker = 'TTE'.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "La valeur d'un panier linéaire à quantités fixes ($q_{\\text{MC}} = 0.60$, $q_{\\text{TTE}} = 0.40$) vaut $V_t = 0.60 \\, P_{\\text{MC}, t} + 0.40 \\, P_{\\text{TTE}, t}$. Or `marche_actions` stocke les actifs en format long (une ligne par couple `(date, ticker)`). L'auto-jointure (*Self-Join*) `FROM marche_actions m JOIN marche_actions t ON m.date = t.date` filtrée par `m.ticker = 'MC' AND t.ticker = 'TTE'` pivote horizontalement les deux cours d'une même séance sur une seule ligne pour évaluer directement `(0.60 * m.prix_cloture + 0.40 * t.prix_cloture) AS valeur_portefeuille`.",
+        stepByStepPlan: [
+          "Joindre `marche_actions` à elle-même sous deux alias distincts (`m` pour LVMH et `t` pour TotalEnergies) sur `ON m.date = t.date`.",
+          "Éliminer le produit cartésien inter-tickers en filtrant `WHERE m.ticker = 'MC' AND t.ticker = 'TTE'`.",
+          "Projeter `m.date`, `m.prix_cloture AS prix_mc`, `t.prix_cloture AS prix_tte` et calculer `(0.60 * m.prix_cloture + 0.40 * t.prix_cloture) AS valeur_portefeuille`.",
+          "Trier la chronologie du panier par `ORDER BY m.date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions m",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Première instance de la table des cours (alias `m`) dédiée à la jambe LVMH (`'MC'`).",
+          },
+          {
+            symbol: "marche_actions t",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Seconde instance de la même table (*self-join*, alias `t`) dédiée à la jambe TotalEnergies (`'TTE'`).",
+          },
+          {
+            symbol: "ON m.date = t.date",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Condition d'alignement temporel associant uniquement les séances de cotation communes aux deux titres.",
+          },
+          {
+            symbol: "m.ticker = 'MC' AND t.ticker = 'TTE'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Filtre indispensable ramenant la jointure à exactement `1:1` paire `(MC, TTE)` par date (évitant un produit cartésien de $5 \\times 5$ lignes/date).",
+          },
+          {
+            symbol: "prix_mc, prix_tte",
+            kind: "Variable",
+            roleInExercise:
+              "Alias explicites de `m.prix_cloture` ($P_{\\text{MC}, t}$) et `t.prix_cloture` ($P_{\\text{TTE}, t}$) exposés côte à côte.",
+          },
+          {
+            symbol: "0.60 et 0.40",
+            kind: "Paramètre",
+            roleInExercise:
+              "Poids fixes du panier appliqués respectivement au cours de LVMH (`60 %`) et de TotalEnergies (`40 %`).",
+          },
+          {
+            symbol: "valeur_portefeuille",
+            kind: "Variable",
+            roleInExercise:
+              "Alias du résultat arithmétique $0.60 \\, P_{\\text{MC}, t} + 0.40 \\, P_{\\text{TTE}, t}$ mesurant la valeur quotidienne du panier.",
+          },
+        ],
+        guidedCode: `-- Auto-jointure de marche_actions pour aligner MC et TTE à chaque date commune
+SELECT
+    m.date,
+    m.prix_cloture AS prix_mc,
+    t.prix_cloture AS prix_tte,
+    (___ * m.prix_cloture + ___ * t.prix_cloture) AS valeur_portefeuille
+FROM marche_actions m
+JOIN marche_actions t
+  ON ___ = ___
+WHERE m.ticker = 'A_COMPLETER'
+  AND t.ticker = 'A_COMPLETER'
+ORDER BY m.date;`,
+      },
     },
     {
       id: "v2-sql-12",
@@ -1350,6 +2104,70 @@ On vérifie numériquement l'écart exact de $25\\%$ sur $T=5$ : $0.000012062 \\
         "Utilisez AVG(b.rendement_journalier * t.rendement_journalier) - AVG(b.rendement_journalier) * AVG(t.rendement_journalier) AS cov_estimee",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En économétrie et théorie de Markowitz, la covariance empirique (au diviseur $1/T$) $\\widehat{\\operatorname{Cov}}_{\\text{pop}}(X, Y) = \\frac{1}{T}\\sum_{t=1}^T (X_t - \\bar{X})(Y_t - \\bar{Y})$ se réécrit par l'identité de **Koenig-Huygens** en un seul balayage : $\\mathbb{E}[XY] - \\mathbb{E}[X]\\mathbb{E}[Y]$. Après avoir apparié les rendements de `'BNP'` ($X_t$) et `'TTE'` ($Y_t$) sur les dates communes via `b.date = t.date`, SQLite évalue cette formule exacte en une passe par `AVG(b.rendement_journalier * t.rendement_journalier) - AVG(b.rendement_journalier) * AVG(t.rendement_journalier) AS cov_estimee`.",
+        stepByStepPlan: [
+          "Réaliser une auto-jointure `FROM marche_actions b JOIN marche_actions t ON b.date = t.date` pour placer $X_t$ et $Y_t$ sur la même ligne.",
+          "Filtrer les deux jambes sur `WHERE b.ticker = 'BNP' AND t.ticker = 'TTE'` afin d'isoler les $T = 5$ séances communes.",
+          "Calculer la différence `AVG(b.rendement_journalier * t.rendement_journalier) - AVG(b.rendement_journalier) * AVG(t.rendement_journalier)` et la nommer `AS cov_estimee`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions b, marche_actions t",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Deux alias de `marche_actions` représentant respectivement la variable $X$ (`'BNP'`) et la variable $Y$ (`'TTE'`).",
+          },
+          {
+            symbol: "ON b.date = t.date",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Apparie chaque séance $t$ de BNP Paribas avec la même séance $t$ de TotalEnergies avant tout produit croisé.",
+          },
+          {
+            symbol: "b.ticker = 'BNP' AND t.ticker = 'TTE'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Prédicat de filtrage isolant exclusivement le couple `(BNP, TTE)` pour les $T = 5$ observations.",
+          },
+          {
+            symbol: "b.rendement_journalier, t.rendement_journalier",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Rendements discrets journaliers $X_t$ et $Y_t$ dont on mesure le co-mouvement linéaire.",
+          },
+          {
+            symbol: "AVG(b.rendement_journalier * t.rendement_journalier)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Calcule en une passe le moment croisé $\\overline{XY} = \\frac{1}{T} \\sum_{t=1}^T X_t Y_t$.",
+          },
+          {
+            symbol: "AVG(b.rendement_journalier) * AVG(t.rendement_journalier)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Calcule le produit des espérances empiriques $\\bar{X}\\bar{Y}$ soustrait dans Koenig-Huygens (estimateur biaisé en $1/T$, sans facteur de Bessel $T/(T-1)$).",
+          },
+          {
+            symbol: "cov_estimee",
+            kind: "Variable",
+            roleInExercise:
+              "Alias scalaire unique renvoyé en sortie, égal à $\\widehat{\\operatorname{Cov}}_{\\text{pop}}(\\text{BNP}, \\text{TTE}) \\approx 0.000012062$.",
+          },
+        ],
+        guidedCode: `-- Covariance empirique (1/T) entre BNP et TTE par Koenig-Huygens en un seul balayage
+SELECT
+    (
+        AVG(b.rendement_journalier * ___)
+        - AVG(___) * AVG(t.rendement_journalier)
+    ) AS cov_estimee
+FROM marche_actions b
+JOIN marche_actions t
+  ON ___ = ___
+WHERE b.ticker = 'A_COMPLETER'
+  AND t.ticker = 'A_COMPLETER';`,
+      },
     },
     {
       id: "v2-sql-13",
@@ -1452,6 +2270,58 @@ Le moteur passe de \`SEARCH ... USING INTEGER PRIMARY KEY\` / \`USING INDEX\` ($
         "Écrivez simplement : EXPLAIN QUERY PLAN SELECT * FROM marche_actions WHERE id = 5;",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Sur de grands volumes tick-by-tick ($N \\approx 10^8$), la complexité d'une requête passe de $\\mathcal{O}(N)$ (*Full Table Scan*) à $\\mathcal{O}(\\log_B N)$ lorsque l'optimiseur descend directement un arbre équilibré B+Tree (4 sauts pour $10^8$ lignes si $B = 200$). En SQLite, la table `marche_actions` est physiquement organisée en B+Tree sur sa clé primaire `id` (`INTEGER PRIMARY KEY`). Préfixer la requête par `EXPLAIN QUERY PLAN` demande au moteur d'afficher ce plan physique (`SEARCH ... USING INTEGER PRIMARY KEY (rowid=?)`) plutôt que les données.",
+        stepByStepPlan: [
+          "Formuler la requête de lecture ciblée par clé primaire : `SELECT * FROM marche_actions WHERE id = 5;`.",
+          "Ajouter le préfixe diagnostique `EXPLAIN QUERY PLAN` juste devant le mot-clé `SELECT`.",
+          "Exécuter et vérifier dans la colonne `detail` que SQLite choisit `SEARCH` via l'index primaire (`INTEGER PRIMARY KEY`) et non un `SCAN` complet.",
+        ],
+        concepts: [
+          {
+            symbol: "EXPLAIN QUERY PLAN",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Commande diagnostique SQLite qui intercepte la requête sans renvoyer ses lignes métier et retourne la trace de l'optimiseur `(id, parent, notused, detail)`.",
+          },
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table B+Tree stockée physiquement par ordre croissant de `id` (`rowid`) et munie d'un index secondaire `idx_marche_ticker_date(ticker, date)`.",
+          },
+          {
+            symbol: "id",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Clé primaire entière (`INTEGER PRIMARY KEY`), alias direct du `rowid` interne permettant une recherche logarithmique en $\\mathcal{O}(\\log_B N)$.",
+          },
+          {
+            symbol: "WHERE id = 5",
+            kind: "Paramètre",
+            roleInExercise:
+              "Prédicat d'égalité exacte sur la clé primaire déclenchant un accès direct `SEARCH ... USING INTEGER PRIMARY KEY (rowid=?)`.",
+          },
+          {
+            symbol: "SELECT *",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Récupère toutes les colonnes stockées dans le nœud feuille du B+Tree principal une fois la ligne `id = 5` localisée.",
+          },
+          {
+            symbol: "SEARCH vs SCAN",
+            kind: "Variable",
+            roleInExercise:
+              "Mots-clés clés affichés dans la colonne `detail` du plan d'exécution : `SEARCH` prouve l'usage d'un index B-Tree, tandis que `SCAN` signale un balayage linéaire $\\mathcal{O}(N)$.",
+          },
+        ],
+        guidedCode: `-- Préfixer la requête cible pour auditer la stratégie d'indexation choisie par SQLite
+___ ___ ___
+SELECT *
+FROM marche_actions
+WHERE ___ = 5;`,
+      },
     },
     {
       id: "v2-sql-14",
@@ -1566,6 +2436,86 @@ Le backtest causal sans biais perd **$-1.91\\%$** (la stratégie de momentum est
         "Utilisez LAG(CASE WHEN ... THEN 1 ELSE -1 END, 1) OVER (ORDER BY date) pour la position d'hier.",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "Pour qu'un backtest respecte la causalité et évite le **Look-Ahead Bias** (où $\\operatorname{sgn}(r_t) \\cdot r_t = |r_t| \\ge 0$ simulerait un don de voyance), la position $\\theta_t$ investie sur l'intervalle $[t-1, t]$ doit être **$\\mathcal{F}_{t-1}$-mesurable** : $\\theta_t = \\operatorname{sgn}(r_{t-1})$ et $\\text{PnL}_t = \\theta_t \\cdot r_t$. En SQL, on calcule le signe `CASE WHEN rendement_journalier > 0 THEN 1 ELSE -1 END` puis on l'enveloppe dans `LAG(..., 1) OVER (ORDER BY date)` pour décaler impérativement la décision à la clôture d'hier avant de la multiplier par le rendement d'aujourd'hui.",
+        stepByStepPlan: [
+          "Sélectionner `date` et `rendement_journalier` depuis `marche_actions` en isolant l'ETF `'CW8'` avec `WHERE ticker = 'CW8'`.",
+          "Construire le signal binaire `CASE WHEN rendement_journalier > 0 THEN 1 ELSE -1 END` et le décaler d'une séance avec `LAG(..., 1) OVER (ORDER BY date) AS position_hier`.",
+          "Calculer le gain causal du jour `t` via `(position_hier * rendement_journalier) AS pnl_journalier` (à l'aide d'une CTE `signaux` ou en répétant le `LAG`).",
+          "Trier les séances chronologiquement avec `ORDER BY date;`.",
+        ],
+        concepts: [
+          {
+            symbol: "marche_actions",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table des rendements quotidiens filtrée ici sur l'ETF MSCI World (`'CW8'`).",
+          },
+          {
+            symbol: "date, rendement_journalier",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Date courante $t$ et rendement réalisé $r_t$ sur lequel s'applique la position décidée la veille.",
+          },
+          {
+            symbol: "ticker = 'CW8'",
+            kind: "Paramètre",
+            roleInExercise:
+              "Prédicat `WHERE` isolant exclusivement l'ETF `'CW8'` avant d'évaluer le décalage temporel `LAG`.",
+          },
+          {
+            symbol: "CASE WHEN rendement_journalier > 0 THEN 1 ELSE -1 END",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Règle systématique convertissant un rendement strictement positif en position acheteuse (`+1`) et un rendement $\\le 0$ en position vendeuse (`-1`).",
+          },
+          {
+            symbol: "LAG(..., 1)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Opérateur anti-*look-ahead* qui décale le signal d'une ligne vers le passé ($t-1$), imposant la mesurabilité $\\mathcal{F}_{t-1}$ (`NULL` au jour 1).",
+          },
+          {
+            symbol: "OVER (ORDER BY date)",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Définit l'ordre chronologique dans lequel `LAG` récupère le signal de la séance précédente.",
+          },
+          {
+            symbol: "position_hier",
+            kind: "Variable",
+            roleInExercise:
+              "Alias de la position $\\theta_t = \\operatorname{sgn}(r_{t-1})$ détenue durant la séance $t$.",
+          },
+          {
+            symbol: "pnl_journalier",
+            kind: "Variable",
+            roleInExercise:
+              "Alias du gain ou perte causal $(\\text{position\\_hier} \\times r_t)$ réalisé à la clôture du jour $t$.",
+          },
+        ],
+        guidedCode: `-- 1. Calculer la position F_{t-1}-mesurable (décalée de 1 jour) dans une CTE
+WITH signaux AS (
+    SELECT
+        date,
+        rendement_journalier,
+        LAG(
+            CASE WHEN ___ > 0 THEN 1 ELSE -1 END,
+            ___
+        ) OVER (ORDER BY date) AS position_hier
+    FROM marche_actions
+    WHERE ticker = 'A_COMPLETER'
+)
+-- 2. Multiplier la position d'hier par le rendement d'aujourd'hui
+SELECT
+    date,
+    rendement_journalier,
+    position_hier,
+    (___ * ___) AS pnl_journalier
+FROM signaux
+ORDER BY date;`,
+      },
     },
     {
       id: "v2-sql-15",
@@ -1679,6 +2629,74 @@ Sur la poche \`Action\` ($4$ titres), le bêta équipondéré vaut exactement $1
         "AVG(rendement_espere) AS rendement_moyen, AVG(beta_marche) AS beta_moyen",
       ],
       datasets: [],
+      guide: {
+        theoryToPracticeLink:
+          "En algèbre relationnelle, la consolidation par axe analytique correspond à l'opérateur $\\gamma_{\\text{secteur}, \\; \\text{COUNT}(*), \\; \\text{AVG}(\\mu), \\; \\text{AVG}(\\beta)}(\\text{portefeuilles\\_actifs})$. Dans le modèle CAPM, l'espérance de rendement et le bêta d'une poche équipondérée ($w_i = 1/K_s$) sont exactement additifs par linéarité : $\\mathbb{E}[R_s] = \\frac{1}{K_s}\\sum_{i \\in s} \\mathbb{E}[R_i]$ et $\\beta_s = \\frac{1}{K_s}\\sum_{i \\in s} \\beta_i$, ce que calculent directement `AVG(rendement_espere)` et `AVG(beta_marche)` sous `GROUP BY secteur`.",
+        stepByStepPlan: [
+          "Interroger la table `portefeuilles_actifs` et partitionner les actifs par axe économique avec `GROUP BY secteur`.",
+          "Projeter la clé de regroupement `secteur` puis calculer `COUNT(*) AS nb_actifs`, `AVG(rendement_espere) AS rendement_moyen` et `AVG(beta_marche) AS beta_moyen`.",
+          "Trier le tableau consolidé par ordre alphabétique croissant avec `ORDER BY secteur;`.",
+        ],
+        concepts: [
+          {
+            symbol: "portefeuilles_actifs",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Table de portefeuille listant chaque actif avec son secteur, son rendement espéré et son bêta de marché.",
+          },
+          {
+            symbol: "secteur",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Dimension analytique de regroupement (`'Diversifié'`, `'Finance'`, `'Industrie'`, `'Luxe'`, `'Énergie'`), obligatoirement présente dans `GROUP BY` car projetée sans agrégat.",
+          },
+          {
+            symbol: "rendement_espere, beta_marche",
+            kind: "Colonne / Table",
+            roleInExercise:
+              "Grandeurs linéaires ($\\mathbb{E}[R_i]$ et sensibilité CAPM $\\beta_i$) dont la moyenne sectorielle reste financièrement cohérente en équipondéré.",
+          },
+          {
+            symbol: "GROUP BY secteur",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Regroupe toutes les lignes d'un même secteur en une ligne unique consolidée avant d'appliquer les fonctions d'agrégation.",
+          },
+          {
+            symbol: "COUNT(*)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Compte le nombre total de lignes (actifs $K_s$) appartenant à chaque groupe `secteur`.",
+          },
+          {
+            symbol: "AVG(...)",
+            kind: "Fonction / Méthode",
+            roleInExercise:
+              "Calcule la moyenne arithmétique équipondérée dans chaque poche sectorielle (à ne pas confondre avec la volatilité, qui n'est pas additive).",
+          },
+          {
+            symbol: "nb_actifs, rendement_moyen, beta_moyen",
+            kind: "Variable",
+            roleInExercise:
+              "Alias des trois indicateurs consolidés attendus pour chaque ligne du reporting sectoriel.",
+          },
+          {
+            symbol: "ORDER BY secteur",
+            kind: "Syntaxe",
+            roleInExercise:
+              "Trie alphabétiquement les secteurs consolidés en sortie finale.",
+          },
+        ],
+        guidedCode: `-- Reporting consolidé par secteur : nombre d'actifs, rendement moyen et bêta moyen
+SELECT
+    secteur,
+    ___(*) AS nb_actifs,
+    AVG(___) AS rendement_moyen,
+    AVG(___) AS beta_moyen
+FROM portefeuilles_actifs
+GROUP BY ___
+ORDER BY secteur;`,
+      },
     },
   ],
 };

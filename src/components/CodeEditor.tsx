@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Play, RotateCcw, CheckCircle, Terminal, HelpCircle, Code2 } from "lucide-react";
+import { Play, RotateCcw, CheckCircle, Terminal, HelpCircle, Code2, ListChecks } from "lucide-react";
 import { Language } from "@/types/course";
 
 // Dynamic import of Monaco Editor with SSR disabled
@@ -34,6 +34,7 @@ interface CodeEditorProps {
   onRun: () => void;
   onValidate: () => void;
   onReset: () => void;
+  onRequestGuidedCode?: () => void;
   onRequestShowSolution?: () => void;
   isRunning: boolean;
   isReady: boolean;
@@ -47,6 +48,7 @@ export function CodeEditor({
   onRun,
   onValidate,
   onReset,
+  onRequestGuidedCode,
   onRequestShowSolution,
   isRunning,
   isReady,
@@ -89,14 +91,25 @@ export function CodeEditor({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          {onRequestGuidedCode && (
+            <button
+              onClick={onRequestGuidedCode}
+              title="Charger le squelette guidé étape par étape (à compléter, sans la solution)"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:text-indigo-900 bg-indigo-50/90 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-200/80 shadow-2xs cursor-pointer"
+            >
+              <ListChecks className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">Squelette guidé</span>
+            </button>
+          )}
+
           {onRequestShowSolution && (
             <button
               onClick={onRequestShowSolution}
               title="Voir la solution (insérer le code de secours)"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 rounded-lg transition-colors border border-stone-200 shadow-2xs"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-100 rounded-lg transition-colors border border-stone-200 shadow-2xs cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
-              <span className="hidden md:inline">Voir la solution</span>
+              <span className="hidden lg:inline">Solution</span>
             </button>
           )}
 

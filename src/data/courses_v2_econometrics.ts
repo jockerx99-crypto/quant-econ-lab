@@ -24,7 +24,7 @@ En gestion d'actifs et en ALM (*Asset-Liability Management*), un portefeuille in
 L'écriture matricielle condense l'allocation entière en deux objets : le **vecteur des poids** $\\mathbf{w}$ et la **matrice de variance-covariance** $\\Sigma$. C'est exactement ce formalisme qui gouverne l'agrégation des risques sous **Solvabilité II** (formule standard du SCR de marché $\\sqrt{\\mathbf{SCR}' C \\mathbf{SCR}}$) et l'optimisation de portefeuille.
 
 #### Démonstration Mathématique Formelle
-Soit un univers de $K$ actifs financiers de rendements aléatoires $\\mathbf{R} = [R_1, \\dots, R_K]'$ d'espérance $\\boldsymbol{\\mu} = \\mathbb{E}[\\mathbf{R}] \\in \\mathbb{R}^K$ et de matrice de covariance $\\Sigma = \\mathbb{E}[(\\mathbf{R} - \\boldsymbol{\\mu})(\\mathbf{R} - \\boldsymbol{\\mu})'] \\in \\mathbb{R}^{K \\times K}$, pondérés par $\\mathbf{w} = [w_1, \\dots, w_K]' \\in \\mathbb{R}^K$ ($\mathbf{w}'\\mathbf{1} = 1$).
+Soit un univers de $K$ actifs financiers de rendements aléatoires $\\mathbf{R} = [R_1, \\dots, R_K]'$ d'espérance $\\boldsymbol{\\mu} = \\mathbb{E}[\\mathbf{R}] \\in \\mathbb{R}^K$ et de matrice de covariance $\\Sigma = \\mathbb{E}[(\\mathbf{R} - \\boldsymbol{\\mu})(\\mathbf{R} - \\boldsymbol{\\mu})'] \\in \\mathbb{R}^{K \\times K}$, pondérés par $\\mathbf{w} = [w_1, \\dots, w_K]' \\in \\mathbb{R}^K$ ($\\mathbf{w}'\\mathbf{1} = 1$).
 
 1. **Linéarité de l'espérance :**
    $$\\mathbb{E}[R_p] = \\mathbb{E}\\left[\\sum_{i=1}^K w_i R_i\\right] = \\sum_{i=1}^K w_i \\mathbb{E}[R_i] = \\mathbf{w}' \\boldsymbol{\\mu}$$
@@ -104,7 +104,71 @@ Affichez les trois grandeurs avec \`print\`.`,
         solutionCode: "import numpy as np\n\nw = np.array([0.4, 0.35, 0.25])\nmu = np.array([0.08, 0.10, 0.06])\nSigma = np.array([\n    [0.04, 0.01, 0.005],\n    [0.01, 0.06, 0.015],\n    [0.005, 0.015, 0.03]\n])\n\nrendement_espere = float(w @ mu)\nvariance_portefeuille = float(w @ Sigma @ w)\nvolatilite_portefeuille = float(np.sqrt(variance_portefeuille))\n\nprint(f'Rendement espéré : {rendement_espere:.4f}')\nprint(f'Variance : {variance_portefeuille:.6f}')\nprint(f'Volatilité : {volatilite_portefeuille:.4f}')",
         testPythonCode: "assert 'rendement_espere' in globals()\nassert 'variance_portefeuille' in globals()\nassert 'volatilite_portefeuille' in globals()\nassert np.isclose(rendement_espere, 0.082, atol=1e-3)\nassert np.isclose(variance_portefeuille, 0.02205, atol=1e-4)",
         hints: ["rendement_espere = float(w @ mu)", "variance_portefeuille = float(w @ Sigma @ w)", "volatilite_portefeuille = float(np.sqrt(variance_portefeuille))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le cours, la rentabilité espérée $\\mathbb{E}[R_p] = \\mathbf{w}'\\boldsymbol{\\mu}$ et la forme quadratique de risque $\\sigma_p^2 = \\mathbf{w}'\\Sigma\\mathbf{w}$ s'écrivent avec des vecteurs colonnes $\\mathbf{w}, \\boldsymbol{\\mu} \\in \\mathbb{R}^3$ et la matrice symétrique $\\Sigma \\in \\mathbb{R}^{3 \\times 3}$. En NumPy, les vecteurs 1D \`w\` et \`mu\` de forme \`(3,)\` agissent indifféremment comme vecteur ligne à gauche de \`@\` et comme vecteur colonne à droite : \`rendement_espere = float(w @ mu)\`, \`variance_portefeuille = float(w @ Sigma @ w)\`, puis \`volatilite_portefeuille = float(np.sqrt(variance_portefeuille))\`.`,
+          stepByStepPlan: [
+            "Conservez les vecteurs 1D `w` et `mu` de forme `(3,)` ainsi que la matrice `Sigma` de forme `(3, 3)` déjà initialisés.",
+            "Calculez le rendement espéré du portefeuille $\\mathbf{w}'\\boldsymbol{\\mu}$ avec l'opérateur `@` dans `rendement_espere` (transtypé avec `float(...)`).",
+            "Calculez la variance $\\mathbf{w}'\\Sigma\\mathbf{w}$ en enchaînant deux produits matriciels `@` dans `variance_portefeuille` (transtypé avec `float(...)`).",
+            "Prenez la racine carrée via `np.sqrt(...)` pour obtenir `volatilite_portefeuille` et affichez les trois grandeurs avec `print(...)`."
+          ],
+          concepts: [
+            {
+              symbol: "w",
+              kind: "Variable",
+              roleInExercise: "Vecteur NumPy 1D de forme `(3,)` contenant les pondérations budgétaires $\\mathbf{w} = [0.40, 0.35, 0.25]'$ (somme égale à $1$)."
+            },
+            {
+              symbol: "mu",
+              kind: "Variable",
+              roleInExercise: "Vecteur NumPy 1D de forme `(3,)` stockant les rendements espérés individuels $\\boldsymbol{\\mu} = \\mathbb{E}[\\mathbf{R}]$ des $K=3$ actifs."
+            },
+            {
+              symbol: "Sigma",
+              kind: "Variable",
+              roleInExercise: "Matrice symétrique 2D de forme `(3, 3)` regroupant les variances $\\sigma_i^2$ sur la diagonale et les covariances $\\sigma_{ij}$ hors diagonale."
+            },
+            {
+              symbol: "@",
+              kind: "Syntaxe",
+              roleInExercise: "Opérateur de multiplication matricielle algébrique (`np.matmul`) : `(3,) @ (3,)` calcule le produit scalaire $\\mathbf{w}'\\boldsymbol{\\mu}$ et `(3,) @ (3, 3) @ (3,)` évalue $\\mathbf{w}'\\Sigma\\mathbf{w}$ (contrairement à `*` qui multiplie élément par élément)."
+            },
+            {
+              symbol: "np.sqrt(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction universelle NumPy calculant la racine carrée de la variance pour passer à l'écart-type $\\sigma_p = \\sqrt{\\sigma_p^2}$."
+            },
+            {
+              symbol: "float(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Convertit un scalaire `np.float64` issu d'une réduction matricielle en flottant Python natif `float` exigé par les assertions."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+# Données du portefeuille à K=3 actifs (vecteurs 1D (3,) et matrice (3, 3))
+w = np.array([0.4, 0.35, 0.25])
+mu = np.array([0.08, 0.10, 0.06])
+Sigma = np.array([
+    [0.04, 0.01, 0.005],
+    [0.01, 0.06, 0.015],
+    [0.005, 0.015, 0.03]
+])
+
+# Étape 1 : Rendement espéré w' * mu via le produit matriciel @ (converti en float)
+rendement_espere = float(___)
+
+# Étape 2 : Variance w' * Sigma * w via la forme quadratique vectorisée
+variance_portefeuille = float(___)
+
+# Étape 3 : Volatilité (écart-type) = racine carrée de la variance
+volatilite_portefeuille = float(___)
+
+print(f"Rendement espéré : {rendement_espere:.4f}")
+print(f"Variance : {variance_portefeuille:.6f}")
+print(f"Volatilité : {volatilite_portefeuille:.4f}")`
+        }
       },
       {
         id: "v2-py-2",
@@ -195,7 +259,62 @@ Affichez \`Sigma\` et \`C\` arrondies pour vérifier la symétrie et la diagonal
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nX = np.random.randn(100, 3) * [0.02, 0.03, 0.015]\n\nSigma = np.cov(X, rowvar=False)\nC = np.corrcoef(X, rowvar=False)\n\nprint('Matrice de Covariance Sigma :\\n', np.round(Sigma, 6))\nprint('Matrice de Corrélation C :\\n', np.round(C, 4))",
         testPythonCode: "assert 'Sigma' in globals()\nassert 'C' in globals()\nassert Sigma.shape == (3, 3)\nassert C.shape == (3, 3)\nassert np.allclose(np.diag(C), 1.0)",
         hints: ["Utilisez Sigma = np.cov(X, rowvar=False)", "C = np.corrcoef(X, rowvar=False)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le cours, la matrice d'observations $X \\in \\mathbb{R}^{T \\times K}$ place les $T=100$ dates en lignes et les $K=3$ actifs en colonnes. L'estimateur sans biais de Bessel $\\hat{\\Sigma} = \\frac{1}{T-1}\\tilde{X}'\\tilde{X}$ correspond exactement à \`Sigma = np.cov(X, rowvar=False)\` (forme \`(3, 3)\`), et la matrice de corrélation normalisée $C = D^{-1/2}\\hat{\\Sigma}D^{-1/2}$ correspond à \`C = np.corrcoef(X, rowvar=False)\` (diagonale égale à $1.0$).`,
+          stepByStepPlan: [
+            "Conservez la graine `np.random.seed(42)` et la matrice simulée `X` de dimension `(100, 3)`.",
+            "Estimez la matrice de variance-covariance empirique `Sigma` `(3, 3)` avec `np.cov(...)` en activant `rowvar=False`.",
+            "Estimez la matrice de corrélation `C` `(3, 3)` avec `np.corrcoef(...)` et `rowvar=False`.",
+            "Affichez `Sigma` et `C` arrondies avec `np.round(...)` pour vérifier la symétrie et la diagonale unitaire de `C`."
+          ],
+          concepts: [
+            {
+              symbol: "X",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D de forme `(100, 3)` contenant $T=100$ tirages centrés en lignes pour $K=3$ actifs en colonnes (volatilités cibles $2\\%$, $3\\%$ et $1.5\\%$)."
+            },
+            {
+              symbol: "np.random.seed(42)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Initialise la graine du générateur aléatoire NumPy pour figer exactement le tirage de `X` à chaque exécution."
+            },
+            {
+              symbol: "np.cov(X, rowvar=False)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Estime la matrice de covariance sans biais $\\hat{\\Sigma}$ de taille `(3, 3)` en divisant par $T-1=99$ (`ddof=1` par défaut)."
+            },
+            {
+              symbol: "np.corrcoef(X, rowvar=False)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule la matrice des corrélations linéaires de Pearson $C_{ij} = \\hat{\\sigma}_{ij}/\\sqrt{\\hat{\\sigma}_{ii}\\hat{\\sigma}_{jj}}$ de taille `(3, 3)`."
+            },
+            {
+              symbol: "rowvar=False",
+              kind: "Paramètre",
+              roleInExercise: "Spécifie que chaque **colonne** représente une variable financière et chaque ligne une date ; l'omettre (`rowvar=True` par défaut) renverrait une matrice `(100, 100)`."
+            },
+            {
+              symbol: "np.round(..., 4)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Arrondit les éléments d'un tableau NumPy à un nombre fixé de décimales pour inspecter proprement la symétrie et la diagonale de `C`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+# Matrice (T=100 dates x K=3 actifs) reproductible
+np.random.seed(42)
+X = np.random.randn(100, 3) * [0.02, 0.03, 0.015]
+
+# Étape 1 : Covariance empirique sans biais (colonnes = variables -> rowvar=False)
+Sigma = ___
+
+# Étape 2 : Matrice de corrélation normalisée C (diagonale = 1)
+C = ___
+
+print("Matrice de Covariance Sigma :\\n", np.round(Sigma, 6))
+print("Matrice de Corrélation C :\\n", np.round(C, 4))`
+        }
       },
       {
         id: "v2-py-3",
@@ -284,7 +403,69 @@ Affichez \`valeurs_propres\` et le booléen \`np.allclose(Sigma, Sigma_reconstru
         solutionCode: "import numpy as np\n\nSigma = np.array([\n    [0.05, 0.02, 0.01],\n    [0.02, 0.08, 0.03],\n    [0.01, 0.03, 0.04]\n])\n\nvaleurs_propres, vecteurs_propres = np.linalg.eigh(Sigma)\nSigma_reconstruite = vecteurs_propres @ np.diag(valeurs_propres) @ vecteurs_propres.T\n\nprint('Valeurs propres lambda :\\n', np.round(valeurs_propres, 6))\nprint('Reconstruction exacte :', np.allclose(Sigma, Sigma_reconstruite))",
         testPythonCode: "assert 'valeurs_propres' in globals()\nassert 'vecteurs_propres' in globals()\nassert 'Sigma_reconstruite' in globals()\nassert np.all(valeurs_propres > 0)\nassert np.allclose(Sigma, Sigma_reconstruite)",
         hints: ["valeurs_propres, vecteurs_propres = np.linalg.eigh(Sigma)", "Sigma_reconstruite = vecteurs_propres @ np.diag(valeurs_propres) @ vecteurs_propres.T"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le théorème spectral $\\Sigma = V \\Lambda V'$ décompose la matrice symétrique \`Sigma\` \`(3, 3)\` en une base orthonormée $V$ de portefeuilles propres (\`vecteurs_propres\`, forme \`(3, 3)\`) et un spectre réel $\\Lambda = \\operatorname{diag}(\\lambda_1, \\lambda_2, \\lambda_3)$ (\`valeurs_propres\`, forme \`(3,)\`). L'appel \`np.linalg.eigh(Sigma)\` fournit directement ces deux objets triés par ordre croissant, et \`np.diag(valeurs_propres)\` reconstruit la matrice diagonale $\\Lambda$ pour vérifier $V \\Lambda V' \\approx \\Sigma$ via \`np.allclose\`.`,
+          stepByStepPlan: [
+            "Partez de la matrice symétrique `Sigma` de dimension `(3, 3)`.",
+            "Appelez `np.linalg.eigh(Sigma)` et dépaquetez le couple retourné dans `valeurs_propres` `(3,)` et `vecteurs_propres` `(3, 3)`.",
+            "Transformez `valeurs_propres` en matrice diagonale $3 \\times 3$ avec `np.diag(...)` et calculez `Sigma_reconstruite` selon $V \\Lambda V'$.",
+            "Affichez `valeurs_propres` et le test booléen `np.allclose(Sigma, Sigma_reconstruite)`."
+          ],
+          concepts: [
+            {
+              symbol: "Sigma",
+              kind: "Variable",
+              roleInExercise: "Matrice symétrique réelle de covariance `(3, 3)` ($\\Sigma = \\Sigma'$) à diagonaliser dans une base orthonormée."
+            },
+            {
+              symbol: "np.linalg.eigh(Sigma)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Solveur spectral dédié aux matrices symétriques (*Hermitian*) : renvoie des valeurs propres garanties réelles et triées en ordre croissant, avec vecteurs propres orthogonaux."
+            },
+            {
+              symbol: "valeurs_propres",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(3,)` contenant les variances $\\lambda_1 \\le \\lambda_2 \\le \\lambda_3$ des $3$ facteurs propres orthogonaux (toutes $> 0$ si $\\Sigma \\succ 0$)."
+            },
+            {
+              symbol: "vecteurs_propres",
+              kind: "Variable",
+              roleInExercise: "Matrice orthogonale $V$ de forme `(3, 3)` ($V'V = I_3$) dont la colonne `vecteurs_propres[:, i]` est le vecteur propre unitaire $\\mathbf{v}_i$."
+            },
+            {
+              symbol: "np.diag(valeurs_propres)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Convertit le vecteur 1D `(3,)` en matrice diagonale $\\Lambda$ `(3, 3)` afin d'effectuer le produit matriciel $V \\Lambda V'$."
+            },
+            {
+              symbol: ".T",
+              kind: "Syntaxe",
+              roleInExercise: "Transposée matricielle retournant $V'$ de forme `(3, 3)`, égale à l'inverse $V^{-1}$ par orthonormalité des colonnes de $V$."
+            },
+            {
+              symbol: "np.allclose(Sigma, Sigma_reconstruite)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Teste l'égalité matricielle à la tolérance flottante près (nécessaire car les erreurs d'arrondi IEEE-754 de l'ordre de $10^{-16}$ font échouer `==`)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+Sigma = np.array([
+    [0.05, 0.02, 0.01],
+    [0.02, 0.08, 0.03],
+    [0.01, 0.03, 0.04]
+])
+
+# Étape 1 : Décomposition spectrale symétrique (retourne un tuple de 2 tableaux)
+valeurs_propres, vecteurs_propres = ___
+
+# Étape 2 : Reconstruction spectrale V @ diag(lambda) @ V.T
+Sigma_reconstruite = ___
+
+print("Valeurs propres lambda :\\n", np.round(valeurs_propres, 6))
+print("Reconstruction exacte :", np.allclose(Sigma, Sigma_reconstruite))`
+        }
       },
       {
         id: "v2-py-4",
@@ -371,7 +552,68 @@ Affichez la plus petite valeur propre avant et après régularisation.`,
         solutionCode: "import numpy as np\n\nSigma_perturbee = np.array([\n    [1.0, 0.9, 0.7],\n    [0.9, 1.0, 0.95],\n    [0.7, 0.95, 1.0]\n])\n\nvaleurs_propres, vecteurs_propres = np.linalg.eigh(Sigma_perturbee)\nvaleurs_propres_psd = np.maximum(valeurs_propres, 1e-6)\nSigma_psd = vecteurs_propres @ np.diag(valeurs_propres_psd) @ vecteurs_propres.T\n\nprint(f'Plus petite valeur propre brute : {valeurs_propres.min():.6f}')\nprint(f'Plus petite valeur propre corrigée : {valeurs_propres_psd.min():.6f}')",
         testPythonCode: "assert 'Sigma_psd' in globals()\nassert 'valeurs_propres_psd' in globals()\nassert np.all(valeurs_propres_psd >= 1e-6)\nassert np.all(np.linalg.eigvalsh(Sigma_psd) > 0)",
         hints: ["valeurs_propres_psd = np.maximum(valeurs_propres, 1e-6)", "Sigma_psd = vecteurs_propres @ np.diag(valeurs_propres_psd) @ vecteurs_propres.T"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `D'après le théorème de projection de Higham au sens de Frobenius, la matrice définie positive la plus proche de \`Sigma_perturbee\` ($3 \\times 3$) s'obtient en conservant sa base propre $V$ (\`vecteurs_propres\`) et en relevant ses valeurs propres sous le plancher $\\epsilon = 10^{-6}$ : $\\Lambda_{\\text{PSD}} = \\max(\\Lambda, \\epsilon I_3)$ devient \`valeurs_propres_psd = np.maximum(valeurs_propres, 1e-6)\`, puis $\\Sigma_{\\text{PSD}} = V \\Lambda_{\\text{PSD}} V'$ devient \`Sigma_psd = vecteurs_propres @ np.diag(valeurs_propres_psd) @ vecteurs_propres.T\`.`,
+          stepByStepPlan: [
+            "Décomposez `Sigma_perturbee` `(3, 3)` via `np.linalg.eigh(...)` pour isoler `valeurs_propres` et `vecteurs_propres`.",
+            "Écrêtez toute valeur propre négative au seuil `1e-6` élément par élément via `np.maximum(...)` dans `valeurs_propres_psd`.",
+            "Reconstruisez `Sigma_psd` avec `vecteurs_propres @ np.diag(valeurs_propres_psd) @ vecteurs_propres.T`.",
+            "Affichez `.min()` avant et après correction pour vérifier que tout le spectre est désormais strictement positif."
+          ],
+          concepts: [
+            {
+              symbol: "Sigma_perturbee",
+              kind: "Variable",
+              roleInExercise: "Matrice symétrique `(3, 3)` incohérente ($\\rho_{12}=0.9, \\rho_{23}=0.95, \\rho_{13}=0.7$) possédant une valeur propre négative ($\\approx -0.0067$)."
+            },
+            {
+              symbol: "np.linalg.eigh(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Extrait les valeurs propres réelles `(3,)` et les vecteurs propres orthonormés `(3, 3)` de la matrice bruitée."
+            },
+            {
+              symbol: "np.maximum(valeurs_propres, 1e-6)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction universelle (*ufunc*) comparant **chaque** composante du vecteur au plancher `1e-6` et renvoyant un vecteur `(3,)` (ne pas confondre avec `np.max` qui réduit en scalaire)."
+            },
+            {
+              symbol: "1e-6",
+              kind: "Paramètre",
+              roleInExercise: "Plancher numérique $\\epsilon = 10^{-6} > 0$ garantissant non seulement la semi-définie positivité ($\\ge 0$) mais l'inversibilité stricte de `Sigma_psd`."
+            },
+            {
+              symbol: "valeurs_propres_psd",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(3,)` des valeurs propres régularisées, toutes $\\ge 10^{-6}$."
+            },
+            {
+              symbol: "Sigma_psd",
+              kind: "Variable",
+              roleInExercise: "Projection orthogonale de `Sigma_perturbee` sur le cône des matrices symétriques définies positives `(3, 3)`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+# Matrice empirique bruitée possédant une valeur propre négative
+Sigma_perturbee = np.array([
+    [1.0, 0.9, 0.7],
+    [0.9, 1.0, 0.95],
+    [0.7, 0.95, 1.0]
+])
+
+# Étape 1 : Extraction spectrale (valeurs propres + base orthogonale V)
+valeurs_propres, vecteurs_propres = ___
+
+# Étape 2 : Troncature élément par élément au plancher strictement positif 1e-6
+valeurs_propres_psd = ___
+
+# Étape 3 : Reconstruction dans la base V : V @ diag(valeurs_propres_psd) @ V.T
+Sigma_psd = ___
+
+print(f"Plus petite valeur propre brute : {valeurs_propres.min():.6f}")
+print(f"Plus petite valeur propre corrigée : {valeurs_propres_psd.min():.6f}")`
+        }
       },
       {
         id: "v2-py-5",
@@ -470,7 +712,74 @@ Affichez \`ratio_explique\` et \`pct_top3\`.`,
         solutionCode: "import numpy as np\n\nnp.random.seed(123)\nlevel = np.random.randn(24, 1) * 0.25\nslope = np.random.randn(24, 1) * np.linspace(-0.15, 0.15, 6)\ndX = level + slope + np.random.randn(24, 6) * 0.03\n\ncov_mat = np.cov(dX, rowvar=False)\nevals, _ = np.linalg.eigh(cov_mat)\nvaleurs_triees = evals[::-1]\nratio_explique = valeurs_triees / valeurs_triees.sum()\npct_top3 = float(ratio_explique[:3].sum() * 100)\n\nprint('Ratios de variance expliquée :', np.round(ratio_explique, 4))\nprint(f'Variance cumulée expliquée par les 3 premiers facteurs : {pct_top3:.2f}%')",
         testPythonCode: "assert 'ratio_explique' in globals()\nassert 'pct_top3' in globals()\nassert pct_top3 > 90.0\nassert np.isclose(ratio_explique.sum(), 1.0)",
         hints: ["evals, _ = np.linalg.eigh(cov_mat)", "valeurs_triees = evals[::-1]", "ratio_explique = valeurs_triees / valeurs_triees.sum()", "pct_top3 = float(ratio_explique[:3].sum() * 100)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `En ACP de la courbe des taux, la conservation de la trace $\\operatorname{Tr}(\\Sigma) = \\sum_{k=1}^6 \\lambda_{(k)}$ permet de mesurer la part de variance captée par chaque composante orthogonale : \`cov_mat = np.cov(dX, rowvar=False)\` donne la covariance \`(6, 6)\`, \`np.linalg.eigh(cov_mat)\` renvoie les valeurs propres en ordre croissant, puis le slicing \`[::-1]\` produit \`valeurs_triees\` ($\\lambda_{(1)} \\ge \\dots \\ge \\lambda_{(6)}$). On normalise par \`.sum()\` dans \`ratio_explique\` et on cumule les $3$ premiers facteurs (Niveau, Pente, Courbure) dans \`pct_top3\`.`,
+          stepByStepPlan: [
+            "Conservez la simulation de `dX` de forme `(24, 6)` ($24$ mois $\\times$ $6$ maturités).",
+            "Calculez la matrice de covariance `cov_mat` `(6, 6)` avec `np.cov(dX, rowvar=False)`.",
+            "Extrayez les valeurs propres `evals` avec `np.linalg.eigh(cov_mat)` (en ignorant les vecteurs propres via `_`) et triez-les en ordre décroissant dans `valeurs_triees` avec `[::-1]`.",
+            "Calculez `ratio_explique = valeurs_triees / valeurs_triees.sum()` puis le cumul des $3$ premiers facteurs en pourcentage `pct_top3` via le slicing `[:3]`."
+          ],
+          concepts: [
+            {
+              symbol: "dX",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(24, 6)` des variations mensuelles simulées pour $6$ maturités souveraines (1Y, 2Y, 5Y, 10Y, 20Y, 30Y)."
+            },
+            {
+              symbol: "cov_mat",
+              kind: "Variable",
+              roleInExercise: "Matrice de covariance `(6, 6)` estimée par `np.cov(dX, rowvar=False)` entre les $6$ maturités."
+            },
+            {
+              symbol: "_",
+              kind: "Syntaxe",
+              roleInExercise: "Convention Python de variable muette dans `evals, _ = np.linalg.eigh(cov_mat)` pour ignorer le second élément du tuple (les vecteurs propres)."
+            },
+            {
+              symbol: "[::-1]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing à pas $-1$ qui retourne `evals` (trié en ordre croissant par `eigh`) du plus grand $\\lambda_{(1)}$ au plus petit $\\lambda_{(6)}$."
+            },
+            {
+              symbol: "valeurs_triees.sum()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Somme toutes les valeurs propres, égale à $\\operatorname{Tr}(\\Sigma)$ (variance totale de la courbe des taux)."
+            },
+            {
+              symbol: "ratio_explique[:3]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing sélectionnant les $3$ premiers ratios (indices `0`, `1`, `2`) : composantes **Niveau**, **Pente** et **Courbure** de Litterman-Scheinkman."
+            },
+            {
+              symbol: "pct_top3",
+              kind: "Variable",
+              roleInExercise: "Flottant Python donnant le pourcentage cumulé de variance expliquée par les $3$ premières composantes principales (attendu $> 90\\%$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(123)
+# Variations mensuelles de 6 maturités (24 mois x 6 taux)
+level = np.random.randn(24, 1) * 0.25
+slope = np.random.randn(24, 1) * np.linspace(-0.15, 0.15, 6)
+dX = level + slope + np.random.randn(24, 6) * 0.03
+
+# Étape 1 : Matrice de covariance (6, 6) des variations de taux (colonnes = maturités)
+cov_mat = ___
+
+# Étape 2 : Valeurs propres via eigh puis tri décroissant via slicing [::-1]
+evals, _ = ___
+valeurs_triees = ___
+
+# Étape 3 : Part de variance par facteur et cumul en % des 3 premiers (Niveau, Pente, Courbure)
+ratio_explique = ___
+pct_top3 = float(___)
+
+print("Ratios de variance expliquée :", np.round(ratio_explique, 4))
+print(f"Variance cumulée expliquée par les 3 premiers facteurs : {pct_top3:.2f}%")`
+        }
       },
       {
         id: "v2-py-6",
@@ -549,7 +858,64 @@ Affichez \`lambda_plus\` et \`nb_signaux\`.`,
         solutionCode: "import numpy as np\n\nT = 500\nN = 50\nevals_obs = np.array([12.5, 3.8, 2.1, 1.7, 1.4, 1.2, 1.1, 0.95, 0.82, 0.75])\n\nlambda_plus = float((1.0 + np.sqrt(N / T))**2)\nnb_signaux = int(np.sum(evals_obs > lambda_plus))\n\nprint(f'Borne supérieure de bruit lambda_+ : {lambda_plus:.4f}')\nprint(f'Nombre de facteurs authentiques (signaux) : {nb_signaux}')",
         testPythonCode: "assert 'lambda_plus' in globals()\nassert 'nb_signaux' in globals()\nassert np.isclose(lambda_plus, 1.73205, atol=0.01)\nassert nb_signaux == 3",
         hints: ["lambda_plus = float((1.0 + np.sqrt(N / T))**2)", "nb_signaux = int(np.sum(evals_obs > lambda_plus))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `D'après la loi de Marchenko-Pastur pour une matrice de corrélation ($\\sigma^2 = 1$ avec $q = T/N$), toute valeur propre d'une matrice de pur bruit blanc est confinée sous la borne $\\lambda_+ = \\left(1 + \\sqrt{N/T}\\right)^2$. En Python, cette formule devient \`lambda_plus = float((1.0 + np.sqrt(N / T))**2)\`. La comparaison vectorisée \`evals_obs > lambda_plus\` génère un masque booléen dont la somme \`int(np.sum(...))\` donne directement \`nb_signaux\`, le nombre de facteurs économiques porteurs de vrai signal.`,
+          stepByStepPlan: [
+            "Conservez les paramètres `T = 500`, `N = 50` et le vecteur `evals_obs` de longueur $10$.",
+            "Calculez la borne supérieure théorique de bruit blanc `lambda_plus` selon $(1 + \\sqrt{N/T})^2$ avec `np.sqrt(N / T)` et `float(...)`.",
+            "Comparez `evals_obs > lambda_plus` pour créer un masque booléen, puis sommez-le avec `int(np.sum(...))` dans `nb_signaux`.",
+            "Affichez `lambda_plus` et `nb_signaux`."
+          ],
+          concepts: [
+            {
+              symbol: "T, N",
+              kind: "Variable",
+              roleInExercise: "Dimensions de l'échantillon financier : $T=500$ séances et $N=50$ actifs, soit un ratio d'échantillonnage $q = T / N = 10$ ($N / T = 0.1$)."
+            },
+            {
+              symbol: "evals_obs",
+              kind: "Variable",
+              roleInExercise: "Vecteur NumPy 1D de forme `(10,)` contenant les $10$ plus grandes valeurs propres observées sur la matrice de corrélation empirique."
+            },
+            {
+              symbol: "lambda_plus",
+              kind: "Variable",
+              roleInExercise: "Flottant Python représentant la borne supérieure de Marchenko-Pastur $\\lambda_+ = (1 + \\sqrt{N/T})^2 \\approx 1.7325$ (au-dessus, le facteur sort de la mer de bruit)."
+            },
+            {
+              symbol: "**2",
+              kind: "Syntaxe",
+              roleInExercise: "Opérateur d'élévation au carré en Python (ne pas utiliser `^`, qui désigne un OU exclusif bit-à-bit)."
+            },
+            {
+              symbol: "evals_obs > lambda_plus",
+              kind: "Syntaxe",
+              roleInExercise: "Comparaison vectorisée par *broadcasting* produisant un tableau de booléens `[True, True, True, False, ...]` (où `True` vaut $1$ et `False` vaut $0$)."
+            },
+            {
+              symbol: "int(np.sum(...))",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Compte les valeurs `True` du masque booléen en sommant des $1$ et $0$, puis convertit le résultat `np.int64` en entier Python `int` dans `nb_signaux`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+T = 500
+N = 50
+
+# Valeurs propres observées sur un portefeuille réel (facteurs de marché + bruit)
+evals_obs = np.array([12.5, 3.8, 2.1, 1.7, 1.4, 1.2, 1.1, 0.95, 0.82, 0.75])
+
+# Étape 1 : Borne supérieure de Marchenko-Pastur (sigma^2 = 1) : (1 + sqrt(N/T))^2
+lambda_plus = float(___)
+
+# Étape 2 : Comptage vectorisé des valeurs propres strictement > lambda_plus
+nb_signaux = int(___)
+
+print(f"Borne supérieure de bruit lambda_+ : {lambda_plus:.4f}")
+print(f"Nombre de facteurs authentiques (signaux) : {nb_signaux}")`
+        }
       },
       {
         id: "v2-py-7",
@@ -631,7 +997,64 @@ Affichez \`Sigma_lw\` et vérifiez que la trace est conservée.`,
         solutionCode: "import numpy as np\n\nSigma_sample = np.array([\n    [0.08, 0.03, 0.01],\n    [0.03, 0.12, 0.05],\n    [0.01, 0.05, 0.06]\n])\nalpha = 0.25\n\nF = np.eye(3) * (np.trace(Sigma_sample) / 3.0)\nSigma_lw = (1.0 - alpha) * Sigma_sample + alpha * F\n\nprint('Matrice Rétrécie de Ledoit-Wolf Sigma_lw :\\n', np.round(Sigma_lw, 5))",
         testPythonCode: "assert 'F' in globals()\nassert 'Sigma_lw' in globals()\nassert Sigma_lw.shape == (3, 3)\nassert np.isclose(np.trace(Sigma_lw), np.trace(Sigma_sample))",
         hints: ["F = np.eye(3) * (np.trace(Sigma_sample) / 3.0)", "Sigma_lw = (1.0 - alpha) * Sigma_sample + alpha * F"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le modèle de rétrécissement de Ledoit-Wolf $\\Sigma_{\\text{LW}} = (1 - \\alpha) S + \\alpha F$, on régularise la matrice empirique bruitée \`Sigma_sample\` ($3 \\times 3$) vers une cible diagonale à variance moyenne constante $F = \\frac{\\operatorname{Tr}(S)}{3} I_3$. En NumPy, \`np.trace(Sigma_sample) / 3.0\` calcule la variance moyenne $\\bar{\\sigma}^2$, \`np.eye(3)\` fournit la matrice identité $I_3$ pour former \`F\`, puis la combinaison convexe \`(1.0 - alpha) * Sigma_sample + alpha * F\` produit \`Sigma_lw\` tout en préservant exactement $\\operatorname{Tr}(\\Sigma_{\\text{LW}}) = \\operatorname{Tr}(S)$.`,
+          stepByStepPlan: [
+            "Conservez la matrice empirique `Sigma_sample` `(3, 3)` et le coefficient de rétrécissement `alpha = 0.25`.",
+            "Calculez la variance moyenne $\\operatorname{Tr}(S) / 3$ avec `np.trace(Sigma_sample)` et multipliez-la par la matrice identité `np.eye(3)` pour obtenir `F`.",
+            "Calculez la matrice régularisée `Sigma_lw` comme combinaison convexe `(1.0 - alpha) * Sigma_sample + alpha * F`.",
+            "Affichez `Sigma_lw` arrondie et contrôlez que sa trace est identique à celle de `Sigma_sample`."
+          ],
+          concepts: [
+            {
+              symbol: "Sigma_sample",
+              kind: "Variable",
+              roleInExercise: "Matrice de covariance empirique bruitée $S$ de forme `(3, 3)` (sans biais mais sensible au bruit d'échantillonnage)."
+            },
+            {
+              symbol: "alpha",
+              kind: "Paramètre",
+              roleInExercise: "Intensité de rétrécissement (*shrinkage*) $\\alpha = 0.25 \\in [0, 1]$ dosant l'arbitrage biais-variance ($75\\%$ d'empirique, $25\\%$ de cible structurée)."
+            },
+            {
+              symbol: "np.trace(Sigma_sample)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Retourne la somme des éléments diagonaux $\\operatorname{Tr}(S) = \\sum_{i=1}^3 S_{ii}$ (variance totale du système)."
+            },
+            {
+              symbol: "np.eye(3)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Génère la matrice identité $I_3$ de forme `(3, 3)` avec des `1.0` sur la diagonale et `0.0` hors diagonale."
+            },
+            {
+              symbol: "F",
+              kind: "Variable",
+              roleInExercise: "Matrice cible structurée `(3, 3)` égale à $(\\operatorname{Tr}(S)/3) \\cdot I_3$ : corrélations nulles et variance uniforme préservant $\\operatorname{Tr}(F) = \\operatorname{Tr}(S)$."
+            },
+            {
+              symbol: "Sigma_lw",
+              kind: "Variable",
+              roleInExercise: "Estimateur de Ledoit-Wolf `(3, 3)` issu de la combinaison convexe $(1 - \\alpha)S + \\alpha F$, mieux conditionné pour l'inversion de Markowitz."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+Sigma_sample = np.array([
+    [0.08, 0.03, 0.01],
+    [0.03, 0.12, 0.05],
+    [0.01, 0.05, 0.06]
+])
+alpha = 0.25
+
+# Étape 1 : Cible diagonale F = (Tr(Sigma_sample) / 3.0) * I_3
+F = ___
+
+# Étape 2 : Combinaison convexe de Ledoit-Wolf : (1 - alpha) * S + alpha * F
+Sigma_lw = ___
+
+print("Matrice Rétrécie de Ledoit-Wolf Sigma_lw :\\n", np.round(Sigma_lw, 5))`
+        }
       },
       {
         id: "v2-py-8",
@@ -724,7 +1147,74 @@ Affichez les poids, la somme des poids ($1.0$) et \`vol_gmvp\`.`,
         solutionCode: "import numpy as np\n\nSigma = np.array([\n    [0.04, 0.015, 0.008],\n    [0.015, 0.06, 0.02],\n    [0.008, 0.02, 0.03]\n])\n\ninv_Sigma = np.linalg.inv(Sigma)\nones = np.ones(len(Sigma))\nw_gmvp = (inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)\nvol_gmvp = float(np.sqrt(1.0 / (ones @ inv_Sigma @ ones)))\n\nprint('Poids optimaux GMVP :', np.round(w_gmvp, 4))\nprint(f'Somme des poids : {w_gmvp.sum():.4f}')\nprint(f'Volatilité minimale annualisée : {vol_gmvp:.4f}')",
         testPythonCode: "assert 'w_gmvp' in globals()\nassert 'vol_gmvp' in globals()\nassert np.isclose(w_gmvp.sum(), 1.0)\nassert vol_gmvp > 0\nassert np.isclose(vol_gmvp, np.sqrt(w_gmvp @ Sigma @ w_gmvp))",
         hints: ["inv_Sigma = np.linalg.inv(Sigma)", "ones = np.ones(len(Sigma))", "w_gmvp = (inv_Sigma @ ones) / (ones @ inv_Sigma @ ones)", "vol_gmvp = float(np.sqrt(1.0 / (ones @ inv_Sigma @ ones)))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La résolution KKT du programme de variance minimale sous contrainte $\\mathbf{w}'\\mathbf{1} = 1$ donne la formule fermée $\\mathbf{w}_{\\text{GMVP}} = \\frac{\\Sigma^{-1}\\mathbf{1}}{\\mathbf{1}'\\Sigma^{-1}\\mathbf{1}}$ et la volatilité minimale $\\sigma_{\\text{GMVP}} = \\sqrt{\\frac{1}{\\mathbf{1}'\\Sigma^{-1}\\mathbf{1}}}$. En NumPy, on calcule \`inv_Sigma = np.linalg.inv(Sigma)\` \`(3, 3)\` et \`ones = np.ones(len(Sigma))\` \`(3,)\`, puis le numérateur vectoriel \`inv_Sigma @ ones\` divisé par le dénominateur scalaire \`ones @ inv_Sigma @ ones\` donne directement \`w_gmvp\`, et \`vol_gmvp\` en découle.`,
+          stepByStepPlan: [
+            "Conservez la matrice de covariance `Sigma` de dimension `(3, 3)`.",
+            "Inversez `Sigma` dans `inv_Sigma` via `np.linalg.inv(Sigma)` et créez le vecteur unitaire `ones` de taille `(3,)` avec `np.ones(len(Sigma))`.",
+            "Calculez les poids optimaux `w_gmvp` en normalisant `inv_Sigma @ ones` par le scalaire `ones @ inv_Sigma @ ones`.",
+            "Calculez la volatilité minimale `vol_gmvp` avec `float(np.sqrt(1.0 / (ones @ inv_Sigma @ ones)))` et affichez `w_gmvp`, sa somme et `vol_gmvp`."
+          ],
+          concepts: [
+            {
+              symbol: "Sigma",
+              kind: "Variable",
+              roleInExercise: "Matrice de covariance symétrique définie positive `(3, 3)` des $K=3$ actifs (le GMVP n'a besoin d'aucun vecteur $\\boldsymbol{\\mu}$)."
+            },
+            {
+              symbol: "np.linalg.inv(Sigma)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule l'inverse matricielle $\\Sigma^{-1}$ de forme `(3, 3)` (pour des portefeuilles de très grande dimension, on préférera `np.linalg.solve`)."
+            },
+            {
+              symbol: "inv_Sigma",
+              kind: "Variable",
+              roleInExercise: "Matrice inverse $\\Sigma^{-1}$ de dimension `(3, 3)` vérifiant `inv_Sigma @ Sigma == np.eye(3)`."
+            },
+            {
+              symbol: "np.ones(len(Sigma))",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Génère dynamiquement le vecteur 1D unitaire $\\mathbf{1}_3 = [1, 1, 1]'$ de taille `len(Sigma)` (`(3,)`), codant la contrainte budgétaire $\\sum w_i = 1$."
+            },
+            {
+              symbol: "ones @ inv_Sigma @ ones",
+              kind: "Syntaxe",
+              roleInExercise: "Scalaire égal à $\\mathbf{1}'\\Sigma^{-1}\\mathbf{1}$ (constante $A$ de Merton), inverse de la variance minimale et dénominateur de normalisation des poids."
+            },
+            {
+              symbol: "w_gmvp",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(3,)` des poids du portefeuille de variance minimale globale, dont la somme `w_gmvp.sum()` vaut exactement $1.0$."
+            },
+            {
+              symbol: "vol_gmvp",
+              kind: "Variable",
+              roleInExercise: "Flottant Python égal à $\\sigma_{\\text{GMVP}} = \\sqrt{1 / (\\mathbf{1}'\\Sigma^{-1}\\mathbf{1})}$, identique à $\\sqrt{\\mathbf{w}_{\\text{GMVP}}'\\Sigma\\mathbf{w}_{\\text{GMVP}}}$."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+Sigma = np.array([
+    [0.04, 0.015, 0.008],
+    [0.015, 0.06, 0.02],
+    [0.008, 0.02, 0.03]
+])
+
+# Étape 1 : Matrice inverse Sigma^-1 et vecteur unitaire ones (len(Sigma) == 3)
+inv_Sigma = ___
+ones = ___
+
+# Étape 2 : Formule analytique KKT du GMVP : (Sigma^-1 @ 1) / (1' @ Sigma^-1 @ 1)
+w_gmvp = ___
+
+# Étape 3 : Volatilité minimale : sqrt(1 / (1' @ Sigma^-1 @ 1))
+vol_gmvp = float(___)
+
+print("Poids optimaux GMVP :", np.round(w_gmvp, 4))
+print(f"Somme des poids : {w_gmvp.sum():.4f}")
+print(f"Volatilité minimale annualisée : {vol_gmvp:.4f}")`
+        }
       },
       {
         id: "v2-py-9",
@@ -826,7 +1316,84 @@ Affichez \`A\`, \`B\`, \`C\` et \`Delta\`.`,
         solutionCode: "import numpy as np\nimport matplotlib.pyplot as plt\n\nmu = np.array([0.06, 0.09, 0.11])\nSigma = np.array([\n    [0.02, 0.005, 0.002],\n    [0.005, 0.04, 0.01],\n    [0.002, 0.01, 0.05]\n])\n\ninv_Sigma = np.linalg.inv(Sigma)\nones = np.ones(len(mu))\n\nA = float(ones @ inv_Sigma @ ones)\nB = float(ones @ inv_Sigma @ mu)\nC = float(mu @ inv_Sigma @ mu)\nDelta = A * C - B**2\n\nmu_targets = np.linspace(0.05, 0.12, 50)\nvar_targets = (A * mu_targets**2 - 2 * B * mu_targets + C) / Delta\nvols = np.sqrt(var_targets)\n\nplt.figure(figsize=(6, 4))\nplt.plot(vols * 100, mu_targets * 100, color='#0284c7', lw=2.2, label='Frontière Efficiente')\nplt.scatter([np.sqrt(1/A)*100], [B/A*100], color='#e11d48', s=60, zorder=5, label='GMVP')\nplt.xlabel('Volatilité (%)')\nplt.ylabel('Rendement Espéré (%)')\nplt.title('Frontière Efficiente de Markowitz')\nplt.legend()\nplt.grid(True, alpha=0.3)\n\nprint(f'Constantes : A={A:.2f}, B={B:.2f}, C={C:.2f}, Delta={Delta:.4f}')",
         testPythonCode: "assert 'A' in globals()\nassert 'B' in globals()\nassert 'C' in globals()\nassert 'Delta' in globals()\nassert Delta > 0",
         hints: ["A = float(ones @ inv_Sigma @ ones)", "B = float(ones @ inv_Sigma @ mu)", "C = float(mu @ inv_Sigma @ mu)", "Delta = A * C - B**2"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La parabole analytique de Merton $\\sigma_p^2(\\mu_p) = \\frac{A\\mu_p^2 - 2B\\mu_p + C}{\\Delta}$ repose sur trois invariants quadratiques calculés avec \`inv_Sigma\` \`(3, 3)\`, \`ones\` \`(3,)\` et \`mu\` \`(3,)\` : \`A = float(ones @ inv_Sigma @ ones)\`, \`B = float(ones @ inv_Sigma @ mu)\`, \`C = float(mu @ inv_Sigma @ mu)\`, et le déterminant \`Delta = A * C - B**2 > 0\`. On évalue ensuite vectoriellement \`var_targets\` sur la grille \`mu_targets = np.linspace(0.05, 0.12, 50)\` et l'on trace l'hyperbole $(\\sqrt{\\text{var}}, \\mu)$ avec Matplotlib.`,
+          stepByStepPlan: [
+            "Calculez `inv_Sigma = np.linalg.inv(Sigma)` `(3, 3)` et `ones = np.ones(len(mu))` `(3,)`.",
+            "Évaluez les trois scalaires `A`, `B`, `C` avec `@` et `float(...)`, puis le déterminant `Delta = A * C - B**2`.",
+            "Générez la grille `mu_targets = np.linspace(0.05, 0.12, 50)` et évaluez vectoriellement `var_targets` puis `vols = np.sqrt(var_targets)`.",
+            "Tracez la courbe `vols * 100` vs `mu_targets * 100` avec `plt.plot(...)`, ajoutez le sommet GMVP `(np.sqrt(1/A)*100, B/A*100)` via `plt.scatter(...)` et affichez les constantes."
+          ],
+          concepts: [
+            {
+              symbol: "inv_Sigma, ones",
+              kind: "Variable",
+              roleInExercise: "Matrice inverse $\\Sigma^{-1}$ `(3, 3)` et vecteur unitaire $\\mathbf{1}$ `(3,)` utilisés pour calculer les trois formes quadratiques de Merton."
+            },
+            {
+              symbol: "A, B, C",
+              kind: "Variable",
+              roleInExercise: "Constantes scalaires de Merton en `float` : $A = \\mathbf{1}'\\Sigma^{-1}\\mathbf{1}$, $B = \\mathbf{1}'\\Sigma^{-1}\\boldsymbol{\\mu}$ et $C = \\boldsymbol{\\mu}'\\Sigma^{-1}\\boldsymbol{\\mu}$."
+            },
+            {
+              symbol: "Delta",
+              kind: "Variable",
+              roleInExercise: "Déterminant de Cauchy-Schwarz $\\Delta = A C - B^2$, strictement positif dès lors que les rendements espérés diffèrent entre actifs."
+            },
+            {
+              symbol: "np.linspace(0.05, 0.12, 50)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Crée un vecteur 1D `(50,)` de $50$ rendements cibles équidistants entre $5\\%$ et $12\\%$ pour évaluer l'hyperbole sans boucle."
+            },
+            {
+              symbol: "var_targets",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(50,)` donnant la variance minimale $\\sigma_p^2(\\mu_p) = (A\\mu_p^2 - 2B\\mu_p + C)/\\Delta$ pour chaque cible de `mu_targets`."
+            },
+            {
+              symbol: "plt.plot(...) / plt.scatter(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonctions Matplotlib traçant la frontière continue (`plt.plot`) et le sommet GMVP de coordonnées $(\\sigma_{\\text{GMVP}}, \\mu_{\\text{GMVP}}) = (1/\\sqrt{A}, B/A)$ (`plt.scatter`)."
+            }
+          ],
+          guidedCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+mu = np.array([0.06, 0.09, 0.11])
+Sigma = np.array([
+    [0.02, 0.005, 0.002],
+    [0.005, 0.04, 0.01],
+    [0.002, 0.01, 0.05]
+])
+
+# Étape 1 : Inverse de Sigma et vecteur unitaire ones
+inv_Sigma = ___
+ones = ___
+
+# Étape 2 : Constantes scalaires de Merton A, B, C et déterminant Delta = A*C - B^2
+A = float(___)
+B = float(___)
+C = float(___)
+Delta = ___
+
+# Étape 3 : Grille de 50 rendements cibles [0.05, 0.12] et parabole de variance
+mu_targets = np.linspace(0.05, 0.12, 50)
+var_targets = ___
+vols = np.sqrt(var_targets)
+
+# Étape 4 : Tracé de la frontière efficiente et du sommet GMVP (1/sqrt(A), B/A)
+plt.figure(figsize=(6, 4))
+plt.plot(vols * 100, mu_targets * 100, color="#0284c7", lw=2.2, label="Frontière Efficiente")
+plt.scatter([___], [___], color="#e11d48", s=60, zorder=5, label="GMVP")
+plt.xlabel("Volatilité (%)")
+plt.ylabel("Rendement Espéré (%)")
+plt.title("Frontière Efficiente de Markowitz")
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+print(f"Constantes : A={A:.2f}, B={B:.2f}, C={C:.2f}, Delta={Delta:.4f}")`
+        }
       },
       {
         id: "v2-py-10",
@@ -910,7 +1477,74 @@ Affichez \`w_tangence\` et \`sharpe_opt\`.`,
         solutionCode: "import numpy as np\n\nmu = np.array([0.07, 0.09, 0.12])\nSigma = np.array([\n    [0.03, 0.008, 0.005],\n    [0.008, 0.05, 0.012],\n    [0.005, 0.012, 0.07]\n])\nrf = 0.025\n\ninv_Sigma = np.linalg.inv(Sigma)\nones = np.ones(len(mu))\nexces_mu = mu - rf * ones\nw_tangence = (inv_Sigma @ exces_mu) / (ones @ inv_Sigma @ exces_mu)\n\nmu_T = float(w_tangence @ mu)\nvol_T = float(np.sqrt(w_tangence @ Sigma @ w_tangence))\nsharpe_opt = (mu_T - rf) / vol_T\n\nprint('Poids du portefeuille de Tangence :', np.round(w_tangence, 4))\nprint(f'Rendement espéré : {mu_T:.4f}, Volatilité : {vol_T:.4f}')\nprint(f'Ratio de Sharpe maximal : {sharpe_opt:.4f}')",
         testPythonCode: "assert 'w_tangence' in globals()\nassert 'sharpe_opt' in globals()\nassert np.isclose(w_tangence.sum(), 1.0)\nassert sharpe_opt > 0",
         hints: ["exces_mu = mu - rf * ones", "w_tangence = (inv_Sigma @ exces_mu) / (ones @ inv_Sigma @ exces_mu)", "sharpe_opt = (float(w_tangence @ mu) - rf) / float(np.sqrt(w_tangence @ Sigma @ w_tangence))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `D'après le théorème de séparation de Tobin, le portefeuille de tangence maximise le ratio de Sharpe et vaut $\\mathbf{w}_T = \\frac{\\Sigma^{-1}(\\boldsymbol{\\mu} - r_f\\mathbf{1})}{\\mathbf{1}'\\Sigma^{-1}(\\boldsymbol{\\mu} - r_f\\mathbf{1})}$. En NumPy, on forme d'abord le vecteur des primes de risque \`exces_mu = mu - rf * ones\` \`(3,)\`, puis \`w_tangence = (inv_Sigma @ exces_mu) / (ones @ inv_Sigma @ exces_mu)\`. On en déduit ensuite le rendement \`mu_T\`, la volatilité \`vol_T\` et le ratio de Sharpe maximal \`sharpe_opt = (mu_T - rf) / vol_T\`.`,
+          stepByStepPlan: [
+            "Calculez `inv_Sigma = np.linalg.inv(Sigma)`, `ones = np.ones(len(mu))` et le vecteur des excès de rendement `exces_mu = mu - rf * ones`.",
+            "Calculez les poids `w_tangence` `(3,)` en divisant `inv_Sigma @ exces_mu` par le scalaire `ones @ inv_Sigma @ exces_mu`.",
+            "Évaluez le rendement espéré `mu_T = float(w_tangence @ mu)` et la volatilité `vol_T = float(np.sqrt(w_tangence @ Sigma @ w_tangence))`.",
+            "Calculez `sharpe_opt = (mu_T - rf) / vol_T` et affichez `w_tangence` et `sharpe_opt`."
+          ],
+          concepts: [
+            {
+              symbol: "rf",
+              kind: "Paramètre",
+              roleInExercise: "Taux sans risque annuel $r_f = 0.025$ ($2.5\\%$), point d'ancrage de la *Capital Market Line* sur l'axe des ordonnées."
+            },
+            {
+              symbol: "exces_mu",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(3,)` des primes de risque $\\tilde{\\boldsymbol{\\mu}} = \\boldsymbol{\\mu} - r_f \\mathbf{1}$, obtenu via `mu - rf * ones`."
+            },
+            {
+              symbol: "inv_Sigma @ exces_mu",
+              kind: "Syntaxe",
+              roleInExercise: "Vecteur `(3,)` proportionnel aux poids du portefeuille tangent avant imposition de la contrainte budgétaire $\\sum w_i = 1$."
+            },
+            {
+              symbol: "ones @ inv_Sigma @ exces_mu",
+              kind: "Syntaxe",
+              roleInExercise: "Dénominateur scalaire $\\mathbf{1}'\\Sigma^{-1}(\\boldsymbol{\\mu} - r_f\\mathbf{1}) = B - A r_f$ (doit être $> 0$ pour se trouver sur la branche efficiente supérieure)."
+            },
+            {
+              symbol: "w_tangence",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(3,)` des poids optimaux du portefeuille tangent, vérifiant `w_tangence.sum() == 1.0`."
+            },
+            {
+              symbol: "sharpe_opt",
+              kind: "Variable",
+              roleInExercise: "Flottant Python égal à la pente maximale de la CML : $(\\mathbf{w}_T'\\boldsymbol{\\mu} - r_f) / \\sqrt{\\mathbf{w}_T'\\Sigma\\mathbf{w}_T}$."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+mu = np.array([0.07, 0.09, 0.12])
+Sigma = np.array([
+    [0.03, 0.008, 0.005],
+    [0.008, 0.05, 0.012],
+    [0.005, 0.012, 0.07]
+])
+rf = 0.025
+
+# Étape 1 : Inverse de Sigma, vecteur unitaire et primes de risque (mu - rf * 1)
+inv_Sigma = ___
+ones = ___
+exces_mu = ___
+
+# Étape 2 : Poids du portefeuille de tangence normalisés à somme 1
+w_tangence = ___
+
+# Étape 3 : Rendement, volatilité et ratio de Sharpe maximal du portefeuille tangent
+mu_T = float(___)
+vol_T = float(___)
+sharpe_opt = ___
+
+print("Poids du portefeuille de Tangence :", np.round(w_tangence, 4))
+print(f"Rendement espéré : {mu_T:.4f}, Volatilité : {vol_T:.4f}")
+print(f"Ratio de Sharpe maximal : {sharpe_opt:.4f}")`
+        }
       },
       {
         id: "v2-py-11",
@@ -1004,7 +1638,70 @@ Affichez ces trois indicateurs.`,
         solutionCode: "import numpy as np\nimport statsmodels.api as sm\n\nnp.random.seed(42)\nT = 120\nR_m = np.random.randn(T) * 0.04 + 0.005\nR_i = 0.002 + 1.25 * R_m + np.random.randn(T) * 0.02\n\nX = sm.add_constant(R_m)\nmodel = sm.OLS(R_i, X).fit()\n\nalpha_jensen = float(model.params[0])\nbeta_capm = float(model.params[1])\nr_squared = float(model.rsquared)\n\nprint(f'Alpha de Jensen : {alpha_jensen:.5f}')\nprint(f'Bêta du CAPM : {beta_capm:.4f}')\nprint(f'R-carré : {r_squared:.4f}')",
         testPythonCode: "assert 'alpha_jensen' in globals()\nassert 'beta_capm' in globals()\nassert 'r_squared' in globals()\nassert np.isclose(beta_capm, 1.25, atol=0.15)\nassert r_squared > 0.5",
         hints: ["X = sm.add_constant(R_m)", "model = sm.OLS(R_i, X).fit()", "alpha_jensen = float(model.params[0])", "beta_capm = float(model.params[1])"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `L'estimation temporelle du CAPM $R_{i,t} - r_f = \\alpha_i + \\beta_i (R_{M,t} - r_f) + \\varepsilon_{i,t}$ par Moindres Carrés Ordinaires sous \`statsmodels\` impose d'ajouter explicitement une colonne de $1$ via \`X = sm.add_constant(R_m)\` (matrice \`(120, 2)\`). On ajuste ensuite \`model = sm.OLS(R_i, X).fit()\` (variable expliquée \`R_i\` en premier !), puis on lit l'alpha de Jensen dans \`model.params[0]\`, le bêta systématique dans \`model.params[1]\` et la part de variance systématique $R^2$ dans \`model.rsquared\`.`,
+          stepByStepPlan: [
+            "Conservez les vecteurs d'excès de rendements `R_m` et `R_i` de dimension `(120,)` simulés avec `np.random.seed(42)`.",
+            "Ajoutez une colonne constante de `1.0` devant `R_m` via `X = sm.add_constant(R_m)` pour obtenir une matrice `(120, 2)`.",
+            "Ajustez la régression linéaire `model = sm.OLS(R_i, X).fit()` (en plaçant bien `R_i` en premier et `X` en second).",
+            "Extrayez `alpha_jensen`, `beta_capm` et `r_squared` en `float(...)` depuis `model.params` et `model.rsquared`, puis affichez-les."
+          ],
+          concepts: [
+            {
+              symbol: "R_m, R_i",
+              kind: "Variable",
+              roleInExercise: "Vecteurs 1D `(120,)` contenant les $T=120$ réalisations d'excès de rendement du marché et de l'actif étudié."
+            },
+            {
+              symbol: "sm.add_constant(R_m)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Empile une colonne de `1.0` en position `0` devant `R_m` pour créer la matrice de design `X` `(120, 2)` et permettre l'estimation de $\\alpha_i$."
+            },
+            {
+              symbol: "sm.OLS(R_i, X)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Construit le modèle MCO *Statsmodels* avec `endog = R_i` (cible) en premier argument et `exog = X` (régresseurs) en second ; n'ajoute **pas** de constante tout seul."
+            },
+            {
+              symbol: ".fit()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Estime $\\hat{\\boldsymbol{\\theta}} = (X'X)^{-1}X'\\mathbf{R}_i$ et retourne l'objet résultat exposant `.params`, `.tvalues`, `.pvalues` et `.rsquared`."
+            },
+            {
+              symbol: "model.params[0], model.params[1]",
+              kind: "Variable",
+              roleInExercise: "Éléments du vecteur `(2,)` des coefficients estimés : l'indice `0` correspond à la constante ajoutée (`alpha_jensen`) et l'indice `1` à la pente de marché (`beta_capm`)."
+            },
+            {
+              symbol: "model.rsquared",
+              kind: "Variable",
+              roleInExercise: "Coefficient de détermination $R^2 = \\frac{\\beta_i^2 \\sigma_M^2}{\\operatorname{Var}(R_i)} \\in [0, 1]$ mesurant la fraction systématique du risque de l'actif."
+            }
+          ],
+          guidedCode: `import numpy as np
+import statsmodels.api as sm
+
+np.random.seed(42)
+T = 120
+R_m = np.random.randn(T) * 0.04 + 0.005
+R_i = 0.002 + 1.25 * R_m + np.random.randn(T) * 0.02
+
+# Étape 1 : Ajout obligatoire de la colonne constante -> matrice X (120, 2)
+X = ___
+
+# Étape 2 : Estimation MCO (attention à l'ordre : variable expliquée R_i puis X)
+model = ___
+
+# Étape 3 : Extraction de alpha_jensen (indice 0), beta_capm (indice 1) et R²
+alpha_jensen = float(___)
+beta_capm = float(___)
+r_squared = float(___)
+
+print(f"Alpha de Jensen : {alpha_jensen:.5f}")
+print(f"Bêta du CAPM : {beta_capm:.4f}")
+print(f"R-carré : {r_squared:.4f}")`
+        }
       },
       {
         id: "v2-py-12",
@@ -1091,7 +1788,75 @@ Affichez \`coeffs\` et le $R^2$ du modèle multi-factoriel.`,
         solutionCode: "import numpy as np\nimport statsmodels.api as sm\n\nnp.random.seed(99)\nT = 200\nMkt_RF = np.random.randn(T) * 0.03\nSMB = np.random.randn(T) * 0.015\nHML = np.random.randn(T) * 0.015\nY_port = 0.001 + 0.95 * Mkt_RF + 0.45 * SMB - 0.20 * HML + np.random.randn(T) * 0.008\n\nX_factors = sm.add_constant(np.column_stack([Mkt_RF, SMB, HML]))\nmodel = sm.OLS(Y_port, X_factors).fit()\n\ncoeffs = model.params\npvalues = model.pvalues\n\nprint(f'Coefficients [Alpha, Mkt, SMB, HML] :\\n', np.round(coeffs, 4))\nprint(f'R2 du modèle multi-factoriel : {model.rsquared:.4f}')",
         testPythonCode: "assert 'coeffs' in globals()\nassert 'pvalues' in globals()\nassert len(coeffs) == 4\nassert np.isclose(coeffs[1], 0.95, atol=0.10)\nassert np.isclose(coeffs[2], 0.45, atol=0.10)",
         hints: ["model = sm.OLS(Y_port, X_factors).fit()", "coeffs = model.params", "pvalues = model.pvalues"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le modèle multi-factoriel $Y_t = \\alpha + \\beta\\,MKT_t + s\\,SMB_t + h\\,HML_t + \\varepsilon_t$, l'estimateur matriciel $\\hat{\\boldsymbol{\\theta}}_{\\text{MCO}} = (X'X)^{-1}X'\\mathbf{Y}$ est calculé directement par \`model = sm.OLS(Y_port, X_factors).fit()\`, où \`X_factors\` de forme \`(200, 4)\` assemble la constante et les $3$ facteurs via \`np.column_stack\`. Les attributs \`model.params\` et \`model.pvalues\` fournissent dans l'ordre exact \`[alpha, beta, s, h]\` les $4$ sensibilités estimées (\`coeffs\`) et leurs p-valeurs de Student (\`pvalues\`).`,
+          stepByStepPlan: [
+            "Conservez les séries simulées (`Mkt_RF`, `SMB`, `HML`, `Y_port`) et la matrice de design `X_factors` de forme `(200, 4)` déjà préparée.",
+            "Ajustez le modèle linéaire multiple dans `model` à l'aide de `sm.OLS(Y_port, X_factors).fit()`.",
+            "Extrayez le vecteur des $4$ coefficients estimés dans `coeffs = model.params`.",
+            "Extrayez le vecteur des $4$ p-valeurs de Student dans `pvalues = model.pvalues`, puis affichez `coeffs` et `model.rsquared`."
+          ],
+          concepts: [
+            {
+              symbol: "np.column_stack([Mkt_RF, SMB, HML])",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Empile trois vecteurs 1D `(200,)` en colonnes pour former une matrice 2D `(200, 3)` avant l'ajout de la constante."
+            },
+            {
+              symbol: "X_factors",
+              kind: "Variable",
+              roleInExercise: "Matrice de design $X$ de forme `(200, 4)` contenant la colonne de `1.0` en position `0`, suivie de `Mkt_RF`, `SMB` et `HML`."
+            },
+            {
+              symbol: "Y_port",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(200,)` des rendements excédentaires du portefeuille (variable dépendante $\\mathbf{Y}$ de la régression)."
+            },
+            {
+              symbol: "sm.OLS(Y_port, X_factors).fit()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Estime conjointement les $4$ paramètres MCO et calcule la matrice de variance-covariance $\\hat{\\sigma}^2(X'X)^{-1}$ nécessaire aux tests de Student."
+            },
+            {
+              symbol: "coeffs",
+              kind: "Variable",
+              roleInExercise: "Tableau `(4,)` issu de `model.params` dans l'ordre exact des colonnes de `X_factors` : `[alpha, beta_Mkt, s_SMB, h_HML]`."
+            },
+            {
+              symbol: "pvalues",
+              kind: "Variable",
+              roleInExercise: "Tableau `(4,)` issu de `model.pvalues` donnant les p-valeurs bilatérales de $H_0 : \\theta_j = 0$ pour chaque facteur."
+            },
+            {
+              symbol: "model.rsquared",
+              kind: "Variable",
+              roleInExercise: "Coefficient de détermination $R^2$ mesurant la variance captée conjointement par les $3$ facteurs (ici $\\approx 93\\%$ contre moins sous CAPM seul)."
+            }
+          ],
+          guidedCode: `import numpy as np
+import statsmodels.api as sm
+
+np.random.seed(99)
+T = 200
+Mkt_RF = np.random.randn(T) * 0.03
+SMB = np.random.randn(T) * 0.015
+HML = np.random.randn(T) * 0.015
+Y_port = 0.001 + 0.95 * Mkt_RF + 0.45 * SMB - 0.20 * HML + np.random.randn(T) * 0.008
+
+# Matrice de design (200, 4) : [1, Mkt_RF, SMB, HML]
+X_factors = sm.add_constant(np.column_stack([Mkt_RF, SMB, HML]))
+
+# Étape 1 : Ajustement de la régression multiple MCO (Y_port en premier)
+model = ___
+
+# Étape 2 : Extraction des 4 paramètres [alpha, Mkt, SMB, HML] et de leurs p-valeurs
+coeffs = ___
+pvalues = ___
+
+print("Coefficients [Alpha, Mkt, SMB, HML] :\\n", np.round(coeffs, 4))
+print(f"R2 du modèle multi-factoriel : {model.rsquared:.4f}")`
+        }
       },
       {
         id: "v2-py-13",
@@ -1185,7 +1950,81 @@ Affichez \`var_long_terme\` et la volatilité annualisée moyenne.`,
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nT = 500\nomega = 1e-5\nalpha = 0.08\nbeta = 0.90\n\nvar_long_terme = float(omega / (1.0 - (alpha + beta)))\nZ = np.random.randn(T)\nsigma2 = np.zeros(T)\neps = np.zeros(T)\n\nsigma2[0] = var_long_terme\neps[0] = np.sqrt(sigma2[0]) * Z[0]\n\nfor t in range(1, T):\n    sigma2[t] = omega + alpha * (eps[t-1]**2) + beta * sigma2[t-1]\n    eps[t] = np.sqrt(sigma2[t]) * Z[t]\n\nprint(f'Variance à long terme : {var_long_terme:.6f}')\nprint(f'Volatilité annualisée moyenne : {np.mean(np.sqrt(sigma2)) * np.sqrt(252):.2%}')",
         testPythonCode: "assert 'var_long_terme' in globals()\nassert 'sigma2' in globals()\nassert len(sigma2) == 500\nassert np.all(sigma2 > 0)\nassert np.isclose(var_long_terme, 0.0005, atol=1e-5)",
         hints: ["var_long_terme = float(omega / (1.0 - (alpha + beta)))", "sigma2[t] = omega + alpha * (eps[t-1]**2) + beta * sigma2[t-1]"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le processus GARCH(1,1), la condition de stationnarité $\\alpha + \\beta < 1$ définit la variance inconditionnelle $\\sigma_L^2 = \\frac{\\omega}{1 - (\\alpha + \\beta)}$, traduite directement en \`var_long_terme\`. Parce que l'équation $\\sigma_t^2 = \\omega + \\alpha\\varepsilon_{t-1}^2 + \\beta\\sigma_{t-1}^2$ dépend de l'instant $t-1$, on pré-alloue les tableaux \`sigma2\` et \`eps\` de longueur \`T = 500\` avec \`np.zeros(T)\`, on tire tous les chocs \`Z\` en une fois, puis on exécute la récurrence dans une boucle \`for t in range(1, T):\`.`,
+          stepByStepPlan: [
+            "Calculez la variance stationnaire de long terme `var_long_terme = float(omega / (1.0 - (alpha + beta)))`.",
+            "Tirez les $T=500$ chocs standard normaux `Z = np.random.randn(T)` et pré-allouez `sigma2 = np.zeros(T)` et `eps = np.zeros(T)`.",
+            "Initialisez l'instant $t=0$ avec `sigma2[0] = var_long_terme` et `eps[0] = np.sqrt(sigma2[0]) * Z[0]`.",
+            "Écrivez la boucle `for t in range(1, T):` mettant à jour `sigma2[t]` à partir de `eps[t-1]**2` et `sigma2[t-1]`, puis `eps[t]`.",
+            "Affichez `var_long_terme` et la volatilité annualisée moyenne `np.mean(np.sqrt(sigma2)) * np.sqrt(252)`."
+          ],
+          concepts: [
+            {
+              symbol: "omega, alpha, beta",
+              kind: "Paramètre",
+              roleInExercise: "Paramètres du modèle GARCH(1,1) : constante $\\omega = 10^{-5}$, sensibilité au choc carré $\\alpha = 0.08$ et persistance $\\beta = 0.90$ ($\\alpha + \\beta = 0.98 < 1$)."
+            },
+            {
+              symbol: "var_long_terme",
+              kind: "Variable",
+              roleInExercise: "Flottant Python égal à $\\sigma_L^2 = \\omega / (1 - \\alpha - \\beta) = 0.0005$, utilisé à la fois comme référence stationnaire et valeur initiale `sigma2[0]`."
+            },
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(500,)` d'innovations i.i.d. $\\mathcal{N}(0, 1)$ tirées en une passe vectorisée hors de la boucle via `np.random.randn(T)`."
+            },
+            {
+              symbol: "np.zeros(T)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Pré-alloue un vecteur NumPy contigu de `500` zéros pour `sigma2` et `eps` (beaucoup plus rapide et propre que `.append()` sur une liste Python)."
+            },
+            {
+              symbol: "sigma2",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(500,)` contenant la trajectoire de variance conditionnelle $\\sigma_t^2$ à chaque date $t$."
+            },
+            {
+              symbol: "eps",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(500,)` des rendements conditionnellement hétéroscédastiques $\\varepsilon_t = \\sqrt{\\sigma_t^2} \\, Z_t$."
+            },
+            {
+              symbol: "for t in range(1, T):",
+              kind: "Syntaxe",
+              roleInExercise: "Boucle séquentielle parcourant les indices $t = 1, \\dots, 499$ ; indispensable car la valeur à l'instant $t$ dépend récursivement de $t-1$."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+T = 500
+omega = 1e-5
+alpha = 0.08
+beta = 0.90
+
+# Étape 1 : Variance stationnaire de long terme omega / (1 - (alpha + beta))
+var_long_terme = float(___)
+
+# Étape 2 : Innovations N(0,1) et pré-allocation des vecteurs de taille T
+Z = np.random.randn(T)
+sigma2 = ___
+eps = ___
+
+# Étape 3 : Condition initiale à t = 0
+sigma2[0] = ___
+eps[0] = ___
+
+# Étape 4 : Récurrence séquentielle GARCH(1,1) pour t = 1 ... T-1
+for t in range(1, T):
+    sigma2[t] = ___
+    eps[t] = ___
+
+print(f"Variance à long terme : {var_long_terme:.6f}")
+print(f"Volatilité annualisée moyenne : {np.mean(np.sqrt(sigma2)) * np.sqrt(252):.2%}")`
+        }
       },
       {
         id: "v2-py-14",
@@ -1284,7 +2123,65 @@ Affichez \`var_hist_99\` et \`cvar_hist_99\` en pourcentage.`,
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nrendements = np.random.standard_t(df=4, size=1000) * 0.015 - 0.0005\n\npertes = -rendements\nvar_hist_99 = float(np.percentile(pertes, 99))\ncvar_hist_99 = float(pertes[pertes >= var_hist_99].mean())\n\nprint(f'VaR historique 99% : {var_hist_99:.4%}')\nprint(f'Expected Shortfall (CVaR) 99% : {cvar_hist_99:.4%}')",
         testPythonCode: "assert 'var_hist_99' in globals()\nassert 'cvar_hist_99' in globals()\nassert cvar_hist_99 >= var_hist_99\nassert var_hist_99 > 0",
         hints: ["pertes = -rendements", "var_hist_99 = float(np.percentile(pertes, 99))", "cvar_hist_99 = float(pertes[pertes >= var_hist_99].mean())"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `En Risk Management, on passe aux pertes positives $L = -R$ via \`pertes = -rendements\` afin de mesurer le risque extrême dans la queue droite. Le quantile empirique $\\operatorname{VaR}_{99\\%}(L)$ se calcule directement avec \`var_hist_99 = float(np.percentile(pertes, 99))\`. Puis l'espérance conditionnelle d'Acerbi-Tasche $\\operatorname{CVaR}_{99\\%}(L) = \\mathbb{E}[L \\mid L \\ge \\operatorname{VaR}_{99\\%}(L)]$ s'évalue sans boucle par masquage booléen : \`cvar_hist_99 = float(pertes[pertes >= var_hist_99].mean())\`.`,
+          stepByStepPlan: [
+            "Conservez les $1\\,000$ tirages à queues épaisses `rendements` issus de la loi de Student ($\\nu = 4$).",
+            "Inversez le signe pour passer en convention de pertes positives dans `pertes = -rendements`.",
+            "Calculez le quantile $99\\%$ des pertes avec `np.percentile(pertes, 99)` converti en `float(...)` dans `var_hist_99`.",
+            "Filtrez les sinistres extrêmes via le masque `pertes[pertes >= var_hist_99]` et prenez leur moyenne `.mean()` dans `cvar_hist_99`, puis affichez les deux mesures en `%`."
+          ],
+          concepts: [
+            {
+              symbol: "rendements",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(1000,)` de rendements journaliers simulés selon une loi de Student à $4$ degrés de liberté (queues nettement plus épaisses qu'une gaussienne)."
+            },
+            {
+              symbol: "pertes = -rendements",
+              kind: "Variable",
+              roleInExercise: "Vecteur `(1000,)` des pertes ($L = -R$) : une chute boursière de $-5\\%$ devient une perte positive $+0.05$, plaçant le risque extrême à droite."
+            },
+            {
+              symbol: "np.percentile(pertes, 99)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Renvoie le $99^{\\text{e}}$ centile de `pertes` (argument attendu entre `0` et `100`, contrairement à `np.quantile` qui prend une probabilité dans `[0, 1]`)."
+            },
+            {
+              symbol: "var_hist_99",
+              kind: "Variable",
+              roleInExercise: "Flottant Python donnant la VaR historique à $99\\%$ : perte qui n'est dépassée que dans $1\\%$ des scénarios."
+            },
+            {
+              symbol: "pertes[pertes >= var_hist_99]",
+              kind: "Syntaxe",
+              roleInExercise: "Indexation booléenne (*boolean masking*) extrayant uniquement le sous-vecteur des pertes situées dans la queue extrême $\\ge \\operatorname{VaR}_{99\\%}$."
+            },
+            {
+              symbol: "cvar_hist_99",
+              kind: "Variable",
+              roleInExercise: "Flottant Python représentant l'Expected Shortfall (CVaR $99\\%$), moyenne des pertes de queue obtenue par `.mean()`, toujours $\\ge \\text{var\\_hist\\_99}$."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+# 1000 rendements journaliers à queues épaisses (loi de Student df=4)
+rendements = np.random.standard_t(df=4, size=1000) * 0.015 - 0.0005
+
+# Étape 1 : Convention de pertes positives (L = -R)
+pertes = ___
+
+# Étape 2 : VaR historique au seuil de confiance 99%
+var_hist_99 = float(___)
+
+# Étape 3 : Expected Shortfall (moyenne des pertes >= var_hist_99 par masquage booléen)
+cvar_hist_99 = float(___)
+
+print(f"VaR historique 99% : {var_hist_99:.4%}")
+print(f"Expected Shortfall (CVaR) 99% : {cvar_hist_99:.4%}")`
+        }
       },
       {
         id: "v2-py-15",
@@ -1376,7 +2273,75 @@ Affichez \`skewness\`, \`kurtosis\`, \`jb_stat\` et indiquez si la normalité es
         solutionCode: "import numpy as np\n\nnp.random.seed(7)\nr = np.random.standard_t(df=5, size=500) * 0.012\n\nm = np.mean(r)\ns = np.std(r, ddof=1)\nz = (r - m) / s\n\nskewness = float(np.mean(z**3))\nkurtosis = float(np.mean(z**4))\njb_stat = float(len(r) / 6.0 * (skewness**2 + ((kurtosis - 3.0)**2) / 4.0))\n\nprint(f'Skewness (Asymétrie) : {skewness:.4f}')\nprint(f'Kurtosis (Aplatissement) : {kurtosis:.4f}')\nprint(f'Statistique de Jarque-Bera : {jb_stat:.2f}')\nprint('Rejet de la normalité gaussienne :', jb_stat > 5.99)",
         testPythonCode: "assert 'skewness' in globals()\nassert 'kurtosis' in globals()\nassert 'jb_stat' in globals()\nassert kurtosis > 3.0\nassert jb_stat > 0",
         hints: ["z = (r - np.mean(r)) / np.std(r, ddof=1)", "skewness = float(np.mean(z**3))", "kurtosis = float(np.mean(z**4))", "jb_stat = float(len(r) / 6.0 * (skewness**2 + ((kurtosis - 3.0)**2) / 4.0))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le test de Jarque-Bera standardise d'abord la série par $z_t = \\frac{r_t - \\bar{r}}{s}$ (avec l'écart-type empirique sans biais $s = \\text{np.std}(r, \\text{ddof}=1)$), puis mesure les moments centrés-réduits $S = \\frac{1}{T}\\sum z_t^3$ (\`skewness\`) et $K = \\frac{1}{T}\\sum z_t^4$ (\`kurtosis\`). La statistique asymptotique $JB = \\frac{T}{6}\\left(S^2 + \\frac{(K - 3)^2}{4}\\right)$ devient \`jb_stat = float(len(r) / 6.0 * (skewness**2 + ((kurtosis - 3.0)**2) / 4.0))\`, à comparer au quantile critique $\\chi^2_{0.95}(2) \\approx 5.99$.`,
+          stepByStepPlan: [
+            "Conservez les $T=500$ observations `r` issues de la loi de Student ($\\nu = 5$).",
+            "Calculez la moyenne `m = np.mean(r)`, l'écart-type corrigé `s = np.std(r, ddof=1)` et standardisez dans `z = (r - m) / s`.",
+            "Calculez les moments d'ordre 3 et 4 : `skewness = float(np.mean(z**3))` et `kurtosis = float(np.mean(z**4))`.",
+            "Calculez `jb_stat` avec `len(r) / 6.0 * ...`, puis affichez les trois indicateurs et le rejet au seuil $5\\%$ (`jb_stat > 5.99`)."
+          ],
+          concepts: [
+            {
+              symbol: "r",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D `(500,)` de rendements financiers simulés selon une loi de Student $\\nu = 5$ (présentant des queues épaisses avec $K > 3$)."
+            },
+            {
+              symbol: "np.std(r, ddof=1)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule l'écart-type empirique corrigé en divisant par $T - 1$ (indispensable de préciser `ddof=1`, car `np.std` utilise `ddof=0` par défaut)."
+            },
+            {
+              symbol: "ddof=1",
+              kind: "Paramètre",
+              roleInExercise: "*Delta Degrees of Freedom* : soustrait $1$ à la taille d'échantillon $T$ au dénominateur pour corriger le biais d'estimation de la variance."
+            },
+            {
+              symbol: "z",
+              kind: "Variable",
+              roleInExercise: "Série centrée-réduite `(500,)` calculée par `(r - m) / s`, rendant les moments d'ordre 3 et 4 invariants à l'échelle."
+            },
+            {
+              symbol: "skewness",
+              kind: "Variable",
+              roleInExercise: "Coefficient d'asymétrie `float(np.mean(z**3))` ($0$ sous symétrie normale ; négatif si les krachs dominent les hausses)."
+            },
+            {
+              symbol: "kurtosis",
+              kind: "Variable",
+              roleInExercise: "Coefficient d'aplatissement `float(np.mean(z**4))` ($3$ sous loi normale ; $> 3$ signale une loi leptokurtique à queues épaisses)."
+            },
+            {
+              symbol: "jb_stat",
+              kind: "Variable",
+              roleInExercise: "Statistique du test de normalité de Jarque-Bera suivant asymptotiquement $\\chi^2(2)$ sous $H_0$ ; un score $> 5.99$ rejette la normalité à $5\\%$."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(7)
+# Rendements financiers simulés avec queues épaisses (loi de Student df=5)
+r = np.random.standard_t(df=5, size=500) * 0.012
+
+# Étape 1 : Moyenne, écart-type corrigé (ddof=1) et série centrée-réduite z
+m = np.mean(r)
+s = np.std(r, ddof=___)
+z = ___
+
+# Étape 2 : Moments centrés-réduits d'ordre 3 (Skewness) et 4 (Kurtosis)
+skewness = float(___)
+kurtosis = float(___)
+
+# Étape 3 : Statistique de Jarque-Bera = (T / 6) * (S^2 + (K - 3)^2 / 4)
+jb_stat = float(___)
+
+print(f"Skewness (Asymétrie) : {skewness:.4f}")
+print(f"Kurtosis (Aplatissement) : {kurtosis:.4f}")
+print(f"Statistique de Jarque-Bera : {jb_stat:.2f}")
+print("Rejet de la normalité gaussienne :", jb_stat > 5.99)`
+        }
       },
     ]
   };

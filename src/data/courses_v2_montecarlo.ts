@@ -106,7 +106,72 @@ Dans ce laboratoire, implémentez le générateur de Box-Muller vectorisé à pa
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 10000\nU1 = np.random.uniform(1e-10, 1.0, N)\nU2 = np.random.uniform(0.0, 1.0, N)\n\nR = np.sqrt(-2.0 * np.log(U1))\nZ1 = R * np.cos(2.0 * np.pi * U2)\n\nmoyenne_z1 = float(np.mean(Z1))\nvariance_z1 = float(np.var(Z1))\n\nprint(f'Moyenne empirique de Z1 : {moyenne_z1:.4f} (théorique : 0.0)')\nprint(f'Variance empirique de Z1 : {variance_z1:.4f} (théorique : 1.0)')",
         testPythonCode: "assert 'Z1' in globals()\nassert 'moyenne_z1' in globals()\nassert 'variance_z1' in globals()\nassert len(Z1) == 10000\nassert np.isclose(moyenne_z1, 0.0, atol=0.05)\nassert np.isclose(variance_z1, 1.0, atol=0.05)",
         hints: ["R = np.sqrt(-2.0 * np.log(U1))", "Z1 = R * np.cos(2.0 * np.pi * U2)", "moyenne_z1 = float(np.mean(Z1))", "variance_z1 = float(np.var(Z1))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La transformation de Box-Muller convertit deux lois uniformes indépendantes $U_1, U_2 \\sim \\mathcal{U}(0, 1)$ en une gaussienne standard $Z_1 = \\sqrt{-2\\ln(U_1)}\\cos(2\\pi U_2) \\sim \\mathcal{N}(0, 1)$. En Python, \`U1\` et \`U2\` sont déjà tirés avec \`1e-10\` comme borne basse de \`U1\` pour éviter $\\ln(0) = -\\infty$ : vous calculez le rayon vectorisé \`R\`, puis la projection \`Z1\`, et vous validez l'espérance nulle (\`moyenne_z1\`) et la variance unitaire (\`variance_z1\`).`,
+          stepByStepPlan: [
+            "Conserver les vecteurs uniformes `U1` et `U2` (longueur $N = 10\\,000$) déjà générés sous la graine `42`.",
+            "Calculer le rayon polaire `R` correspondant à $\\sqrt{-2\\ln(U_1)}$ avec les fonctions vectorisées `np.sqrt` et `np.log`.",
+            "Projeter le rayon sur l'axe des abscisses pour construire `Z1` selon $R\\cos(2\\pi U_2)$ via `np.cos` et `np.pi`.",
+            "Calculer les moments empiriques scalaires `moyenne_z1` et `variance_z1` (convertis en `float`) et afficher le contrôle de normalité."
+          ],
+          concepts: [
+            {
+              symbol: "U1, U2",
+              kind: "Variable",
+              roleInExercise: "Vecteurs NumPy 1D de longueur $N = 10\\,000$ contenant des tirages $\\mathcal{U}(0, 1)$. `U1` démarre à `1e-10` pour protéger `np.log(U1)` contre la divergence en $0$."
+            },
+            {
+              symbol: "R",
+              kind: "Variable",
+              roleInExercise: "Vecteur du rayon polaire tel que $R^2 \\sim \\text{Exp}(1/2)$, obtenu en une opération vectorisée par $\\sqrt{-2\\ln(U_1)}$."
+            },
+            {
+              symbol: "Z1",
+              kind: "Variable",
+              roleInExercise: "Vecteur final des $10\\,000$ réalisations gaussiennes $\\mathcal{N}(0, 1)$ vérifié par `testPythonCode` (`len(Z1) == 10000`)."
+            },
+            {
+              symbol: "np.log / np.sqrt / np.cos",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonctions universelles (*ufuncs*) NumPy qui appliquent $\\ln$, $\\sqrt{\\cdot}$ et $\\cos$ élément par élément sur tout le tableau sans boucle `for`."
+            },
+            {
+              symbol: "np.pi",
+              kind: "Paramètre",
+              roleInExercise: "Constante mathématique $\\pi$ permettant de convertir `U2` en un angle aléatoire $\\Theta = 2\\pi U_2$ uniforme sur $[0, 2\\pi[$."
+            },
+            {
+              symbol: "moyenne_z1, variance_z1",
+              kind: "Variable",
+              roleInExercise: "Scalaires `float(np.mean(Z1))` et `float(np.var(Z1))` contrôlant la proximité des moments empiriques avec $0$ et $1$."
+            },
+            {
+              symbol: "np.random.seed(42)",
+              kind: "Syntaxe",
+              roleInExercise: "Fige l'état du générateur pseudo-aléatoire pour garantir la reproductibilité exacte de `U1`, `U2` et `Z1`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 10000
+U1 = np.random.uniform(1e-10, 1.0, N)
+U2 = np.random.uniform(0.0, 1.0, N)
+
+# Étape 1 : Rayon polaire R issu de la loi exponentielle
+R = ___
+
+# Étape 2 : Première composante gaussienne standard Z1
+Z1 = ___
+
+# Étape 3 : Moments empiriques scalaires de Z1
+moyenne_z1 = float(___)
+variance_z1 = float(___)
+
+print(f'Moyenne empirique de Z1 : {moyenne_z1:.4f} (théorique : 0.0)')
+print(f'Variance empirique de Z1 : {variance_z1:.4f} (théorique : 1.0)')`
+        }
       },
       {
         id: "v2-py-17",
@@ -125,7 +190,7 @@ En gestion de portefeuille multi-actifs (Actions, Obligations OAT, Crédit Inves
 
 > 💡 **Démonstration formelle : Factorisation $\\Sigma = L L'$ et Propagation de Covariance**
 > 
-> **Théorème de Cholesky :** Soit $\\Sigma \\in \\mathbb{R}^{K \\times K}$ une matrice symétrique ($\Sigma = \\Sigma'$) et **strictement définie positive** ($\\forall \\mathbf{x} \\ne \\mathbf{0}, \\mathbf{x}' \\Sigma \\mathbf{x} > 0$, soit toutes valeurs propres $\\lambda_k > 0$). Il existe une unique matrice triangulaire inférieure $L = (\\ell_{ij})_{1 \\le j \\le i \\le K}$ à diagonale strictement positive ($\\ell_{ii} > 0$) telle que :
+> **Théorème de Cholesky :** Soit $\\Sigma \\in \\mathbb{R}^{K \\times K}$ une matrice symétrique ($\\Sigma = \\Sigma'$) et **strictement définie positive** ($\\forall \\mathbf{x} \\ne \\mathbf{0}, \\mathbf{x}' \\Sigma \\mathbf{x} > 0$, soit toutes valeurs propres $\\lambda_k > 0$). Il existe une unique matrice triangulaire inférieure $L = (\\ell_{ij})_{1 \\le j \\le i \\le K}$ à diagonale strictement positive ($\\ell_{ii} > 0$) telle que :
 > 
 > $$\\Sigma = L L'$$
 > 
@@ -150,7 +215,7 @@ En gestion de portefeuille multi-actifs (Actions, Obligations OAT, Crédit Inves
 Attention aux conventions matricielles et de dimensions entre les mathématiques (vecteurs colonnes) et NumPy :
 - **Convention triangulaire** : \`np.linalg.cholesky(Sigma)\` retourne la matrice triangulaire **inférieure** $L$ vérifiant \`L @ L.T == Sigma\` *(à l'inverse de MATLAB dont \`chol()\` renvoie par défaut la triangulaire supérieure $U = L'$ !)*.
 - **Produit matriciel et alignement de dimensions** : Si $L$ est de dimension $(K, K)$ et que l'on simule $N$ tirages dans \`Z = np.random.randn(K, N)\`, le produit \`L @ Z\` a pour dimension $(K, N)$. On transpose ensuite via \`.T\` vers \`X = (L @ Z).T\` de dimension $(N, K)$ (chaque ligne = 1 scénario, chaque colonne = 1 actif).
-- **Le piège critique de \`rowvar=False\`** : Par défaut, \`np.cov(X)\` suppose \`rowvar=True\` (variables en lignes). Sur une matrice $(50\\,000, 3)$, oublier \`rowvar=False\` tenterait d'allouer une matrice de covariance $50\\,000 \\times 50\\,000$ ($\approx 20\\text{ Go}$ de RAM !). Avec \`rowvar=False\`, NumPy calcule directement la matrice $3 \\times 3$.
+- **Le piège critique de \`rowvar=False\`** : Par défaut, \`np.cov(X)\` suppose \`rowvar=True\` (variables en lignes). Sur une matrice $(50\\,000, 3)$, oublier \`rowvar=False\` tenterait d'allouer une matrice de covariance $50\\,000 \\times 50\\,000$ ($\\approx 20\\text{ Go}$ de RAM !). Avec \`rowvar=False\`, NumPy calcule directement la matrice $3 \\times 3$.
 
 \`\`\`python
 import numpy as np
@@ -208,7 +273,78 @@ Corrélation cible : 0.4000 | Corrélation simulée : 0.4064
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nSigma_cible = np.array([\n    [0.04, 0.015, 0.008],\n    [0.015, 0.09, 0.025],\n    [0.008, 0.025, 0.06]\n])\nN = 50000\n\nL = np.linalg.cholesky(Sigma_cible)\nZ = np.random.randn(3, N)\nX = (L @ Z).T\ncov_empirique = np.cov(X, rowvar=False)\n\nprint('Matrice de Cholesky L :\\n', np.round(L, 4))\nprint('Matrice de Covariance Empirique :\\n', np.round(cov_empirique, 4))\nprint('Écart maximal absolu :', np.max(np.abs(cov_empirique - Sigma_cible)))",
         testPythonCode: "assert 'L' in globals()\nassert 'cov_empirique' in globals()\nassert np.allclose(L @ L.T, Sigma_cible)\nassert np.allclose(cov_empirique, Sigma_cible, atol=0.01)",
         hints: ["L = np.linalg.cholesky(Sigma_cible)", "Z = np.random.randn(3, N)", "X = (L @ Z).T", "cov_empirique = np.cov(X, rowvar=False)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le théorème de Cholesky factorise $\\Sigma_{\\text{cible}} = L L'$ où $L$ est triangulaire inférieure (\`L\`). Pour un vecteur colonne $\\mathbf{Z} \\sim \\mathcal{N}(\\mathbf{0}, I_3)$, le produit $\\mathbf{X} = L\\mathbf{Z}$ vérifie $\\operatorname{Var}(\\mathbf{X}) = L I_3 L' = \\Sigma_{\\text{cible}}$ : en NumPy, on tire \`Z\` de forme \`(3, N)\`, on calcule \`L @ Z\` puis on transpose via \`.T\` pour obtenir \`X\` de dimension \`(50000, 3)\`, format exigé par \`cov_empirique = np.cov(X, rowvar=False)\`.`,
+          stepByStepPlan: [
+            "Factoriser `Sigma_cible` avec `np.linalg.cholesky` pour obtenir la matrice triangulaire inférieure `L` ($3 \\times 3$).",
+            "Générer la matrice `Z` de dimension `(3, N)` de chocs gaussiens indépendants via `np.random.randn(3, N)`.",
+            "Transformer les chocs par produit matriciel `L @ Z` puis transposer le résultat en `(N, 3)` pour former `X`.",
+            "Estimer `cov_empirique` avec `np.cov` en activant `rowvar=False`, puis afficher `L`, `cov_empirique` et l'écart maximal absolu."
+          ],
+          concepts: [
+            {
+              symbol: "Sigma_cible",
+              kind: "Variable",
+              roleInExercise: "Matrice $(3, 3)$ symétrique définie positive contenant les variances cibles ($0.04, 0.09, 0.06$) sur la diagonale et les covariances hors diagonale."
+            },
+            {
+              symbol: "L",
+              kind: "Variable",
+              roleInExercise: "Matrice triangulaire inférieure $(3, 3)$ vérifiée par `L @ L.T == Sigma_cible` dans les assertions unitaires."
+            },
+            {
+              symbol: "np.linalg.cholesky",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule la décomposition de Cholesky $\\Sigma = L L'$. Lève une `LinAlgError` si la matrice d'entrée n'est pas strictement définie positive."
+            },
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Matrice $(3, 50\\,000)$ de chocs gaussiens indépendants $\\mathcal{N}(0, 1)$ : 3 facteurs de risque en lignes, $N$ scénarios en colonnes."
+            },
+            {
+              symbol: "@ et .T",
+              kind: "Syntaxe",
+              roleInExercise: "L'opérateur `@` effectue le produit matriciel `L @ Z` de taille $(3, N)$ ; `.T` transpose ensuite le résultat vers `(50000, 3)` (1 scénario par ligne)."
+            },
+            {
+              symbol: "X",
+              kind: "Variable",
+              roleInExercise: "Matrice $(50\\,000, 3)$ des chocs multivariés corrélés respectant exactement la structure de covariance de `Sigma_cible`."
+            },
+            {
+              symbol: "rowvar=False",
+              kind: "Paramètre",
+              roleInExercise: "Paramètre essentiel de `np.cov(X, rowvar=False)` signalant que les 3 variables sont en colonnes (évite de calculer une matrice $50\\,000 \\times 50\\,000$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+Sigma_cible = np.array([
+    [0.04, 0.015, 0.008],
+    [0.015, 0.09, 0.025],
+    [0.008, 0.025, 0.06]
+])
+N = 50000
+
+# Étape 1 : Facteur triangulaire inférieur L tel que L @ L.T == Sigma_cible
+L = ___
+
+# Étape 2 : Tirage de N vecteurs gaussiens indépendants de dimension (3, N)
+Z = ___
+
+# Étape 3 : Transformation corrélée puis transposition en format (N, 3)
+X = ___
+
+# Étape 4 : Matrice de covariance empirique (variables en colonnes)
+cov_empirique = ___
+
+print('Matrice de Cholesky L :\\n', np.round(L, 4))
+print('Matrice de Covariance Empirique :\\n', np.round(cov_empirique, 4))
+print('Écart maximal absolu :', np.max(np.abs(cov_empirique - Sigma_cible)))`
+        }
       },
       {
         id: "v2-py-18",
@@ -304,7 +440,83 @@ Simulez $M = 5$ trajectoires d'un mouvement brownien standard sur l'horizon $T =
         solutionCode: "import numpy as np\nimport matplotlib.pyplot as plt\n\nnp.random.seed(42)\nM = 5\nN = 252\nT = 1.0\ndt = T / N\ntemps = np.linspace(0, T, N + 1)\n\ndW = np.sqrt(dt) * np.random.randn(M, N)\nW = np.zeros((M, N + 1))\nW[:, 1:] = np.cumsum(dW, axis=1)\n\nplt.figure(figsize=(6, 3.5))\nfor i in range(M):\n    plt.plot(temps, W[i], lw=1.5, label=f'Trajectoire {i+1}')\nplt.axhline(0, color='black', ls='--', lw=1)\nplt.xlabel('Temps t (années)')\nplt.ylabel('W(t)')\nplt.title('Simulations du Mouvement Brownien Standard')\nplt.legend(loc='upper left', fontsize=8)\nplt.grid(True, alpha=0.3)\n\nprint(f'Moyenne finale : {np.mean(W[:, -1]):.4f}, Écart-type : {np.std(W[:, -1]):.4f}')",
         testPythonCode: "assert 'W' in globals()\nassert W.shape == (5, 253)\nassert np.all(W[:, 0] == 0.0)",
         hints: ["dW = np.sqrt(dt) * np.random.randn(M, N)", "W = np.zeros((M, N + 1))", "W[:, 1:] = np.cumsum(dW, axis=1)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Un processus de Wiener démarre à $W_0 = 0$ et accumule des accroissements gaussiens indépendants $\\Delta W_k = \\sqrt{\\Delta t}\\,Z_k \\sim \\mathcal{N}(0, \\Delta t)$ : $W_{t_m} = \\sum_{k=0}^{m-1} \\Delta W_k$. En NumPy 2D, \`dW\` de forme \`(M, N) = (5, 252)\` stocke les pas élémentaires, \`W\` est pré-allouée en \`(M, N + 1) = (5, 253)\` pour conserver \`W[:, 0] == 0.0\`, et \`np.cumsum(dW, axis=1)\` remplit \`W[:, 1:]\` le long de l'axe temporel.`,
+          stepByStepPlan: [
+            "Construire le vecteur d'abscisses temporelles `temps` sur $[0, T]$ comportant `N + 1` points via `np.linspace`.",
+            "Simuler la matrice 2D `dW` de forme `(M, N)` en multipliant des tirages $\\mathcal{N}(0, 1)$ par $\\sqrt{\\Delta t}$.",
+            "Pré-allouer `W` à zéro avec la dimension `(M, N + 1)` pour garantir $W_0 = 0$ sur la première colonne `W[:, 0]`.",
+            "Remplir `W[:, 1:]` par somme cumulée horizontale de `dW` le long de `axis=1`.",
+            "Tracer les $M = 5$ trajectoires `W[i]` en fonction de `temps` sous Matplotlib et afficher la moyenne et l'écart-type de `W[:, -1]`."
+          ],
+          concepts: [
+            {
+              symbol: "dt",
+              kind: "Variable",
+              roleInExercise: "Pas de discrétisation $\\Delta t = T / N = 1/252$ (1 jour ouvré). L'écart-type d'un accroissement brownien vaut $\\sqrt{\\Delta t}$ et non $\\Delta t$."
+            },
+            {
+              symbol: "dW",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(5, 252)` des incréments browniens indépendants $\\Delta W_{i,k} \\sim \\mathcal{N}(0, \\Delta t)$."
+            },
+            {
+              symbol: "W",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(5, 253)` contenant les 5 trajectoires complètes de $t = 0$ (`W[:, 0] == 0.0`) à $t = T$ (`W[:, -1]`), contrôlée par `testPythonCode`."
+            },
+            {
+              symbol: "np.zeros((M, N + 1))",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Alloue la matrice des trajectoires avec une colonne supplémentaire à zéro afin que `W[:, 0]` représente l'état initial déterministe $W_0 = 0$."
+            },
+            {
+              symbol: "[:, 1:] et [:, 0]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing 2D : `[:, 0]` désigne la colonne initiale $t_0 = 0$ pour toutes les trajectoires ; `[:, 1:]` cible toutes les colonnes de $t_1$ à $t_N$."
+            },
+            {
+              symbol: "axis=1",
+              kind: "Paramètre",
+              roleInExercise: "Indique à `np.cumsum(dW, axis=1)` de sommer horizontalement le long des colonnes (du jour 1 au jour 252) pour chaque trajectoire séparément."
+            },
+            {
+              symbol: "temps",
+              kind: "Variable",
+              roleInExercise: "Grille 1D de longueur `253` créée avec `np.linspace(0, T, N + 1)` pour aligner l'abscisse du graphique sur les `253` colonnes de `W`."
+            }
+          ],
+          guidedCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+M = 5
+N = 252
+T = 1.0
+dt = T / N
+temps = np.linspace(0, T, N + 1)
+
+# Étape 1 : Matrice (M, N) des accroissements gaussiens dW ~ N(0, dt)
+dW = ___
+
+# Étape 2 : Pré-allocation (M, N + 1) à zéro et cumul temporel horizontal
+W = ___
+W[:, 1:] = ___
+
+# Étape 3 : Tracé des M trajectoires avec Matplotlib
+plt.figure(figsize=(6, 3.5))
+for i in range(M):
+    plt.plot(temps, ___, lw=1.5, label=f'Trajectoire {i+1}')
+plt.axhline(0, color='black', ls='--', lw=1)
+plt.xlabel('Temps t (années)')
+plt.ylabel('W(t)')
+plt.title('Simulations du Mouvement Brownien Standard')
+plt.legend(loc='upper left', fontsize=8)
+plt.grid(True, alpha=0.3)
+
+print(f'Moyenne finale : {np.mean(W[:, -1]):.4f}, Écart-type : {np.std(W[:, -1]):.4f}')`
+        }
       },
       {
         id: "v2-py-19",
@@ -397,7 +609,70 @@ Pour un actif de prix initial $S_0 = 100$, un drift annuel $\\mu = 0.08$, une vo
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nS0 = 100.0\nmu = 0.08\nsigma = 0.20\nT = 1.0\nN = 100000\n\nZ = np.random.randn(N)\nS_T = S0 * np.exp((mu - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)\n\nesperance_empirique = float(np.mean(S_T))\nesperance_theorique = float(S0 * np.exp(mu * T))\n\nprint(f'Espérance empirique : {esperance_empirique:.4f}')\nprint(f'Espérance théorique : {esperance_theorique:.4f}')\nprint(f'Erreur relative : {abs(esperance_empirique - esperance_theorique) / esperance_theorique:.4%}')",
         testPythonCode: "assert 'S_T' in globals()\nassert 'esperance_empirique' in globals()\nassert 'esperance_theorique' in globals()\nassert np.isclose(esperance_empirique, esperance_theorique, rtol=0.01)",
         hints: ["Z = np.random.randn(N)", "S_T = S0 * np.exp((mu - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)", "esperance_empirique = float(np.mean(S_T))", "esperance_theorique = float(S0 * np.exp(mu * T))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le lemme d'Itô appliqué à $\\ln(S_t)$ fournit la solution analytique exacte du GBM : $S_T = S_0 \\exp\\big((\\mu - \\frac{1}{2}\\sigma^2)T + \\sigma\\sqrt{T}\\,Z\\big)$ pour $Z \\sim \\mathcal{N}(0, 1)$. En Python, vous tirez le vecteur \`Z\`, vous calculez \`S_T\` en une instruction vectorisée (sans oublier le terme correctif \`- 0.5 * sigma**2\` qui compense la convexité de l'exponentielle), puis vous confrontez \`esperance_empirique\` à \`esperance_theorique\` $= S_0 e^{\\mu T}$.`,
+          stepByStepPlan: [
+            "Tirer `N = 100000` aléas gaussiens standards `Z` avec `np.random.randn(N)`.",
+            "Simuler directement le vecteur des cours terminaux `S_T` via la formule exponentielle exacte d'Itô (avec correction $-\\frac{1}{2}\\sigma^2$).",
+            "Calculer l'espérance simulée `esperance_empirique` et l'espérance théorique `esperance_theorique` (toutes deux converties en `float`).",
+            "Afficher les deux grandeurs et l'erreur relative pour vérifier la propriété $\\mathbb{E}[S_T] = S_0 e^{\\mu T}$."
+          ],
+          concepts: [
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D de taille $N = 100\\,000$ issu de $\\mathcal{N}(0, 1)$, représentant le brownien normalisé $W_T / \\sqrt{T}$."
+            },
+            {
+              symbol: "S_T",
+              kind: "Variable",
+              roleInExercise: "Vecteur des $100\\,000$ cours terminaux log-normaux à $t = T$, simulés en une seule étape sans erreur de discrétisation."
+            },
+            {
+              symbol: "0.5 * sigma**2",
+              kind: "Syntaxe",
+              roleInExercise: "Ajustement de convexité issu du terme d'ordre 2 du lemme d'Itô : sans lui, $\\mathbb{E}[e^{\\sigma W_T}] = e^{\\frac{1}{2}\\sigma^2 T}$ biaiserait l'espérance au-dessus de $S_0 e^{\\mu T}$."
+            },
+            {
+              symbol: "np.exp(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Exponentielle vectorisée NumPy garantissant la stricte positivité des cours ($S_T > 0$)."
+            },
+            {
+              symbol: "esperance_empirique",
+              kind: "Variable",
+              roleInExercise: "Scalaire `float(np.mean(S_T))` estimant $\\mathbb{E}[S_T]$ par moyenne Monte Carlo."
+            },
+            {
+              symbol: "esperance_theorique",
+              kind: "Variable",
+              roleInExercise: "Valeur analytique exacte $S_0 e^{\\mu T} \\approx 108.3287$ servant de cible dans l'assertion `np.isclose`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+S0 = 100.0
+mu = 0.08
+sigma = 0.20
+T = 1.0
+N = 100000
+
+# Étape 1 : Tirages gaussiens standard Z ~ N(0, 1)
+Z = ___
+
+# Étape 2 : Solution exacte d'Itô pour S_T à l'horizon T
+S_T = ___
+
+# Étape 3 : Comparaison espérance simulée vs espérance théorique
+esperance_empirique = float(___)
+esperance_theorique = float(___)
+
+print(f'Espérance empirique : {esperance_empirique:.4f}')
+print(f'Espérance théorique : {esperance_theorique:.4f}')
+print(f'Erreur relative : {abs(esperance_empirique - esperance_theorique) / esperance_theorique:.4%}')`
+        }
       },
       {
         id: "v2-py-20",
@@ -481,7 +756,71 @@ Parité Call-Put -> Empirique (C - P): 4.9021 EUR vs Théorique: 4.8771 EUR
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nS0 = 100.0\nK = 100.0\nr = 0.05\nsigma = 0.20\nT = 1.0\nN = 100000\n\nZ = np.random.randn(N)\nS_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)\npayoffs = np.maximum(S_T - K, 0.0)\nprix_call_mc = float(np.exp(-r * T) * np.mean(payoffs))\n\nprint(f'Prix estimé du Call Européen (Monte Carlo) : {prix_call_mc:.4f} €')",
         testPythonCode: "assert 'prix_call_mc' in globals()\nassert np.isclose(prix_call_mc, 10.45, atol=0.20)",
         hints: ["Z = np.random.randn(N)", "S_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)", "payoffs = np.maximum(S_T - K, 0.0)", "prix_call_mc = float(np.exp(-r * T) * np.mean(payoffs))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Sous la mesure risque-neutre $\\mathbb{Q}$ (Girsanov), le drift historique $\\mu$ est remplacé par le taux sans risque $r$ : $S_T = S_0 \\exp\\big((r - \\frac{1}{2}\\sigma^2)T + \\sigma\\sqrt{T}\\,Z\\big)$, et le prix du Call vaut $C_0 = e^{-rT}\\mathbb{E}^{\\mathbb{Q}}[\\max(S_T - K, 0)]$. En Python, ce payoff devient le vecteur \`payoffs = np.maximum(S_T - K, 0.0)\`, dont on actualise la moyenne empirique par \`np.exp(-r * T)\` pour obtenir \`prix_call_mc\`.`,
+          stepByStepPlan: [
+            "Tirer `N = 100000` aléas gaussiens standards `Z` avec `np.random.randn(N)`.",
+            "Simuler les cours terminaux `S_T` sous la mesure risque-neutre $\\mathbb{Q}$ en utilisant `r` (et non un drift historique).",
+            "Évaluer le vecteur `payoffs` à l'échéance avec `np.maximum(S_T - K, 0.0)`.",
+            "Actualiser l'espérance empirique des `payoffs` par $e^{-rT}$ pour calculer `prix_call_mc` et afficher la prime."
+          ],
+          concepts: [
+            {
+              symbol: "r",
+              kind: "Paramètre",
+              roleInExercise: "Taux sans risque annuel (`0.05`) intervenant à la fois dans le drift risque-neutre de `S_T` et dans l'actualisation finale `np.exp(-r * T)`."
+            },
+            {
+              symbol: "S_T",
+              kind: "Variable",
+              roleInExercise: "Vecteur des $100\\,000$ cours terminaux simulés à $t = T$ sous $\\mathbb{Q}$ (vérifiant $\\mathbb{E}^{\\mathbb{Q}}[S_T] = S_0 e^{rT}$)."
+            },
+            {
+              symbol: "np.maximum(..., 0.0)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Applique la partie positive $\\max(x, 0)$ élément par élément sur un vecteur NumPy. Le `max()` natif de Python échouerait avec une `ValueError`."
+            },
+            {
+              symbol: "payoffs",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D des flux bruts à l'échéance $(S_T - K)^+$ avant actualisation."
+            },
+            {
+              symbol: "np.exp(-r * T)",
+              kind: "Syntaxe",
+              roleInExercise: "Facteur d'actualisation continu ramenant l'espérance des flux terminaux de $t = T$ à $t = 0$."
+            },
+            {
+              symbol: "prix_call_mc",
+              kind: "Variable",
+              roleInExercise: "Prime scalaire `float(...)` estimée par Monte Carlo, attendue proche du benchmark Black-Scholes ($10.45\\text{ EUR}$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+S0 = 100.0
+K = 100.0
+r = 0.05
+sigma = 0.20
+T = 1.0
+N = 100000
+
+# Étape 1 : Tirages gaussiens standard Z ~ N(0, 1)
+Z = ___
+
+# Étape 2 : Simulation risque-neutre de S_T sous la mesure Q (drift = r)
+S_T = ___
+
+# Étape 3 : Vecteur des payoffs terminaux du Call (S_T - K)+
+payoffs = ___
+
+# Étape 4 : Espérance actualisée au taux sans risque r
+prix_call_mc = float(___)
+
+print(f'Prix estimé du Call Européen (Monte Carlo) : {prix_call_mc:.4f} €')`
+        }
       },
       {
         id: "v2-py-21",
@@ -588,7 +927,65 @@ K=120.0 | Call= 3.247 | Put=17.395 | Delta=Phi(d1)=0.2872 | Q(S_T>K)=Phi(d2)=0.2
         solutionCode: "import numpy as np\nfrom scipy.stats import norm\n\nS0 = 100.0\nK = 100.0\nr = 0.05\nsigma = 0.20\nT = 1.0\n\nd1 = (np.log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))\nd2 = d1 - sigma * np.sqrt(T)\nprix_bs = float(S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2))\n\nprint(f'd1 : {d1:.4f}, d2 : {d2:.4f}')\nprint(f'Prix théorique exact de Black-Scholes : {prix_bs:.4f} €')",
         testPythonCode: "assert 'd1' in globals()\nassert 'd2' in globals()\nassert 'prix_bs' in globals()\nassert np.isclose(prix_bs, 10.4506, atol=1e-3)",
         hints: ["d1 = (np.log(S0 / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))", "d2 = d1 - sigma * np.sqrt(T)", "prix_bs = float(S0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La formule fermée de Black-Scholes-Merton décompose la valeur du Call en $C_{\\text{BS}} = S_0\\Phi(d_1) - K e^{-rT}\\Phi(d_2)$, où $d_1 = \\frac{\\ln(S_0/K) + (r + \\frac{1}{2}\\sigma^2)T}{\\sigma\\sqrt{T}}$ et $d_2 = d_1 - \\sigma\\sqrt{T}$. En Python, les distances normalisées deviennent les scalaires \`d1\` et \`d2\`, et la fonction de répartition normale $\\Phi(\\cdot)$ est évaluée par \`norm.cdf(...)\` de \`scipy.stats\` pour produire \`prix_bs\`.`,
+          stepByStepPlan: [
+            "Calculer `d1` en veillant à placer tout le numérateur $\\ln(S_0/K) + (r + \\frac{1}{2}\\sigma^2)T$ et tout le dénominateur $\\sigma\\sqrt{T}$ entre parenthèses.",
+            "Déduire `d2` en retranchant $\\sigma\\sqrt{T}$ à `d1`.",
+            "Évaluer la prime exacte `prix_bs` avec `norm.cdf(d1)` et `norm.cdf(d2)` (convertie en `float`), puis afficher les trois résultats."
+          ],
+          concepts: [
+            {
+              symbol: "d1",
+              kind: "Variable",
+              roleInExercise: "Distance normalisée sous le numéraire action ($0.3500$ ici) ; $\\Phi(d_1)$ correspond au ratio de couverture Delta du Call."
+            },
+            {
+              symbol: "d2",
+              kind: "Variable",
+              roleInExercise: "Distance normalisée égale à `d1 - sigma * np.sqrt(T)` ($0.1500$ ici) ; $\\Phi(d_2)$ mesure la probabilité risque-neutre d'exercice $\\mathbb{Q}(S_T > K)$."
+            },
+            {
+              symbol: "norm.cdf(x)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction de répartition cumulée $\\Phi(x)$ de la loi normale centrée réduite issue de `scipy.stats.norm` (à ne pas confondre avec la densité `norm.pdf`)."
+            },
+            {
+              symbol: "np.log(S0 / K)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Logarithme népérien du ratio de *moneyness* $S_0 / K$ (vaut $0$ à la monnaie lorsque $S_0 = K$)."
+            },
+            {
+              symbol: "K * np.exp(-r * T)",
+              kind: "Syntaxe",
+              roleInExercise: "Valeur actualisée du prix d'exercice $K$ payé à l'échéance en cas d'exercice, pondérée par la probabilité risque-neutre $\\Phi(d_2)$."
+            },
+            {
+              symbol: "prix_bs",
+              kind: "Variable",
+              roleInExercise: "Prix analytique exact `float(...)` du Call européen ($10.4506\\text{ EUR}$), vérifié à `1e-3` près par `testPythonCode`."
+            }
+          ],
+          guidedCode: `import numpy as np
+from scipy.stats import norm
+
+S0 = 100.0
+K = 100.0
+r = 0.05
+sigma = 0.20
+T = 1.0
+
+# Étape 1 : Distances normalisées d1 et d2 de Black-Scholes
+d1 = ___
+d2 = ___
+
+# Étape 2 : Prime exacte du Call via norm.cdf
+prix_bs = float(___)
+
+print(f'd1 : {d1:.4f}, d2 : {d2:.4f}')
+print(f'Prix théorique exact de Black-Scholes : {prix_bs:.4f} €')`
+        }
       },
       {
         id: "v2-py-22",
@@ -669,7 +1066,70 @@ N=100000 | Prix=10.4252 | SE=0.04647 | IC95=[10.3341, 10.5163]
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 50000\nS0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0\nZ = np.random.randn(N)\nS_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)\npayoffs_actualises = np.exp(-r * T) * np.maximum(S_T - K, 0.0)\n\nprix_mc = float(np.mean(payoffs_actualises))\ns_N = float(np.std(payoffs_actualises, ddof=1))\nse = float(s_N / np.sqrt(N))\ndemi_largeur = float(1.96 * se)\n\nprint(f'Prix Monte Carlo : {prix_mc:.4f} €')\nprint(f'Erreur Standard (SE) : {se:.5f} €')\nprint(f'Intervalle de Confiance à 95% : [{prix_mc - demi_largeur:.4f} €, {prix_mc + demi_largeur:.4f} €]')",
         testPythonCode: "assert 'prix_mc' in globals()\nassert 'se' in globals()\nassert 'demi_largeur' in globals()\nassert se > 0\nassert demi_largeur < 0.20",
         hints: ["prix_mc = float(np.mean(payoffs_actualises))", "s_N = float(np.std(payoffs_actualises, ddof=1))", "se = float(s_N / np.sqrt(N))", "demi_largeur = float(1.96 * se)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Par le Théorème Central Limite appliqué aux $N$ réalisations i.i.d. $Y_i = e^{-rT}\\max(S_T^{(i)} - K, 0)$ (vecteur \`payoffs_actualises\`), la moyenne empirique \`prix_mc\` fluctue avec une erreur standard $\\text{SE} = s_N / \\sqrt{N}$ (\`se\`), où $s_N$ (\`s_N\`) est l'écart-type empirique sans biais (\`ddof=1\`). L'intervalle de confiance bilatéral à $95\\%$ s'écrit alors \`prix_mc\` $\\pm$ \`demi_largeur\`, avec \`demi_largeur = 1.96 * se\`.`,
+          stepByStepPlan: [
+            "Calculer le prix Monte Carlo `prix_mc` comme moyenne empirique de `payoffs_actualises`.",
+            "Estimer l'écart-type corrigé sans biais `s_N` de `payoffs_actualises` en passant le paramètre `ddof=1` à `np.std`.",
+            "Diviser `s_N` par $\\sqrt{N}$ pour obtenir l'erreur standard `se` en $\\mathcal{O}(1/\\sqrt{N})$.",
+            "Multiplier `se` par `1.96` pour obtenir `demi_largeur`, puis afficher le prix, `se` et les bornes de l'intervalle à $95\\%$."
+          ],
+          concepts: [
+            {
+              symbol: "payoffs_actualises",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D pré-simulé de $N = 50\\,000$ payoffs actualisés $Y_i$ sous $\\mathbb{Q}$."
+            },
+            {
+              symbol: "prix_mc",
+              kind: "Variable",
+              roleInExercise: "Estimateur ponctuel $\\hat{C}_N$ du prix du Call obtenu par `float(np.mean(payoffs_actualises))`."
+            },
+            {
+              symbol: "ddof=1",
+              kind: "Paramètre",
+              roleInExercise: "Correction de Bessel dans `np.std(..., ddof=1)` imposant le dénominateur $N - 1$ au lieu de $N$ pour obtenir un estimateur sans biais de la variance."
+            },
+            {
+              symbol: "s_N",
+              kind: "Variable",
+              roleInExercise: "Écart-type empirique des payoffs individuels (environ $14.7\\text{ EUR}$), numérateur de l'erreur standard."
+            },
+            {
+              symbol: "se",
+              kind: "Variable",
+              roleInExercise: "Erreur standard $s_N / \\sqrt{N}$ mesurant l'incertitude statistique de `prix_mc` et décroissant en $1/\\sqrt{N}$."
+            },
+            {
+              symbol: "demi_largeur",
+              kind: "Variable",
+              roleInExercise: "Demi-largeur $1.96 \\times \\text{SE}$ de l'intervalle de confiance à $95\\%$ (vérifiée `< 0.20` EUR pour $N = 50\\,000$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 50000
+S0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0
+Z = np.random.randn(N)
+S_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)
+payoffs_actualises = np.exp(-r * T) * np.maximum(S_T - K, 0.0)
+
+# Étape 1 : Estimateur ponctuel Monte Carlo
+prix_mc = float(___)
+
+# Étape 2 : Écart-type empirique sans biais (ddof=1) et Erreur Standard
+s_N = float(___)
+se = float(___)
+
+# Étape 3 : Demi-largeur de l'intervalle de confiance à 95 %
+demi_largeur = float(___)
+
+print(f'Prix Monte Carlo : {prix_mc:.4f} €')
+print(f'Erreur Standard (SE) : {se:.5f} €')
+print(f'Intervalle de Confiance à 95% : [{prix_mc - demi_largeur:.4f} €, {prix_mc + demi_largeur:.4f} €]')`
+        }
       },
       {
         id: "v2-py-23",
@@ -759,7 +1219,81 @@ Implémentez la réduction de variance par variables antithétiques sur $N = 25\
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 25000\nS0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0\n\nZ = np.random.randn(N)\ndrift = (r - 0.5 * sigma**2) * T\nvol = sigma * np.sqrt(T)\n\nS_T1 = S0 * np.exp(drift + vol * Z)\nS_T2 = S0 * np.exp(drift - vol * Z)\n\nY1 = np.exp(-r * T) * np.maximum(S_T1 - K, 0.0)\nY2 = np.exp(-r * T) * np.maximum(S_T2 - K, 0.0)\n\nY_anti = 0.5 * (Y1 + Y2)\n\nvar_standard = float(np.var(Y1))\nvar_anti = float(np.var(Y_anti))\nratio_reduction = float(var_standard / var_anti)\n\nprint(f'Variance standard : {var_standard:.4f}')\nprint(f'Variance antithétique : {var_anti:.4f}')\nprint(f'Gain de réduction de variance : x{ratio_reduction:.2f}')",
         testPythonCode: "assert 'var_standard' in globals()\nassert 'var_anti' in globals()\nassert 'ratio_reduction' in globals()\nassert ratio_reduction > 1.5",
         hints: ["S_T1 = S0 * np.exp(drift + vol * Z)", "S_T2 = S0 * np.exp(drift - vol * Z)", "Y_anti = 0.5 * (Y1 + Y2)", "ratio_reduction = float(var_standard / var_anti)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La méthode antithétique associe à chaque choc \`Z\` son opposé \`-Z\` afin de créer deux prix terminaux symétriques \`S_T1\` et \`S_T2\`, puis deux payoffs actualisés \`Y1\` $= h(Z)$ et \`Y2\` $= h(-Z)$. Comme le payoff du Call est monotone croissant en $Z$, $\\operatorname{Cov}(Y_1, Y_2) < 0$ et l'estimateur apparié \`Y_anti = 0.5 * (Y1 + Y2)\` réduit la variance d'un facteur \`ratio_reduction = var_standard / var_anti\` égal à $\\frac{2}{1 + \\rho} > 2$ (gain net même à budget d'évaluations égal).`,
+          stepByStepPlan: [
+            "Tirer le vecteur unique `Z` de taille `N = 25000` et factoriser les scalaires `drift` et `vol` sous la mesure $\\mathbb{Q}$.",
+            "Simuler les prix directs `S_T1` avec `+Z` et les prix antithétiques `S_T2` avec `-Z`.",
+            "Calculer les payoffs actualisés `Y1` et `Y2`, puis construire la moyenne par paire `Y_anti`.",
+            "Calculer `var_standard` sur `Y1`, `var_anti` sur `Y_anti`, leur ratio `ratio_reduction` et afficher les résultats."
+          ],
+          concepts: [
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Vecteur unique de $25\\,000$ tirages $\\mathcal{N}(0, 1)$ exploité deux fois (`+Z` et `-Z`) pour induire une anticorrélation entre jumeaux."
+            },
+            {
+              symbol: "drift, vol",
+              kind: "Variable",
+              roleInExercise: "Scalaires factorisés $(r - \\frac{1}{2}\\sigma^2)T$ et $\\sigma\\sqrt{T}$ simplifiant l'écriture symétrique de `S_T1` et `S_T2`."
+            },
+            {
+              symbol: "S_T1, S_T2",
+              kind: "Variable",
+              roleInExercise: "Vecteurs des cours terminaux directs (`+ vol * Z`) et symétriques (`- vol * Z`) sous $\\mathbb{Q}$."
+            },
+            {
+              symbol: "Y1, Y2",
+              kind: "Variable",
+              roleInExercise: "Payoffs actualisés $e^{-rT}\\max(S_T - K, 0)$ associés respectivement à `S_T1` et `S_T2`."
+            },
+            {
+              symbol: "Y_anti",
+              kind: "Variable",
+              roleInExercise: "Moyenne par paire `0.5 * (Y1 + Y2)` : même espérance sans biais que `Y1`, mais variance fortement comprimée grâce à $\\rho(Y_1, Y_2) < 0$."
+            },
+            {
+              symbol: "var_standard, var_anti",
+              kind: "Variable",
+              roleInExercise: "Variances empiriques scalaires de l'estimateur classique (`Y1`) et de l'estimateur antithétique (`Y_anti`) obtenues via `np.var`."
+            },
+            {
+              symbol: "ratio_reduction",
+              kind: "Variable",
+              roleInExercise: "Facteur d'amélioration `var_standard / var_anti` (vérifié $> 1.5$, attendu autour de $\\times 4$ pour un Call ATM)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 25000
+S0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0
+
+# Étape 1 : Tirages Z et pré-calcul du drift et de la volatilité sur T
+Z = ___
+drift = ___
+vol = ___
+
+# Étape 2 : Prix terminaux directs (+Z) et antithétiques (-Z)
+S_T1 = ___
+S_T2 = ___
+
+# Étape 3 : Payoffs actualisés jumeaux puis moyenne appariée
+Y1 = ___
+Y2 = ___
+Y_anti = ___
+
+# Étape 4 : Comparaison des variances et facteur d'amélioration
+var_standard = float(___)
+var_anti = float(___)
+ratio_reduction = float(___)
+
+print(f'Variance standard : {var_standard:.4f}')
+print(f'Variance antithétique : {var_anti:.4f}')
+print(f'Gain de réduction de variance : x{ratio_reduction:.2f}')`
+        }
       },
       {
         id: "v2-py-24",
@@ -852,7 +1386,79 @@ Put  | c*=-0.3228 | R^2=57.65% | Gain var=57.65% | Prix=5.5712 EUR
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 50000\nS0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0\nZ = np.random.randn(N)\nS_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)\nX = np.exp(-r * T) * np.maximum(S_T - K, 0.0)\nY = np.exp(-r * T) * S_T\n\ncov_mat = np.cov(X, Y)\nc_star = cov_mat[0, 1] / cov_mat[1, 1]\nX_ctrl = X - c_star * (Y - S0)\n\nprix_ctrl = float(np.mean(X_ctrl))\npct_gain = float((1.0 - np.var(X_ctrl) / np.var(X)) * 100)\n\nprint(f'Coefficient optimal c* : {c_star:.4f}')\nprint(f'Prix avec variable de contrôle : {prix_ctrl:.4f} €')\nprint(f'Réduction de variance obtenue : {pct_gain:.2f}%')",
         testPythonCode: "assert 'c_star' in globals()\nassert 'X_ctrl' in globals()\nassert 'pct_gain' in globals()\nassert pct_gain > 50.0\nassert np.isclose(prix_ctrl, 10.45, atol=0.10)",
         hints: ["cov_mat = np.cov(X, Y)", "c_star = cov_mat[0, 1] / cov_mat[1, 1]", "X_ctrl = X - c_star * (Y - S0)", "pct_gain = float((1.0 - np.var(X_ctrl) / np.var(X)) * 100)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `L'estimateur par variable de contrôle corrige chaque payoff \`X\` par l'erreur d'échantillonnage observée sur une variable auxiliaire \`Y\` d'espérance exacte connue ($Y = e^{-rT}S_T \\implies \\mathbb{E}^{\\mathbb{Q}}[Y] = S_0$) : $X^*(c^*) = X - c^*(Y - S_0)$. Le coefficient optimal $c^* = \\frac{\\operatorname{Cov}(X, Y)}{\\operatorname{Var}(Y)}$ se lit directement dans la matrice $2\\times 2$ \`cov_mat = np.cov(X, Y)\` et supprime une fraction $R^2 = \\rho_{XY}^2$ (\`pct_gain\`) de la variance.`,
+          stepByStepPlan: [
+            "Calculer la matrice de covariance $2 \\times 2$ `cov_mat` entre le payoff `X` et la variable de contrôle `Y`.",
+            "Extraire le coefficient optimal `c_star` en divisant la covariance `[0, 1]` par la variance de `Y` `[1, 1]`.",
+            "Construire le vecteur corrigé sans biais `X_ctrl` en retranchant `c_star * (Y - S0)` à `X`.",
+            "Calculer `prix_ctrl` et le pourcentage de réduction de variance `pct_gain`, puis afficher les résultats."
+          ],
+          concepts: [
+            {
+              symbol: "X",
+              kind: "Variable",
+              roleInExercise: "Vecteur pré-simulé des $50\\,000$ payoffs actualisés du Call européen à estimer."
+            },
+            {
+              symbol: "Y",
+              kind: "Variable",
+              roleInExercise: "Variable de contrôle $e^{-rT}S_T$ fortement corrélée à `X`, dont l'espérance théorique sous $\\mathbb{Q}$ vaut exactement `S0` ($100.0$)."
+            },
+            {
+              symbol: "np.cov(X, Y)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule la matrice $2 \\times 2$ symétrique contenant $\\operatorname{Var}(X)$ en `[0, 0]`, $\\operatorname{Cov}(X, Y)$ en `[0, 1]` et $\\operatorname{Var}(Y)$ en `[1, 1]`."
+            },
+            {
+              symbol: "[0, 1] et [1, 1]",
+              kind: "Syntaxe",
+              roleInExercise: "Indexation 2D sur `cov_mat` extrayant respectivement le numérateur $\\operatorname{Cov}(X, Y)$ et le dénominateur $\\operatorname{Var}(Y)$."
+            },
+            {
+              symbol: "c_star",
+              kind: "Variable",
+              roleInExercise: "Pente optimale $\\operatorname{Cov}(X, Y) / \\operatorname{Var}(Y)$ minimisant quadratiquement $\\operatorname{Var}(X_{\\text{ctrl}})$."
+            },
+            {
+              symbol: "X_ctrl",
+              kind: "Variable",
+              roleInExercise: "Vecteur des payoffs ajustés `X - c_star * (Y - S0)`, rigoureusement centré sur la même espérance que `X`."
+            },
+            {
+              symbol: "prix_ctrl, pct_gain",
+              kind: "Variable",
+              roleInExercise: "Moyenne empirique de `X_ctrl` (vérifiée à `0.10` près de $10.45$) et gain de variance $(1 - \\operatorname{Var}(X_{\\text{ctrl}})/\\operatorname{Var}(X)) \\times 100$ (vérifié $> 50\\%$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 50000
+S0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0
+Z = np.random.randn(N)
+S_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)
+X = np.exp(-r * T) * np.maximum(S_T - K, 0.0)
+Y = np.exp(-r * T) * S_T
+
+# Étape 1 : Matrice de covariance 2x2 entre X et Y
+cov_mat = ___
+
+# Étape 2 : Coefficient optimal c* = Cov(X, Y) / Var(Y)
+c_star = ___
+
+# Étape 3 : Série contrôlée sans biais autour de l'espérance connue S0
+X_ctrl = ___
+
+# Étape 4 : Prix estimé et pourcentage de variance supprimée
+prix_ctrl = float(___)
+pct_gain = float(___)
+
+print(f'Coefficient optimal c* : {c_star:.4f}')
+print(f'Prix avec variable de contrôle : {prix_ctrl:.4f} €')
+print(f'Réduction de variance obtenue : {pct_gain:.2f}%')`
+        }
       },
       {
         id: "v2-py-25",
@@ -939,7 +1545,81 @@ Simulez $N = 10\\,000$ trajectoires de GBM sur $M = 252$ pas de temps ($S_0 = 10
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 10000\nM = 252\nS0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0\ndt = T / M\n\nZ = np.random.randn(N, M)\ndrift = (r - 0.5 * sigma**2) * dt\nvol = sigma * np.sqrt(dt)\nlog_returns = drift + vol * Z\n\nlog_paths = np.zeros((N, M + 1))\nlog_paths[:, 1:] = np.cumsum(log_returns, axis=1)\nS_paths = S0 * np.exp(log_paths)\n\nS_mean = np.mean(S_paths, axis=1)\npayoffs_asiatiques = np.maximum(S_mean - K, 0.0)\nprix_asiatique = float(np.exp(-r * T) * np.mean(payoffs_asiatiques))\n\nprint(f'Prix du Call Asiatique à moyenne arithmétique : {prix_asiatique:.4f} €')\nprint('Note : Le prix asiatique est inférieur au Call vanille (10.45 €) car la moyenne réduit la volatilité effective.')",
         testPythonCode: "assert 'prix_asiatique' in globals()\nassert 'S_mean' in globals()\nassert 5.0 < prix_asiatique < 7.0",
         hints: ["S_paths = S0 * np.exp(log_paths)", "S_mean = np.mean(S_paths, axis=1)", "prix_asiatique = float(np.exp(-r * T) * np.mean(np.maximum(S_mean - K, 0.0)))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `L'option asiatique arithmétique dépend de toute la trajectoire via $\\bar{S} = \\frac{1}{M+1}\\sum_{k=0}^M S_{t_k}$ et $H = \\max(\\bar{S} - K, 0)$. En Python, on passe en matrice 2D \`(N, M)\` pour les incréments \`log_returns\` ($\\ln(S_{t_{k+1}}/S_{t_k})$), on cumule horizontalement avec \`np.cumsum(log_returns, axis=1)\` dans \`log_paths[:, 1:]\` pour obtenir \`S_paths\` de forme \`(N, M + 1)\`, puis \`np.mean(S_paths, axis=1)\` réduit l'axe temporel en un vecteur \`S_mean\` de longueur $N$.`,
+          stepByStepPlan: [
+            "Générer la matrice `Z` de taille `(N, M)` et calculer les incréments logarithmiques `log_returns` sur le pas `dt` sous $\\mathbb{Q}$.",
+            "Pré-allouer `log_paths` à zéro de forme `(N, M + 1)` puis remplir `log_paths[:, 1:]` par somme cumulée horizontale (`axis=1`).",
+            "Transformer les log-trajectoires en prix spots `S_paths` via `S0 * np.exp(log_paths)`.",
+            "Calculer la moyenne temporelle de chaque trajectoire `S_mean` avec `np.mean(S_paths, axis=1)`.",
+            "Évaluer les payoffs asiatiques `np.maximum(S_mean - K, 0.0)` et actualiser leur moyenne par $e^{-rT}$ pour obtenir `prix_asiatique`."
+          ],
+          concepts: [
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(10000, 252)` de chocs $\\mathcal{N}(0, 1)$ : 10 000 scénarios en lignes et 252 pas journaliers en colonnes."
+            },
+            {
+              symbol: "log_returns",
+              kind: "Variable",
+              roleInExercise: "Matrice `(N, M)` des incréments $\\left(r - \\frac{1}{2}\\sigma^2\\right)\\Delta t + \\sigma\\sqrt{\\Delta t}\\,Z$ sur chaque intervalle $\\Delta t$."
+            },
+            {
+              symbol: "log_paths[:, 1:]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing écrivant le cumul temporel dans les colonnes $1$ à $M$ tout en laissant la colonne `0` (`log_paths[:, 0]`) à `0.0` (soit $S_0 e^0 = S_0$)."
+            },
+            {
+              symbol: "S_paths",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(10000, 253)` des cours spots simulés de $t = 0$ à $t = T$."
+            },
+            {
+              symbol: "axis=1",
+              kind: "Paramètre",
+              roleInExercise: "Indique à `np.cumsum(..., axis=1)` et `np.mean(S_paths, axis=1)` d'opérer horizontalement le long du temps pour chaque trajectoire (`axis=0` agrégerait entre scénarios)."
+            },
+            {
+              symbol: "S_mean",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D de longueur `10000` contenant la moyenne arithmétique de chaque trajectoire, vérifié par `testPythonCode`."
+            },
+            {
+              symbol: "prix_asiatique",
+              kind: "Variable",
+              roleInExercise: "Prime actualisée `float(...)` du Call asiatique (comprise entre $5.0$ et $7.0\\text{ EUR}$, inférieure au Call vanille car le moyennage lisse la volatilité)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 10000
+M = 252
+S0, K, r, sigma, T = 100.0, 100.0, 0.05, 0.20, 1.0
+dt = T / M
+
+# Étape 1 : Matrice (N, M) des chocs et incréments logarithmiques
+Z = ___
+drift = ___
+vol = ___
+log_returns = ___
+
+# Étape 2 : Cumul horizontal sur (N, M + 1) puis passage en prix spots
+log_paths = np.zeros((N, M + 1))
+log_paths[:, 1:] = ___
+S_paths = ___
+
+# Étape 3 : Moyenne arithmétique le long de chaque trajectoire (axis=1)
+S_mean = ___
+
+# Étape 4 : Payoffs asiatiques et actualisation sous Q
+payoffs_asiatiques = ___
+prix_asiatique = float(___)
+
+print(f'Prix du Call Asiatique à moyenne arithmétique : {prix_asiatique:.4f} €')`
+        }
       },
       {
         id: "v2-py-26",
@@ -1024,7 +1704,79 @@ M=252 pas | Survie=65.26% | DOC=10.2138 | DIC=0.4199 | DOC+DIC=10.6337
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 10000\nM = 252\nS0, K, B, r, sigma, T = 100.0, 100.0, 85.0, 0.05, 0.20, 1.0\ndt = T / M\n\nZ = np.random.randn(N, M)\nlog_inc = (r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z\nlog_paths = np.zeros((N, M + 1))\nlog_paths[:, 1:] = np.cumsum(log_inc, axis=1)\nS_paths = S0 * np.exp(log_paths)\n\nS_min = np.min(S_paths, axis=1)\nactifs_vivants = (S_min > B)\npayoffs_doc = np.maximum(S_paths[:, -1] - K, 0.0) * actifs_vivants\nprix_doc = float(np.exp(-r * T) * np.mean(payoffs_doc))\ntaux_survie = float(np.mean(actifs_vivants) * 100)\n\nprint(f'Prix du Down-and-Out Call (Barrière B={B}) : {prix_doc:.4f} €')\nprint(f'Taux de survie des contrats : {taux_survie:.2f}%')",
         testPythonCode: "assert 'prix_doc' in globals()\nassert 'taux_survie' in globals()\nassert prix_doc < 10.45\nassert 0 < taux_survie < 100",
         hints: ["S_min = np.min(S_paths, axis=1)", "actifs_vivants = (S_min > B)", "prix_doc = float(np.exp(-r * T) * np.mean(np.maximum(S_paths[:, -1] - K, 0.0) * actifs_vivants))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le Call Down-and-Out verse $H_{\\text{DOC}} = \\max(S_T - K, 0)\\cdot \\mathbb{I}_{\\{M_T^{\\min} > B\\}}$ où $M_T^{\\min} = \\min_{0 \\le t \\le T} S_t$. En Python, sur la matrice 2D \`S_paths\` de forme \`(N, M + 1)\`, le minimum temporel s'extrait via \`S_min = np.min(S_paths, axis=1)\`, l'indicatrice de survie devient le masque booléen \`actifs_vivants = (S_min > B)\`, et le payoff terminal \`np.maximum(S_paths[:, -1] - K, 0.0)\` est multiplié par \`actifs_vivants\` avant actualisation pour obtenir \`prix_doc\`.`,
+          stepByStepPlan: [
+            "Simuler la matrice 2D `S_paths` de forme `(N, M + 1)` sous $\\mathbb{Q}$ par somme cumulée horizontale (`axis=1`) des log-incréments.",
+            "Extraire le cours minimum atteint par chaque trajectoire dans `S_min` via `np.min(S_paths, axis=1)`.",
+            "Construire le masque booléen `actifs_vivants` testant la survie stricte `S_min > B`.",
+            "Évaluer les payoffs terminaux sur `S_paths[:, -1]` multipliés par `actifs_vivants`, actualiser leur moyenne dans `prix_doc` et calculer `taux_survie` en pourcentage."
+          ],
+          concepts: [
+            {
+              symbol: "S_paths",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(10000, 253)` des trajectoires simulées sous $\\mathbb{Q}$, avec $S_0 = 100$ en colonne `0` et $S_T$ en colonne `-1`."
+            },
+            {
+              symbol: "S_min",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D de longueur $N = 10\\,000$ donnant le minimum historique de chaque trajectoire grâce à `np.min(S_paths, axis=1)`."
+            },
+            {
+              symbol: "actifs_vivants",
+              kind: "Variable",
+              roleInExercise: "Vecteur booléen (`True`/`False`) valant `True` uniquement si la trajectoire est restée strictement au-dessus de la barrière `B = 85.0`."
+            },
+            {
+              symbol: "[:, -1]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing 2D extrayant la dernière colonne de `S_paths` (les cours finaux $S_T$ à échéance $t = T$ pour tous les scénarios)."
+            },
+            {
+              symbol: "* actifs_vivants",
+              kind: "Syntaxe",
+              roleInExercise: "Produit élément par élément d'un tableau flottant par un masque booléen : NumPy convertit automatiquement `True` en `1.0` et `False` en `0.0` (annulation Knock-Out)."
+            },
+            {
+              symbol: "prix_doc",
+              kind: "Variable",
+              roleInExercise: "Prime actualisée `float(...)` du Down-and-Out Call (nécessairement $< 10.45\\text{ EUR}$, le prix du Call vanille sans barrière)."
+            },
+            {
+              symbol: "taux_survie",
+              kind: "Variable",
+              roleInExercise: "Pourcentage (`0` à `100`) de contrats non désactivés calculé via `float(np.mean(actifs_vivants) * 100)`."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 10000
+M = 252
+S0, K, B, r, sigma, T = 100.0, 100.0, 85.0, 0.05, 0.20, 1.0
+dt = T / M
+
+# Étape 1 : Trajectoires GBM (N, M + 1) sous la mesure Q
+Z = ___
+log_inc = ___
+log_paths = np.zeros((N, M + 1))
+log_paths[:, 1:] = ___
+S_paths = ___
+
+# Étape 2 : Minimum par trajectoire (axis=1) et masque booléen de survie
+S_min = ___
+actifs_vivants = ___
+
+# Étape 3 : Payoff terminal annulé si barrière touchée, puis actualisation
+payoffs_doc = ___
+prix_doc = float(___)
+taux_survie = float(___)
+
+print(f'Prix du Down-and-Out Call (Barrière B={B}) : {prix_doc:.4f} €')
+print(f'Taux de survie des contrats : {taux_survie:.2f}%')`
+        }
       },
       {
         id: "v2-py-27",
@@ -1125,7 +1877,83 @@ Simulez $N = 20\\,000$ prix terminaux à $T = 1.0$ an sous le modèle Jump-Diffu
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 20000\nS0, r, sigma, T = 100.0, 0.05, 0.15, 1.0\nlambda_jump = 0.75\nmu_J = -0.15\nsigma_J = 0.10\n\nkappa = np.exp(mu_J + 0.5 * sigma_J**2) - 1.0\ndrift_corr = (r - lambda_jump * kappa - 0.5 * sigma**2) * T\n\nZ = np.random.randn(N)\nnb_sauts = np.random.poisson(lambda_jump * T, N)\n\nsomme_sauts = np.zeros(N)\nfor i in range(N):\n    if nb_sauts[i] > 0:\n        somme_sauts[i] = np.sum(np.random.normal(mu_J, sigma_J, nb_sauts[i]))\n\nS_T_merton = S0 * np.exp(drift_corr + sigma * np.sqrt(T) * Z + somme_sauts)\nz_merton = (S_T_merton - np.mean(S_T_merton)) / np.std(S_T_merton)\nkurtosis_merton = float(np.mean(z_merton**4))\n\nprint(f'Kurtosis sous Merton Jump-Diffusion : {kurtosis_merton:.4f}')\nprint(f'Excès de Kurtosis (Queues épaisses) : {kurtosis_merton - 3.0:.4f}')",
         testPythonCode: "assert 'S_T_merton' in globals()\nassert 'kurtosis_merton' in globals()\nassert kurtosis_merton > 3.05",
         hints: ["kappa = np.exp(mu_J + 0.5 * sigma_J**2) - 1.0", "nb_sauts = np.random.poisson(lambda_jump * T, N)", "S_T_merton = S0 * np.exp(drift_corr + sigma * np.sqrt(T) * Z + somme_sauts)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le modèle de Merton superpose au GBM un processus de Poisson composé : $S_T = S_0 \\exp\\big((r - \\lambda\\kappa - \\frac{1}{2}\\sigma^2)T + \\sigma\\sqrt{T}\\,Z + \\sum_{j=1}^{N_T}\\ln Y_j\\big)$ avec $\\kappa = e^{\\mu_J + \\frac{1}{2}\\sigma_J^2} - 1$. En Python, \`kappa\` compense la dérive dans \`drift_corr\`, \`nb_sauts = np.random.poisson(lambda_jump * T, N)\` tire le nombre aléatoire de sauts $N_T$ par scénario, la boucle cumule les sauts gaussiens dans \`somme_sauts\`, et \`kurtosis_merton\` mesure l'excès de queues épaisses ($> 3$).`,
+          stepByStepPlan: [
+            "Calculer l'amplitude moyenne relative des sauts `kappa` et la dérive risque-neutre compensée `drift_corr` sur l'horizon `T`.",
+            "Simuler le vecteur continu `Z` ($\\mathcal{N}(0, 1)$) et le nombre entier de sauts par scénario `nb_sauts` via `np.random.poisson`.",
+            "Initialiser `somme_sauts` à zéro et, dans une boucle `for i in range(N):`, sommer `nb_sauts[i]` tirages $\\mathcal{N}(\\mu_J, \\sigma_J)$ lorsque `nb_sauts[i] > 0`.",
+            "Calculer les cours finaux `S_T_merton`, centrer-réduire dans `z_merton` puis évaluer `kurtosis_merton = float(np.mean(z_merton**4))`."
+          ],
+          concepts: [
+            {
+              symbol: "kappa",
+              kind: "Variable",
+              roleInExercise: "Compensateur de martingale $\\mathbb{E}[Y - 1] = \\exp(\\mu_J + \\frac{1}{2}\\sigma_J^2) - 1$ corrigeant l'effet moyen des sauts sur la dérive."
+            },
+            {
+              symbol: "drift_corr",
+              kind: "Variable",
+              roleInExercise: "Dérive corrigée $(r - \\lambda\\kappa - \\frac{1}{2}\\sigma^2)T$ garantissant que $\\mathbb{E}^{\\mathbb{Q}}[S_T] = S_0 e^{rT}$ malgré les sauts."
+            },
+            {
+              symbol: "nb_sauts",
+              kind: "Variable",
+              roleInExercise: "Vecteur d'entiers de taille $N = 20\\,000$ donnant le nombre de discontinuités sur $[0, T]$ pour chaque scénario."
+            },
+            {
+              symbol: "np.random.poisson(lambda_jump * T, N)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Simule $N$ réalisations indépendantes d'une loi de Poisson de paramètre moyen $\\lambda T = 0.75$."
+            },
+            {
+              symbol: "somme_sauts",
+              kind: "Variable",
+              roleInExercise: "Vecteur accumulant la somme logarithmique $\\sum_{j=1}^{N_T}\\ln(Y_j)$ pour chaque trajectoire (vaut `0.0` si `nb_sauts[i] == 0`)."
+            },
+            {
+              symbol: "np.random.normal(mu_J, sigma_J, ...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Tire les `nb_sauts[i]` amplitudes logarithmiques de loi $\\mathcal{N}(\\mu_J, \\sigma_J^2)$. Attention : le 2e paramètre est l'écart-type `sigma_J`, pas la variance."
+            },
+            {
+              symbol: "S_T_merton, kurtosis_merton",
+              kind: "Variable",
+              roleInExercise: "Cours terminaux Jump-Diffusion et moment d'ordre 4 centré-réduit vérifié $> 3.05$ par `testPythonCode` (queues épaisses)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 20000
+S0, r, sigma, T = 100.0, 0.05, 0.15, 1.0
+lambda_jump = 0.75
+mu_J = -0.15
+sigma_J = 0.10
+
+# Étape 1 : Compensateur kappa et drift risque-neutre corrigé
+kappa = ___
+drift_corr = ___
+
+# Étape 2 : Diffusion continue Z et nombre de sauts de Poisson nb_sauts
+Z = ___
+nb_sauts = ___
+
+# Étape 3 : Boucle sur le processus de Poisson composé pour somme_sauts
+somme_sauts = np.zeros(N)
+for i in range(N):
+    if nb_sauts[i] > 0:
+        somme_sauts[i] = ___
+
+# Étape 4 : Prix terminaux Merton et kurtosis standardisé
+S_T_merton = ___
+z_merton = ___
+kurtosis_merton = float(___)
+
+print(f'Kurtosis sous Merton Jump-Diffusion : {kurtosis_merton:.4f}')
+print(f'Excès de Kurtosis (Queues épaisses) : {kurtosis_merton - 3.0:.4f}')`
+        }
       },
       {
         id: "v2-py-28",
@@ -1222,7 +2050,70 @@ Soit un portefeuille Covered Call composé de $10$ actions ($S_0 = 100$) et de l
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN = 25000\nS0, K, T, r, sigma = 100.0, 105.0, 0.25, 0.04, 0.22\nV0 = 10.0 * S0 - 10.0 * 7.50\n\nZ = np.random.randn(N)\nS_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)\ncall_payoffs = np.maximum(S_T - K, 0.0)\nV_T = 10.0 * S_T - 10.0 * call_payoffs\npertes = V0 - V_T\n\nvar_mc_99 = float(np.percentile(pertes, 99))\n\nprint(f'Valeur initiale du portefeuille : {V0:.2f} €')\nprint(f'Value-at-Risk 99% (Full Revaluation) : {var_mc_99:.2f} €')\nprint(f'Perte maximale relative à 99% : {var_mc_99 / V0:.2%}')",
         testPythonCode: "assert 'var_mc_99' in globals()\nassert 'pertes' in globals()\nassert var_mc_99 > 145.0",
         hints: ["call_payoffs = np.maximum(S_T - K, 0.0)", "V_T = 10.0 * S_T - 10.0 * call_payoffs", "pertes = V0 - V_T", "var_mc_99 = float(np.percentile(pertes, 99))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `La méthode *Full Revaluation* évite les biais de Taylor (Delta-Normale ou Delta-Gamma) en recalculant exactement la valeur non linéaire du portefeuille sur chaque scénario $S_T^{(i)}$ : $V_T = 10 S_T - 10\\max(S_T - K, 0)$ (\`V_T\`). On forme ensuite les pertes positives \`pertes = V0 - V_T\` ($L^{(i)} = V_0 - V_T^{(i)}$), puis le quantile empirique à $99\\%$ donne directement $\\operatorname{VaR}_{99\\%} = q_{0.99}(L)$ (\`var_mc_99\`).`,
+          stepByStepPlan: [
+            "Tirer `Z` de taille `N = 25000` et simuler les cours à échéance `S_T` sur `T = 0.25` via la solution exacte du GBM.",
+            "Calculer le payoff unitaire `call_payoffs` des Calls vendus, puis réévaluer la valeur totale `V_T` du Covered Call ($10$ actions moins $10$ Calls).",
+            "Calculer le vecteur des pertes nettes `pertes = V0 - V_T` (convention : une perte est positive).",
+            "Extraire `var_mc_99` via `np.percentile(pertes, 99)` et afficher `V0`, `var_mc_99` et la perte relative."
+          ],
+          concepts: [
+            {
+              symbol: "V0",
+              kind: "Variable",
+              roleInExercise: "Valeur initiale du portefeuille Covered Call ($925.0\\text{ EUR}$) : achat de $10$ actions à $100\\text{ EUR}$ financé partiellement par la vente de $10$ Calls à $7.50\\text{ EUR}$."
+            },
+            {
+              symbol: "S_T",
+              kind: "Variable",
+              roleInExercise: "Vecteur des $25\\,000$ scénarios de cours à l'horizon `T = 0.25` an ($3$ mois)."
+            },
+            {
+              symbol: "call_payoffs",
+              kind: "Variable",
+              roleInExercise: "Payoff unitaire $\\max(S_T - K, 0)$ des Calls vendus à découvert, plafonnant le gain maximal du portefeuille au-dessus du strike `K = 105.0`."
+            },
+            {
+              symbol: "V_T",
+              kind: "Variable",
+              roleInExercise: "Valeur terminale réévaluée exactement par scénario (`10.0 * S_T - 10.0 * call_payoffs`), capturant intégralement la non-linéarité au coude $S_T = K$."
+            },
+            {
+              symbol: "pertes",
+              kind: "Variable",
+              roleInExercise: "Vecteur `V0 - V_T` exprimé en convention risque (perte financière $> 0$, profit $< 0$), vérifié par `testPythonCode`."
+            },
+            {
+              symbol: "np.percentile(..., 99)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Calcule le 99e percentile haut de la distribution des pertes positives pour obtenir `var_mc_99` (seuil dépassé dans $1\\%$ des pires cas)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N = 25000
+S0, K, T, r, sigma = 100.0, 105.0, 0.25, 0.04, 0.22
+V0 = 10.0 * S0 - 10.0 * 7.50
+
+# Étape 1 : Simulation GBM des cours à l'échéance T
+Z = ___
+S_T = ___
+
+# Étape 2 : Réévaluation complète (Full Revaluation) du Covered Call
+call_payoffs = ___
+V_T = ___
+
+# Étape 3 : Vecteur des pertes positives et VaR à 99 %
+pertes = ___
+var_mc_99 = float(___)
+
+print(f'Valeur initiale du portefeuille : {V0:.2f} €')
+print(f'Value-at-Risk 99% (Full Revaluation) : {var_mc_99:.2f} €')
+print(f'Perte maximale relative à 99% : {var_mc_99 / V0:.2%}')`
+        }
       },
       {
         id: "v2-py-29",
@@ -1332,7 +2223,92 @@ Simulez $M = 100$ trajectoires de taux courts sur $T = 5.0$ ans ($N = 500$ pas d
         solutionCode: "import numpy as np\nimport matplotlib.pyplot as plt\n\nnp.random.seed(42)\nr0 = 0.01\ntheta = 0.035\nkappa = 0.50\nsigma = 0.015\nT = 5.0\nN = 500\ndt = T / N\nM = 100\n\nr_paths = np.zeros((M, N + 1))\nr_paths[:, 0] = r0\n\nfor t in range(N):\n    Z = np.random.randn(M)\n    r_paths[:, t + 1] = r_paths[:, t] + kappa * (theta - r_paths[:, t]) * dt + sigma * np.sqrt(dt) * Z\n\nmoyenne_finale_taux = float(np.mean(r_paths[:, -1]))\n\ntemps = np.linspace(0, T, N + 1)\nplt.figure(figsize=(6, 3.5))\nfor i in range(5):\n    plt.plot(temps, r_paths[i] * 100, lw=1.2, alpha=0.8)\nplt.axhline(theta * 100, color='#e11d48', ls='--', lw=2, label=f'Moyenne cible theta ({theta:.1%})')\nplt.xlabel('Horizon (années)')\nplt.ylabel('Taux court (%)')\nplt.title('Modèle de Taux de Vasicek (Ornstein-Uhlenbeck)')\nplt.legend()\nplt.grid(True, alpha=0.3)\n\nprint(f'Taux moyen final simulé à 5 ans : {moyenne_finale_taux:.4%}')\nprint(f'Niveau d équilibre théorique theta : {theta:.4%}')",
         testPythonCode: "assert 'r_paths' in globals()\nassert 'moyenne_finale_taux' in globals()\nassert np.isclose(moyenne_finale_taux, theta, atol=0.01)",
         hints: ["r_paths[:, t + 1] = r_paths[:, t] + kappa * (theta - r_paths[:, t]) * dt + sigma * np.sqrt(dt) * Z", "moyenne_finale_taux = float(np.mean(r_paths[:, -1]))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Le schéma d'Euler-Maruyama discrétise l'EDS de Vasicek $dr_t = \\kappa(\\theta - r_t)dt + \\sigma dW_t$ par $r_{t + \\Delta t} = r_t + \\kappa(\\theta - r_t)\\Delta t + \\sigma\\sqrt{\\Delta t}\\,Z_t$. Comme la dérive dépend du niveau courant $r_t$, on parcourt les $N = 500$ pas de temps dans une boucle \`for t in range(N):\`, mais en mettant à jour les $M = 100$ trajectoires simultanément sur la colonne \`r_paths[:, t + 1]\` à partir de \`r_paths[:, t]\`, avant d'auditer la convergence vers $\\theta$ sur \`r_paths[:, -1]\`.`,
+          stepByStepPlan: [
+            "Pré-allouer la matrice `r_paths` de forme `(M, N + 1)` remplie de zéros et fixer la colonne initiale `r_paths[:, 0]` à `r0`.",
+            "Itérer sur `t in range(N)` : à chaque pas, tirer `Z` de longueur `M` et calculer `r_paths[:, t + 1]` par Euler-Maruyama.",
+            "Extraire la moyenne terminale `moyenne_finale_taux` sur la dernière colonne `r_paths[:, -1]`.",
+            "Construire `temps = np.linspace(0, T, N + 1)` et tracer les 5 premières trajectoires en pourcentage (`r_paths[i] * 100`) avec la cible `theta * 100`."
+          ],
+          concepts: [
+            {
+              symbol: "r_paths",
+              kind: "Variable",
+              roleInExercise: "Matrice 2D `(M, N + 1) = (100, 501)` stockant les 100 trajectoires du taux court sur 501 dates de $t = 0$ à $5.0$ ans."
+            },
+            {
+              symbol: "r_paths[:, 0] = r0",
+              kind: "Syntaxe",
+              roleInExercise: "Initialisation vectorisée de la colonne `0` de toutes les trajectoires au taux de départ $r_0 = 0.01$ ($1\\%$)."
+            },
+            {
+              symbol: "kappa, theta",
+              kind: "Paramètre",
+              roleInExercise: "Paramètres du retour à la moyenne : `kappa = 0.50` fixe la force de rappel et `theta = 0.035` ($3.5\\%$) le taux d'équilibre long terme."
+            },
+            {
+              symbol: "for t in range(N):",
+              kind: "Syntaxe",
+              roleInExercise: "Boucle séquentielle nécessaire sur le temps car l'incrément en `t + 1` dépend de `r_paths[:, t]`, tout en restant vectorisée sur les `M` trajectoires."
+            },
+            {
+              symbol: "Z",
+              kind: "Variable",
+              roleInExercise: "Vecteur 1D de longueur `M = 100` tiré à chaque pas `t` via `np.random.randn(M)` pour appliquer des chocs indépendants aux 100 scénarios."
+            },
+            {
+              symbol: "r_paths[:, -1]",
+              kind: "Syntaxe",
+              roleInExercise: "Slicing sélectionnant l'ensemble des taux simulés à l'échéance finale $T = 5.0$ ans."
+            },
+            {
+              symbol: "moyenne_finale_taux",
+              kind: "Variable",
+              roleInExercise: "Moyenne empirique `float(np.mean(r_paths[:, -1]))` vérifiée à `0.01` près autour de `theta` par `testPythonCode`."
+            }
+          ],
+          guidedCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+r0 = 0.01
+theta = 0.035
+kappa = 0.50
+sigma = 0.015
+T = 5.0
+N = 500
+dt = T / N
+M = 100
+
+# Étape 1 : Allocation (M, N + 1) et initialisation de la colonne 0 à r0
+r_paths = np.zeros((M, N + 1))
+r_paths[:, 0] = ___
+
+# Étape 2 : Boucle temporelle d'Euler-Maruyama vectorisée sur M
+for t in range(N):
+    Z = ___
+    r_paths[:, t + 1] = ___
+
+# Étape 3 : Taux moyen terminal à T = 5 ans
+moyenne_finale_taux = float(___)
+
+# Étape 4 : Tracé en % des 5 premières trajectoires et de la cible theta
+temps = np.linspace(0, T, N + 1)
+plt.figure(figsize=(6, 3.5))
+for i in range(5):
+    plt.plot(temps, ___, lw=1.2, alpha=0.8)
+plt.axhline(___, color='#e11d48', ls='--', lw=2, label=f'Moyenne cible theta ({theta:.1%})')
+plt.xlabel('Horizon (années)')
+plt.ylabel('Taux court (%)')
+plt.title('Modèle de Taux de Vasicek (Ornstein-Uhlenbeck)')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+print(f'Taux moyen final simulé à 5 ans : {moyenne_finale_taux:.4%}')
+print(f'Niveau d équilibre théorique theta : {theta:.4%}')`
+        }
       },
       {
         id: "v2-py-30",
@@ -1440,7 +2416,80 @@ Simulez un stress-test actuariel de Cramér-Lundberg sur $N_{\\text{scenarios}} 
         solutionCode: "import numpy as np\n\nnp.random.seed(42)\nN_scenarios = 10000\nu = 500000.0\nc = 80000.0\nlambda_sin = 5.0\ncout_moyen = 15000.0\n\nnb_sinistres = np.random.poisson(lambda_sin, N_scenarios)\ncharge_totale = np.zeros(N_scenarios)\n\nfor i in range(N_scenarios):\n    if nb_sinistres[i] > 0:\n        charge_totale[i] = np.sum(np.random.exponential(cout_moyen, nb_sinistres[i]))\n\ncapital_fin = u + c - charge_totale\nruine_detectee = (capital_fin < 0)\nproba_ruine = float(np.mean(ruine_detectee))\n\nprint(f'Capital initial : {u:,.2f} €')\nprint(f'Charge moyenne annuelle des sinistres : {np.mean(charge_totale):,.2f} €')\nprint(f'Probabilité empirique de ruine : {proba_ruine:.4%}')\nprint(f'Conformité Solvabilité II (< 0.5%) : {proba_ruine < 0.005}')",
         testPythonCode: "assert 'proba_ruine' in globals()\nassert 'capital_fin' in globals()\nassert 0 <= proba_ruine < 0.05",
         hints: ["nb_sinistres = np.random.poisson(lambda_sin, N_scenarios)", "capital_fin = u + c - charge_totale", "proba_ruine = float(np.mean(capital_fin < 0))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: `Dans le modèle collectif de Cramér-Lundberg à horizon 1 an, le surplus final vaut $U_1 = u + c - \\sum_{j=1}^{N_1} X_j$ (\`capital_fin\`). En Python, \`nb_sinistres = np.random.poisson(lambda_sin, N_scenarios)\` simule $N_1$, la boucle somme \`nb_sinistres[i]\` coûts exponentiels de moyenne \`cout_moyen\` dans \`charge_totale[i]\`, puis le masque \`ruine_detectee = (capital_fin < 0)\` permet d'estimer \`proba_ruine\` et de contrôler la norme Solvabilité II ($< 0.5\\%$).`,
+          stepByStepPlan: [
+            "Tirer le vecteur `nb_sinistres` de longueur `N_scenarios = 10000` selon la loi de Poisson de paramètre `lambda_sin`.",
+            "Initialiser `charge_totale` à zéro puis, pour chaque scénario `i` tel que `nb_sinistres[i] > 0`, sommer `nb_sinistres[i]` sinistres exponentiels de moyenne `cout_moyen`.",
+            "Calculer le surplus de fin d'année `capital_fin` à partir de `u`, `c` et `charge_totale`.",
+            "Créer le vecteur booléen `ruine_detectee`, calculer `proba_ruine` comme sa moyenne empirique et vérifier la conformité Solvabilité II (`proba_ruine < 0.005`)."
+          ],
+          concepts: [
+            {
+              symbol: "u, c",
+              kind: "Paramètre",
+              roleInExercise: "Fonds propres initiaux (`u = 500000.0` EUR) et primes annuelles encaissées (`c = 80000.0` EUR), supérieures à la charge espérée $\\lambda\\mu = 75\\,000\\text{ EUR}$."
+            },
+            {
+              symbol: "nb_sinistres",
+              kind: "Variable",
+              roleInExercise: "Vecteur d'entiers de taille `10000` simulé par `np.random.poisson(lambda_sin, N_scenarios)` donnant le nombre de sinistres sur l'année."
+            },
+            {
+              symbol: "np.random.exponential(cout_moyen, ...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Simule les coûts individuels de sinistres. **Attention** : NumPy prend comme premier argument l'échelle (*scale* = moyenne `15000.0`) et non le taux $1/\\mu$."
+            },
+            {
+              symbol: "charge_totale",
+              kind: "Variable",
+              roleInExercise: "Vecteur de longueur `N_scenarios` stockant la somme annuelle des coûts de sinistres pour chaque scénario (vaut `0.0` si `nb_sinistres[i] == 0`)."
+            },
+            {
+              symbol: "capital_fin",
+              kind: "Variable",
+              roleInExercise: "Surplus en fin d'année `u + c - charge_totale` : toute composante négative traduit l'insolvabilité de l'assureur."
+            },
+            {
+              symbol: "ruine_detectee",
+              kind: "Variable",
+              roleInExercise: "Masque booléen `(capital_fin < 0)` valant `True` pour chaque scénario conduisant à la faillite."
+            },
+            {
+              symbol: "proba_ruine",
+              kind: "Variable",
+              roleInExercise: "Probabilité empirique de ruine `float(np.mean(ruine_detectee))` comparée au plafond réglementaire Solvabilité II de `0.005` ($0.5\\%$)."
+            }
+          ],
+          guidedCode: `import numpy as np
+
+np.random.seed(42)
+N_scenarios = 10000
+u = 500000.0
+c = 80000.0
+lambda_sin = 5.0
+cout_moyen = 15000.0
+
+# Étape 1 : Nombre annuel de sinistres par scénario (Poisson)
+nb_sinistres = ___
+
+# Étape 2 : Charge totale par processus de Poisson composé (Exponentielle)
+charge_totale = np.zeros(N_scenarios)
+for i in range(N_scenarios):
+    if nb_sinistres[i] > 0:
+        charge_totale[i] = ___
+
+# Étape 3 : Surplus final et probabilité de ruine Solvabilité II
+capital_fin = ___
+ruine_detectee = ___
+proba_ruine = float(___)
+
+print(f'Capital initial : {u:,.2f} €')
+print(f'Charge moyenne annuelle des sinistres : {np.mean(charge_totale):,.2f} €')
+print(f'Probabilité empirique de ruine : {proba_ruine:.4%}')
+print(f'Conformité Solvabilité II (< 0.5%) : {proba_ruine < 0.005}')`
+        }
       },
     ]
   };

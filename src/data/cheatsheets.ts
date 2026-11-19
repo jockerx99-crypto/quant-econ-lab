@@ -341,7 +341,7 @@ print(f"OAT moy: {oat_moy:.3f} % | Vol: {oat_vol:.3f} % | Q95 Inf: {q95_inf:.2f}
             syntax: "df[cols].corr() | IQR = Q75 - Q25",
             formula: r`$$IQR = Q_{75} - Q_{25}, \qquad \text{Seuil Haut} = Q_{75} + 1.5 \times IQR$$`,
             description:
-              "La matrice `.corr()` mesure la liaison linéaire entre paires de variables. L'écart interquartile (IQR) détecte les chocs extrêmes au-dessus de $Q_{75} + 1.5 \cdot IQR$ ou sous $Q_{25} - 1.5 \cdot IQR$.",
+              "La matrice `.corr()` mesure la liaison linéaire entre paires de variables. L'écart interquartile (IQR) détecte les chocs extrêmes au-dessus de $Q_{75} + 1.5 \\cdot IQR$ ou sous $Q_{25} - 1.5 \\cdot IQR$.",
             exampleCode: r`print(df[['euribor_3m', 'oat_10y', 'inflation_hicp']].corr().round(3))
 
 q25 = df['inflation_hicp'].quantile(0.25)

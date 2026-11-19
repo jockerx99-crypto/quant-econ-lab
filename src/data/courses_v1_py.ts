@@ -83,7 +83,47 @@ Importez \`pandas as pd\` et affichez les 3 premières lignes du DataFrame \`df\
         solutionCode: "import pandas as pd\nprint(df.head(3))",
         testPythonCode: "assert len(df) > 0, 'df ne doit pas être vide.'",
         hints: ["Utilisez : print(df.head(3))"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Dans le cours, la Valeur Temps de l'Argent ($V_0 = \\frac{CF_T}{(1+r)^T}$ et $V_T = V_0 e^{rT}$) s'appuie sur des taux souverains comme `oat_10y`. Avant de calculer la moindre actualisation ou régression, il est impératif de vérifier si les colonnes de `df` sont exprimées en points de pourcentage (ex : `-0.15` pour $-0.15\\%$) ou en décimales (`-0.0015`). L'appel `df.head(3)` affiche exactement les $3$ premières lignes (`2020-Q1` à `2020-Q3`) du DataFrame préchargé `df` (dont la non-vacuité `len(df) > 0` est vérifiée par les tests).",
+          stepByStepPlan: [
+            "Importer la bibliothèque `pandas` sous son alias conventionnel `pd` avec `import pandas as pd`.",
+            "Appeler la méthode `.head(3)` sur le DataFrame `df` déjà préchargé en mémoire pour extraire ses $3$ premières observations.",
+            "Afficher le résultat dans la console avec `print(...)` afin de contrôler les noms de colonnes, le signe des taux et leurs unités.",
+          ],
+          concepts: [
+            {
+              symbol: "df",
+              kind: "Colonne / Table",
+              roleInExercise: "DataFrame Pandas préchargé automatiquement dans l'environnement Pyodide au démarrage de l'exercice. Il contient les $16$ trimestres (`2020-Q1` à `2023-Q4`) et les $7$ colonnes de la table `macro_taux` : aucun chargement CSV manuel n'est nécessaire.",
+            },
+            {
+              symbol: "import pandas as pd",
+              kind: "Syntaxe",
+              roleInExercise: "Importe la librairie d'analyse de données tabulaires `pandas` et lui attribue le raccourci standard `pd` dans votre script.",
+            },
+            {
+              symbol: ".head(3)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode de `DataFrame` (toujours suivie de parenthèses car elle exécute une action d'extraction) qui renvoie un sous-tableau limité aux $3$ premières lignes de `df`. Sans argument, `.head()` en affiche $5$.",
+            },
+            {
+              symbol: "3",
+              kind: "Paramètre",
+              roleInExercise: "Entier passé en argument à `.head(3)` pour limiter la sortie aux $3$ premiers trimestres (`2020-Q1`, `2020-Q2`, `2020-Q3`) sans encombrer la console.",
+            },
+            {
+              symbol: "print(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction native Python qui affiche la représentation textuelle de l'objet passé entre parenthèses dans la console de résultats.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer Pandas sous son alias standard pd
+import ___ as pd
+
+# Étape 2 : Extraire les 3 premières lignes de df (déjà préchargé) et les afficher
+print(df.___(___))`,
+        },
       },
       {
         id: "py-2",
@@ -151,7 +191,47 @@ Stockez le tuple \`df.shape\` dans la variable exacte \`dimensions\` et affichez
         solutionCode: "dimensions = df.shape\nprint('Dimensions :', dimensions)",
         testPythonCode: "assert 'dimensions' in globals(), 'La variable dimensions doit exister.'\nassert len(dimensions) == 2, 'dimensions doit être un tuple de taille 2.'",
         hints: ["dimensions = df.shape"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La théorie rappelle que pour actualiser un échéancier $V_0 = \\sum_{t=1}^T \\frac{CF_t}{(1+r)^t}$ puis estimer une régression MCO $\\hat{\\beta} = (X'X)^{-1}X'y$, la matrice $X$ doit être de plein rang et les degrés de liberté doivent rester positifs : $\\nu = T - K - 1 > 0$. L'attribut `df.shape` renvoie directement le couple `(T, nb_colonnes)` = `(16, 7)` et se stocke dans la variable exacte `dimensions` exigée par `testPythonCode` (`len(dimensions) == 2`).",
+          stepByStepPlan: [
+            "Lire l'attribut `.shape` du DataFrame préchargé `df` (sans parenthèses) pour récupérer `(T, nb_colonnes)`.",
+            "Affecter ce tuple à la variable exacte `dimensions` vérifiée par le test automatique.",
+            "Afficher le résultat avec `print('Dimensions :', dimensions)` pour lire $T = 16$ et vérifier que $\\nu = 16 - 2 - 1 = 13 > 0$.",
+          ],
+          concepts: [
+            {
+              symbol: "df",
+              kind: "Colonne / Table",
+              roleInExercise: "DataFrame Pandas préchargé dans Pyodide avec les $16$ trimestres en lignes et $7$ indicateurs macroéconomiques en colonnes.",
+            },
+            {
+              symbol: ".shape",
+              kind: "Syntaxe",
+              roleInExercise: "Attribut du DataFrame (sans parenthèses car c'est une propriété stockée et non une fonction calculée) qui renvoie un tuple `(lignes, colonnes)`, soit `(16, 7)`.",
+            },
+            {
+              symbol: "dimensions",
+              kind: "Variable",
+              roleInExercise: "Nom exact de la variable globale vérifiée par `testPythonCode` (`assert 'dimensions' in globals()` et `len(dimensions) == 2`).",
+            },
+            {
+              symbol: "tuple (16, 7)",
+              kind: "Syntaxe",
+              roleInExercise: "Structure Python ordonnée et non modifiable entre parenthèses : `dimensions[0]` donne le nombre d'observations $T = 16$ et `dimensions[1]` le nombre total de colonnes ($7$).",
+            },
+            {
+              symbol: "print('Dimensions :', dimensions)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Affiche l'étiquette textuelle suivie du tuple `dimensions` afin de confirmer visuellement la taille de l'échantillon.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Lire l'attribut .shape de df (sans parenthèses) dans la variable dimensions
+dimensions = df.___
+
+# Étape 2 : Afficher le tuple (T, K) obtenu
+print('Dimensions :', ___)`,
+        },
       },
       {
         id: "py-3",
@@ -223,7 +303,51 @@ Calculez et stockez exactement les deux variables suivantes : \`oat_moyenne = df
         solutionCode: "oat_moyenne = df['oat_10y'].mean()\noat_volatilite = df['oat_10y'].std()\nprint(f'Moyenne OAT : {oat_moyenne:.3f} % | Volatilité : {oat_volatilite:.3f} %')",
         testPythonCode: "assert 'oat_moyenne' in globals() and 'oat_volatilite' in globals()\nassert oat_volatilite > 0",
         hints: ["Utilisez df['oat_10y'].mean() et df['oat_10y'].std()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La démonstration de Bessel établit que la moyenne $\\bar{y} = \\frac{1}{T}\\sum_{t=1}^T y_t$ et l'écart-type corrigé $s = \\sqrt{\\frac{1}{T-1}\\sum_{t=1}^T (y_t - \\bar{y})^2}$ (avec diviseur $T-1 = 15$) fournissent un estimateur sans biais de la variance ($\\mathbb{E}[s^2] = \\sigma^2$). En Python, `df['oat_10y'].mean()` calcule $\\bar{y}$ dans `oat_moyenne`, et `df['oat_10y'].std()` applique automatiquement `ddof=1` ($T-1$) pour alimenter `oat_volatilite`, les deux variables contrôlées par `testPythonCode`.",
+          stepByStepPlan: [
+            "Isoler la colonne `oat_10y` de `df` en Série 1D via des crochets simples : `df['oat_10y']`.",
+            "Calculer sa moyenne arithmétique avec `.mean()` et la stocker dans la variable exacte `oat_moyenne`.",
+            "Calculer son écart-type sans biais (Bessel $T-1$) avec `.std()` et le stocker dans la variable exacte `oat_volatilite`.",
+            "Afficher les deux grandeurs arrondies à $3$ décimales à l'aide d'une f-string.",
+          ],
+          concepts: [
+            {
+              symbol: "df['oat_10y']",
+              kind: "Colonne / Table",
+              roleInExercise: "Sélection par **simple crochet** de la colonne du taux souverain français à $10$ ans dans `df`. Cela renvoie une Série 1D (`pd.Series`) de $16$ nombres flottants.",
+            },
+            {
+              symbol: ".mean()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode de Série Pandas (avec parenthèses) qui calcule $\\frac{1}{T}\\sum_{t=1}^T y_t$ et retourne un flottant (`1.2931...`).",
+            },
+            {
+              symbol: ".std()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode de Série Pandas qui calcule l'écart-type corrigé de Bessel avec `ddof=1` (diviseur $T-1$) par défaut — à la différence de `np.std()` qui divise par $T$ par défaut.",
+            },
+            {
+              symbol: "oat_moyenne / oat_volatilite",
+              kind: "Variable",
+              roleInExercise: "Noms exacts des deux variables globales vérifiées par les assertions (`oat_volatilite > 0`).",
+            },
+            {
+              symbol: "f'... {var:.3f} %'",
+              kind: "Syntaxe",
+              roleInExercise: "Chaîne formatée (*f-string*) : le préfixe `f` évalue les expressions entre accolades `{...}` et `:.3f` limite l'affichage à $3$ décimales sans modifier la précision des variables.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Calculer la moyenne empirique de 'oat_10y'
+oat_moyenne = df['___'].___()
+
+# Étape 2 : Calculer l'écart-type sans biais (Bessel T-1, défaut Pandas)
+oat_volatilite = df['___'].___()
+
+# Étape 3 : Afficher les résultats formatés à 3 décimales
+print(f'Moyenne OAT : {oat_moyenne:.3f} % | Volatilité : {oat_volatilite:.3f} %')`,
+        },
       },
       {
         id: "py-4",
@@ -288,7 +412,51 @@ Calculez exactement les variables \`mediane_inf = df['inflation_hicp'].median()\
         solutionCode: "mediane_inf = df['inflation_hicp'].median()\nq95_inf = df['inflation_hicp'].quantile(0.95)\nprint(f'Médiane : {mediane_inf:.2f} % | Quantile 95% : {q95_inf:.2f} %')",
         testPythonCode: "assert 'mediane_inf' in globals() and 'q95_inf' in globals()\nassert q95_inf >= mediane_inf",
         hints: ["df['inflation_hicp'].quantile(0.95)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le quantile d'ordre $\\alpha$ est défini par l'inverse généralisée $q_\\alpha = \\inf\\{x \\in \\mathbb{R} : F_T(x) \\ge \\alpha\\}$, avec la médiane robuste en $\\alpha = 0.50$ et la VaR inflation en $\\alpha = 0.95$. Sur la série `df['inflation_hicp']`, `.median()` traduit exactement $q_{0.50}$ dans `mediane_inf`, et `.quantile(0.95)` interpole $q_{0.95}$ dans `q95_inf`, deux variables vérifiées par `testPythonCode` (`q95_inf >= mediane_inf`).",
+          stepByStepPlan: [
+            "Sélectionner la Série 1D d'inflation avec `df['inflation_hicp']`.",
+            "Calculer la médiane $q_{0.50}$ via `.median()` et la ranger dans la variable exacte `mediane_inf`.",
+            "Calculer le 95e percentile $q_{0.95}$ via `.quantile(0.95)` et le ranger dans la variable exacte `q95_inf`.",
+            "Afficher les deux indicateurs à $2$ décimales pour comparer le régime central au risque extrême de 2022.",
+          ],
+          concepts: [
+            {
+              symbol: "df['inflation_hicp']",
+              kind: "Colonne / Table",
+              roleInExercise: "Série 1D extraite de `df` mesurant le glissement annuel des prix en zone euro (en pourcentage, allant de $-0.30\\%$ à $+9.90\\%$).",
+            },
+            {
+              symbol: ".median()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode Pandas qui ordonne les $16$ observations et retourne la valeur centrale ($50\\%$ en dessous, $50\\%$ au-dessus), strictement équivalente à `.quantile(0.5)`.",
+            },
+            {
+              symbol: ".quantile(0.95)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode Pandas calculant le quantile empirique par interpolation linéaire entre les statistiques d'ordre voisines.",
+            },
+            {
+              symbol: "0.95",
+              kind: "Paramètre",
+              roleInExercise: "Niveau de probabilité $\\alpha \\in [0, 1]$ passé à `.quantile(...)` ($0.95$ pour le 95e percentile, contrairement à `np.percentile` qui attend `95`).",
+            },
+            {
+              symbol: "mediane_inf / q95_inf",
+              kind: "Variable",
+              roleInExercise: "Variables scalaires (`float`) exigées par les assertions automatiques (`assert q95_inf >= mediane_inf`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Calculer la médiane (q_0.50) de l'inflation HICP
+mediane_inf = df['___'].___()
+
+# Étape 2 : Calculer le quantile à 95 % (paramètre 0.95)
+q95_inf = df['___'].quantile(___)
+
+# Étape 3 : Afficher les deux seuils en pourcentage
+print(f'Médiane : {mediane_inf:.2f} % | Quantile 95% : {q95_inf:.2f} %')`,
+        },
       },
       {
         id: "py-5",
@@ -360,7 +528,47 @@ Créez la nouvelle colonne \`df['pente_taux'] = df['oat_10y'] - df['euribor_3m']
         solutionCode: "df['pente_taux'] = df['oat_10y'] - df['euribor_3m']\nprint(df[['periode', 'oat_10y', 'euribor_3m', 'pente_taux']].head())",
         testPythonCode: "assert 'pente_taux' in df.columns, 'La colonne pente_taux doit exister.'",
         hints: ["df['pente_taux'] = df['oat_10y'] - df['euribor_3m']"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La formule de la pente de la courbe des taux $\\text{Pente}_t = r_{\\text{OAT}, t} - r_{\\text{Euribor}, t}$ (mesurant la prime de terme et les anticipations de taux) se traduit directement par une soustraction vectorisée entre deux Séries alignées : `df['pente_taux'] = df['oat_10y'] - df['euribor_3m']`. Pandas calcule l'écart trimestre par trimestre sans boucle `for` et crée la colonne `'pente_taux'` vérifiée par `assert 'pente_taux' in df.columns`.",
+          stepByStepPlan: [
+            "Soustraire la Série 1D `df['euribor_3m']` de `df['oat_10y']` grâce aux opérations vectorisées de Pandas.",
+            "Affecter ce résultat dans une nouvelle colonne de `df` nommée exactement `'pente_taux'`.",
+            "Afficher les $5$ premières lignes des $4$ colonnes utiles avec doubles crochets : `df[['periode', 'oat_10y', 'euribor_3m', 'pente_taux']].head()`.",
+          ],
+          concepts: [
+            {
+              symbol: "df['pente_taux'] = ...",
+              kind: "Syntaxe",
+              roleInExercise: "Affectation de colonne dans un DataFrame : comme `'pente_taux'` n'existe pas encore dans `df`, Pandas crée et ajoute cette colonne à la table (vérifiée par `testPythonCode`).",
+            },
+            {
+              symbol: "df['oat_10y'] - df['euribor_3m']",
+              kind: "Syntaxe",
+              roleInExercise: "Soustraction vectorisée entre deux Séries 1D alignées sur le même index (`0` à `15`) : chaque trimestre reçoit automatiquement sa différence de taux en C compilé.",
+            },
+            {
+              symbol: "df[['periode', 'oat_10y', 'euribor_3m', 'pente_taux']]",
+              kind: "Syntaxe",
+              roleInExercise: "**Doubles crochets `[[...]]`** : les crochets externes interrogent `df` et la liste interne `['periode', ...]` sélectionne $4$ colonnes à la fois pour retourner un tableau 2D (`DataFrame`).",
+            },
+            {
+              symbol: "'periode', 'oat_10y', 'euribor_3m'",
+              kind: "Colonne / Table",
+              roleInExercise: "Colonnes natives de `df` représentant la date trimestrielle, le taux long souverain ($10$ ans) et le taux court monétaire ($3$ mois).",
+            },
+            {
+              symbol: ".head()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode appelée sans argument qui extrait par défaut les $5$ premières lignes du sous-DataFrame sélectionné.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Créer la colonne 'pente_taux' par soustraction vectorisée des deux taux
+df['___'] = df['___'] - df['___']
+
+# Étape 2 : Afficher les 5 premières lignes avec doubles crochets multi-colonnes
+print(df[['periode', 'oat_10y', 'euribor_3m', '___']].head())`,
+        },
       },
       {
         id: "py-6",
@@ -432,7 +640,47 @@ Calculez \`matrice_corr = df[['euribor_3m', 'oat_10y', 'inflation_hicp']].corr()
         solutionCode: "matrice_corr = df[['euribor_3m', 'oat_10y', 'inflation_hicp']].corr()\nprint(matrice_corr.round(3))",
         testPythonCode: "assert 'matrice_corr' in globals()\nassert matrice_corr.shape == (3, 3)",
         hints: ["Utilisez : df[variables].corr()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le coefficient linéaire de Pearson $\\rho_{X,Y} = \\frac{\\operatorname{Cov}(X,Y)}{\\sigma_X \\sigma_Y} = \\cos(\\theta) \\in [-1, 1]$ forme la matrice symétrique $R \\in \\mathbb{R}^{3 \\times 3}$ des corrélations par paires. En sélectionnant les $3$ variables avec doubles crochets `df[['euribor_3m', 'oat_10y', 'inflation_hicp']]`, la méthode `.corr()` construit exactement cette matrice $(3, 3)$ dans la variable `matrice_corr` vérifiée par `assert matrice_corr.shape == (3, 3)`.",
+          stepByStepPlan: [
+            "Extraire un sous-DataFrame 2D contenant les $3$ séries via des doubles crochets : `df[['euribor_3m', 'oat_10y', 'inflation_hicp']]`.",
+            "Appeler `.corr()` sur ce sous-tableau et stocker la matrice $(3 \\times 3)$ dans la variable exacte `matrice_corr`.",
+            "Arrondir l'affichage à $3$ décimales avec `.round(3)` dans `print(...)`.",
+          ],
+          concepts: [
+            {
+              symbol: "df[['euribor_3m', 'oat_10y', 'inflation_hicp']]",
+              kind: "Syntaxe",
+              roleInExercise: "**Doubles crochets** obligatoires pour passer une liste Python de $3$ noms de colonnes à `df`. Le résultat est un `DataFrame` 2D de dimension `(16, 3)` (un simple crochet ne peut sélectionner qu'une seule colonne).",
+            },
+            {
+              symbol: ".corr()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode de `DataFrame` qui calcule le coefficient de corrélation de Pearson entre chaque paire de colonnes et renvoie un tableau carré symétrique de diagonale égale à `1.0`.",
+            },
+            {
+              symbol: "matrice_corr",
+              kind: "Variable",
+              roleInExercise: "DataFrame résultat de dimension `(3, 3)` exigé et testé par `testPythonCode` (`assert matrice_corr.shape == (3, 3)`).",
+            },
+            {
+              symbol: ".round(3)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode d'arrondi qui formate les corrélations affichées au millième près sans altérer les valeurs exactes de `matrice_corr`.",
+            },
+            {
+              symbol: "3",
+              kind: "Paramètre",
+              roleInExercise: "Argument entier passé à `.round(3)` indiquant le nombre de chiffres après la virgule à conserver à l'affichage.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Sélectionner les 3 colonnes (doubles crochets) et calculer .corr()
+matrice_corr = df[['___', '___', '___']].___()
+
+# Étape 2 : Afficher la matrice arrondie à 3 décimales
+print(matrice_corr.___(3))`,
+        },
       },
       {
         id: "py-7",
@@ -515,7 +763,55 @@ Pour la série \`df['inflation_hicp']\`, calculez exactement \`q25\`, \`q75\`, \
         solutionCode: "q25 = df['inflation_hicp'].quantile(0.25)\nq75 = df['inflation_hicp'].quantile(0.75)\niqr = q75 - q25\nseuil_haut = q75 + 1.5 * iqr\nprint(f'IQR : {iqr:.2f} % | Seuil Haut Tukey : {seuil_haut:.2f} %')",
         testPythonCode: "assert 'seuil_haut' in globals() and 'iqr' in globals()",
         hints: ["iqr = q75 - q25 puis seuil_haut = q75 + 1.5 * iqr"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La méthode robuste de John Tukey définit l'écart interquartile $\\text{IQR} = Q_{75} - Q_{25}$ puis la clôture supérieure $\\text{Seuil haut} = Q_{75} + 1.5 \\times \\text{IQR}$ (environ $\\mu + 2.698\\sigma$ sous loi normale, avec un point de rupture de $25\\%$). Chaque terme de ces deux équations devient une variable Python dédiée sur `df['inflation_hicp']` : `q25`, `q75`, `iqr`, puis `seuil_haut` (avec `iqr` et `seuil_haut` vérifiés par `testPythonCode`).",
+          stepByStepPlan: [
+            "Extraire les deux quartiles de `df['inflation_hicp']` avec `.quantile(0.25)` dans `q25` et `.quantile(0.75)` dans `q75`.",
+            "Calculer l'étendue interquartile dans la variable exacte `iqr = q75 - q25`.",
+            "Calculer la clôture supérieure de Tukey dans la variable exacte `seuil_haut = q75 + 1.5 * iqr`.",
+            "Afficher `iqr` et `seuil_haut` en pourcentage à $2$ décimales.",
+          ],
+          concepts: [
+            {
+              symbol: "df['inflation_hicp']",
+              kind: "Colonne / Table",
+              roleInExercise: "Série 1D de l'inflation trimestrielle sur laquelle on évalue la dispersion centrale robuste aux chocs de 2022.",
+            },
+            {
+              symbol: ".quantile(0.25) / .quantile(0.75)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Appels à la méthode `.quantile(...)` qui renvoient respectivement le 1er quartile $Q_{25}$ ($1.15\\%$) et le 3e quartile $Q_{75}$ ($7.025\\%$).",
+            },
+            {
+              symbol: "0.25 / 0.75",
+              kind: "Paramètre",
+              roleInExercise: "Niveaux de probabilité cumulée passés à `.quantile(...)` pour isoler les bornes des $50\\%$ centraux de la distribution.",
+            },
+            {
+              symbol: "1.5",
+              kind: "Paramètre",
+              roleInExercise: "Coefficient multiplicateur standard de Tukey : ajoute $1.5$ largeur de boîte au-dessus de $Q_{75}$ pour fixer le seuil d'anomalie statistique.",
+            },
+            {
+              symbol: "iqr / seuil_haut",
+              kind: "Variable",
+              roleInExercise: "Noms exacts des deux variables globales vérifiées par `testPythonCode` (`assert 'seuil_haut' in globals() and 'iqr' in globals()`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Extraire Q25 et Q75 sur la colonne 'inflation_hicp'
+q25 = df['inflation_hicp'].quantile(___)
+q75 = df['inflation_hicp'].quantile(___)
+
+# Étape 2 : Calculer l'écart interquartile iqr = Q75 - Q25
+iqr = ___ - ___
+
+# Étape 3 : Calculer la clôture haute de Tukey
+seuil_haut = ___ + 1.5 * ___
+
+# Étape 4 : Afficher iqr et seuil_haut
+print(f'IQR : {iqr:.2f} % | Seuil Haut Tukey : {seuil_haut:.2f} %')`,
+        },
       },
       {
         id: "py-8",
@@ -591,7 +887,50 @@ Importez \`statsmodels.api as sm\`, créez la matrice de design \`X = sm.add_con
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\nprint(X.head())",
         testPythonCode: "assert 'X' in globals()\nassert 'const' in X.columns",
         hints: ["X = sm.add_constant(df[['euribor_3m']])"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La condition du premier ordre des MCO $\\frac{\\partial SCR}{\\partial \\beta_0} = -2\\sum_{t=1}^T \\hat{e}_t = 0$ exige que la matrice de design $X = (\\mathbf{1}, x) \\in \\mathbb{R}^{T \\times 2}$ contienne une colonne de $1$ afin d'assurer $\\bar{\\hat{e}} = 0$ et d'éviter le biais d'omission de la constante. Comme `sm.OLS` n'ajoute pas d'ordonnée à l'origine automatiquement, `X = sm.add_constant(df[['euribor_3m']])` crée la colonne `'const'` remplie de `1.0` dans `X`, vérifiée par `assert 'const' in X.columns`.",
+          stepByStepPlan: [
+            "Importer le module économétrique avec `import statsmodels.api as sm`.",
+            "Extraire `euribor_3m` en DataFrame 2D via doubles crochets `df[['euribor_3m']]` et lui préfixer la colonne unitaire avec `sm.add_constant(...)` dans la variable exacte `X`.",
+            "Afficher les $5$ premières lignes de `X` via `print(X.head())` pour confirmer la présence de `'const'` à `1.0`.",
+          ],
+          concepts: [
+            {
+              symbol: "import statsmodels.api as sm",
+              kind: "Syntaxe",
+              roleInExercise: "Charge la bibliothèque économétrique `statsmodels.api` sous son alias universel `sm`, donnant accès à `sm.add_constant` et `sm.OLS`.",
+            },
+            {
+              symbol: "sm.add_constant(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction Statsmodels qui ajoute en première colonne un vecteur de `1.0` nommé `'const'` pour estimer $\\beta_0$. Sans cet appel, la droite de régression est forcée de passer par $(0, 0)$.",
+            },
+            {
+              symbol: "df[['euribor_3m']]",
+              kind: "Syntaxe",
+              roleInExercise: "**Doubles crochets** : même avec une seule variable explicative, `[['euribor_3m']]` renvoie un **DataFrame 2D** `(16, 1)` au lieu d'une Série 1D. Cela préserve les étiquettes de colonnes (`'const'` et `'euribor_3m'`) dans `X` et permet à `assert 'const' in X.columns` de réussir.",
+            },
+            {
+              symbol: "X",
+              kind: "Variable",
+              roleInExercise: "Matrice de design $(16, 2)$ contenant `'const'` et `'euribor_3m'`, nommée `X` et vérifiée par les tests automatiques.",
+            },
+            {
+              symbol: "'const'",
+              kind: "Colonne / Table",
+              roleInExercise: "Colonne générée automatiquement par `sm.add_constant` dont toutes les lignes valent `1.0` pour multiplier le paramètre $\\beta_0$.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer statsmodels.api sous l'alias sm
+import statsmodels.api as ___
+
+# Étape 2 : Préfixer la colonne 'const' au DataFrame 2D (doubles crochets obligatoires)
+X = sm.___(df[['___']])
+
+# Étape 3 : Afficher les 5 premières lignes de X
+print(X.___())`,
+        },
       },
       {
         id: "py-9",
@@ -699,7 +1038,58 @@ Construisez \`X = sm.add_constant(df[['euribor_3m']])\` et \`y = df['oat_10y']\`
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\ny = df['oat_10y']\nmodel = sm.OLS(y, X).fit()\nprint(model.summary())",
         testPythonCode: "assert 'model' in globals()\nassert hasattr(model, 'params')",
         hints: ["model = sm.OLS(y, X).fit()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "L'estimateur BLUE de Gauss-Markov minimise $SCR(\\hat{\\beta}_0, \\hat{\\beta}_1) = \\sum_{t=1}^T (y_t - \\hat{\\beta}_0 - \\hat{\\beta}_1 x_t)^2$ pour le modèle $y = X\\beta + \\varepsilon$. En Python, le vecteur cible est la Série 1D `y = df['oat_10y']`, la matrice des régresseurs 2D avec constante est `X = sm.add_constant(df[['euribor_3m']])`, et `model = sm.OLS(y, X).fit()` résout les équations normales pour produire l'objet `model` (vérifié par `hasattr(model, 'params')`).",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm`, construire la matrice 2D `X = sm.add_constant(df[['euribor_3m']])` et le vecteur 1D `y = df['oat_10y']`.",
+            "Instancier la spécification `sm.OLS(y, X)` en respectant strictement l'ordre : `y` en premier, `X` en second.",
+            "Appeler la méthode `.fit()` pour lancer l'estimation et stocker l'objet résultat dans la variable exacte `model`.",
+            "Afficher le rapport économétrique complet avec `print(model.summary())`.",
+          ],
+          concepts: [
+            {
+              symbol: "df[['euribor_3m']] vs df['oat_10y']",
+              kind: "Syntaxe",
+              roleInExercise: "`df[['euribor_3m']]` (doubles crochets $\\to$ DataFrame 2D) forme la matrice `X` pouvant accueillir plusieurs colonnes, tandis que `df['oat_10y']` (simple crochet $\\to$ Série 1D) forme l'unique vecteur cible `y`.",
+            },
+            {
+              symbol: "sm.OLS(y, X)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Constructeur du modèle MCO. Attention à l'ordre impératif des arguments dans Statsmodels : la variable expliquée `y` (`endog`) est toujours passée en **premier**, et la matrice `X` (`exog`) en **second**. Cet appel prépare le modèle sans encore calculer les paramètres.",
+            },
+            {
+              symbol: ".fit()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode (avec parenthèses) qui résout $(X'X)^{-1}X'y$, calcule résidus, $R^2$, $t$-stats et retourne l'objet ajusté contenant tous les résultats.",
+            },
+            {
+              symbol: "model",
+              kind: "Variable",
+              roleInExercise: "Objet résultat retourné par `.fit()` et exigé par `testPythonCode` (`assert hasattr(model, 'params')`).",
+            },
+            {
+              symbol: ".summary()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode (avec parenthèses) de `model` qui génère le tableau statistique complet ($R^2$, $F$, coefficients, $t$, p-valeurs, Jarque-Bera, Durbin-Watson).",
+            },
+            {
+              symbol: "X / y",
+              kind: "Variable",
+              roleInExercise: "Respectivement la matrice explicative `(16, 2)` avec constante et le vecteur endogène `(16,)`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer sm et préparer X (2D avec constante) et y (1D)
+import statsmodels.api as sm
+X = sm.add_constant(df[['___']])
+y = df['___']
+
+# Étape 2 : Spécifier sm.OLS(y, X) puis estimer avec .fit()
+model = sm.___(___, ___).___()
+
+# Étape 3 : Afficher le tableau complet des résultats
+print(model.___())`,
+        },
       },
       {
         id: "py-10",
@@ -761,7 +1151,53 @@ Ajustez le modèle OAT sur Euribor (avec constante), extrayez les coefficients d
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\nmodel = sm.OLS(df['oat_10y'], X).fit()\nbetas = model.params\nprint('Coefficients estimés :\\n', betas)",
         testPythonCode: "assert 'betas' in globals()\nassert 'euribor_3m' in betas",
         hints: ["betas = model.params"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Dans l'équation estimée $\\hat{y}_t = \\hat{\\beta}_0 + \\hat{\\beta}_1 x_t$, la pente $\\hat{\\beta}_1 = \\frac{\\partial \\hat{y}}{\\partial x}$ mesure le *pass-through* d'un choc d'Euribor sur l'OAT 10 ans et $\\hat{\\beta}_0$ le niveau de taux long à Euribor nul. L'attribut sans parenthèses `model.params` extrait directement ce vecteur `[0.6982, 0.7707]` dans la variable exacte `betas` vérifiée par `assert 'euribor_3m' in betas`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et construire `X = sm.add_constant(df[['euribor_3m']])`.",
+            "Estimer le modèle MCO `model = sm.OLS(df['oat_10y'], X).fit()`.",
+            "Lire l'attribut sans parenthèses `model.params` et le stocker dans la variable exacte `betas`.",
+            "Afficher `betas` avec `print('Coefficients estimés :\\n', betas)`.",
+          ],
+          concepts: [
+            {
+              symbol: "model.params",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses !) de l'objet `model` déjà ajusté par `.fit()`. Il contient une `pd.Series` indexée par les noms exacts des colonnes de `X` (`'const'` et `'euribor_3m'`).",
+            },
+            {
+              symbol: "betas",
+              kind: "Variable",
+              roleInExercise: "Série Pandas à $2$ valeurs (`betas['const']` $\\approx 0.6982$, `betas['euribor_3m']` $\\approx 0.7707$), nommée `betas` comme exigé par `testPythonCode` (`assert 'euribor_3m' in betas`).",
+            },
+            {
+              symbol: "df['oat_10y']",
+              kind: "Colonne / Table",
+              roleInExercise: "Série 1D cible passée directement en 1er argument `y` dans `sm.OLS(df['oat_10y'], X)` sans avoir besoin d'une variable intermédiaire.",
+            },
+            {
+              symbol: "sm.add_constant(df[['euribor_3m']])",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Grâce aux doubles crochets sur `'euribor_3m'`, `model.params` hérite des noms `'const'` et `'euribor_3m'` au lieu de simples numéros `x1`, rendant `assert 'euribor_3m' in betas` valide.",
+            },
+            {
+              symbol: "\\n",
+              kind: "Syntaxe",
+              roleInExercise: "Séquence d'échappement signifiant « retour à la ligne » dans `'Coefficients estimés :\\n'` afin que la Série `betas` s'affiche proprement juste en dessous du titre.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer statsmodels et ajuster le modèle OLS simple
+import statsmodels.api as sm
+X = sm.add_constant(df[['___']])
+model = sm.OLS(df['___'], X).___()
+
+# Étape 2 : Lire l'attribut .params (sans parenthèses) dans la variable betas
+betas = model.___
+
+# Étape 3 : Afficher les coefficients estimés
+print('Coefficients estimés :\\n', ___)`,
+        },
       },
       {
         id: "py-11",
@@ -841,7 +1277,53 @@ Ajustez le modèle simple \`oat_10y\` sur \`euribor_3m\` (avec constante), extra
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\nmodel = sm.OLS(df['oat_10y'], X).fit()\np_val = model.pvalues['euribor_3m']\nprint(f'P-valeur de l\\'Euribor : {p_val:.4e}')",
         testPythonCode: "assert 'p_val' in globals()\nassert p_val < 0.05",
         hints: ["p_val = model.pvalues['euribor_3m']"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le test de Student calcule $t_j = \\frac{\\hat{\\beta}_j}{\\widehat{SE}(\\hat{\\beta}_j)} \\sim \\mathcal{T}(T - K - 1)$ puis la p-valeur bilatérale $p = 2\\,\\mathbb{P}(|T_\\nu| \\ge |t_{\\text{obs}}|)$ sous $H_0: \\beta_1 = 0$. Statsmodels stocke ces p-valeurs dans l'attribut `model.pvalues` ; en indexant par clé `model.pvalues['euribor_3m']`, on isole le scalaire `p_val` ($1.736 \\times 10^{-6} < 0.05$) vérifié par `testPythonCode`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm`, préparer `X = sm.add_constant(df[['euribor_3m']])` et ajuster `model = sm.OLS(df['oat_10y'], X).fit()`.",
+            "Accéder à l'attribut `model.pvalues` (sans parenthèses), qui est une Série indexée par `'const'` et `'euribor_3m'`.",
+            "Extraire la p-valeur de l'Euribor par son étiquette `['euribor_3m']` et l'assigner à la variable exacte `p_val`.",
+            "Afficher `p_val` en notation scientifique (`:.4e`) pour lire $1.7360 \\times 10^{-6}$.",
+          ],
+          concepts: [
+            {
+              symbol: "model.pvalues",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses) de `model` renvoyant une `pd.Series` avec les p-valeurs bilatérales des tests $H_0: \\beta_j = 0$ pour chaque colonne de `X`.",
+            },
+            {
+              symbol: "['euribor_3m']",
+              kind: "Syntaxe",
+              roleInExercise: "Sélection par clé sur la Série `model.pvalues` : extrait uniquement le flottant associé à la pente de l'Euribor en excluant la constante.",
+            },
+            {
+              symbol: "p_val",
+              kind: "Variable",
+              roleInExercise: "Flottant scalaire exact vérifié par `testPythonCode` (`assert p_val < 0.05`), confirmant la significativité statistique de l'Euribor.",
+            },
+            {
+              symbol: ".fit()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Exécute l'estimation MCO et peuple automatiquement tous les attributs d'inférence (`.params`, `.bse`, `.tvalues`, `.pvalues`).",
+            },
+            {
+              symbol: ":.4e",
+              kind: "Syntaxe",
+              roleInExercise: "Spécificateur de format scientifique dans une f-string (`1.7360e-06`) : indispensable pour lire une p-valeur très inférieure à $0.0001$ qui s'afficherait sinon comme `0.0000`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Estimer le modèle OLS OAT ~ const + Euribor
+import statsmodels.api as sm
+X = sm.add_constant(df[['___']])
+model = sm.OLS(df['___'], X).fit()
+
+# Étape 2 : Extraire la p-valeur de 'euribor_3m' depuis l'attribut model.pvalues
+p_val = model.___['___']
+
+# Étape 3 : Afficher p_val en notation scientifique
+print(f"P-valeur de l'Euribor : {p_val:.4e}")`,
+        },
       },
       {
         id: "py-12",
@@ -914,7 +1396,54 @@ Estimez \`model = sm.OLS(df['oat_10y'], X).fit()\` avec constante, stockez \`r2 
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\nmodel = sm.OLS(df['oat_10y'], X).fit()\nr2 = model.rsquared\nr2_adj = model.rsquared_adj\nprint(f'R² : {r2 * 100:.2f} % | R² ajusté : {r2_adj * 100:.2f} %')",
         testPythonCode: "assert 'r2' in globals() and 'r2_adj' in globals()\nassert r2 > 0.70",
         hints: ["model.rsquared et model.rsquared_adj"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La décomposition orthogonale $SCT = SCE + SCR$ (valable grâce à la constante) définit $R^2 = 1 - \\frac{SCR}{SCT}$ et le $R^2$ ajusté de Theil $\\bar{R}^2 = 1 - (1 - R^2)\\frac{T - 1}{T - K - 1}$ qui pénalise l'ajout de régresseurs. Statsmodels expose directement ces deux grandeurs sans parenthèses via `r2 = model.rsquared` ($0.8144$) et `r2_adj = model.rsquared_adj` ($0.8012$), les deux variables contrôlées par `testPythonCode` (`r2 > 0.70`).",
+          stepByStepPlan: [
+            "Estimer `model = sm.OLS(df['oat_10y'], sm.add_constant(df[['euribor_3m']])).fit()`.",
+            "Lire l'attribut flottant `model.rsquared` (sans parenthèses) dans la variable exacte `r2`.",
+            "Lire l'attribut flottant `model.rsquared_adj` (sans parenthèses) dans la variable exacte `r2_adj`.",
+            "Afficher les deux scores convertis en pourcentage (`* 100`) dans `print(...)`.",
+          ],
+          concepts: [
+            {
+              symbol: "model.rsquared",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** flottant (sans parenthèses) retournant $R^2 \\in [0, 1]$ ($0.8144$ ici), soit la part de variance de `oat_10y` expliquée par `euribor_3m`.",
+            },
+            {
+              symbol: "model.rsquared_adj",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** flottant (sans parenthèses) retournant $\\bar{R}^2$ ($0.8012$ ici), ajusté des degrés de liberté $T - K - 1 = 14$.",
+            },
+            {
+              symbol: "r2 / r2_adj",
+              kind: "Variable",
+              roleInExercise: "Noms exacts des deux variables globales vérifiées par les tests (`assert r2 > 0.70`).",
+            },
+            {
+              symbol: "sm.add_constant(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Garantit que $SCT = SCE + SCR$ reste exact : sans constante, Statsmodels calcule un $R^2$ non centré artificiellement gonflé.",
+            },
+            {
+              symbol: "r2 * 100",
+              kind: "Syntaxe",
+              roleInExercise: "Multiplication effectuée uniquement dans la f-string d'affichage (`81.44 %`) afin de laisser la variable `r2` en proportion décimale (`0.8144`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Ajuster le modèle OLS simple avec constante
+import statsmodels.api as sm
+X = sm.add_constant(df[['___']])
+model = sm.OLS(df['___'], X).fit()
+
+# Étape 2 : Lire les deux attributs de qualité d'ajustement (sans parenthèses)
+r2 = model.___
+r2_adj = model.___
+
+# Étape 3 : Afficher les deux indicateurs en pourcentage
+print(f'R² : {r2 * 100:.2f} % | R² ajusté : {r2_adj * 100:.2f} %')`,
+        },
       },
       {
         id: "py-13",
@@ -1005,7 +1534,61 @@ Convertissez \`sm.add_constant(df[['euribor_3m']]).values\` en matrice \`X\` et 
         solutionCode: "import numpy as np\nimport statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']]).values\ny = df['oat_10y'].values\nbeta_numpy = np.linalg.inv(X.T @ X) @ X.T @ y\nprint('Coefficients calculés à la main :', beta_numpy)",
         testPythonCode: "assert 'beta_numpy' in globals()\nassert len(beta_numpy) == 2",
         hints: ["np.linalg.inv(X.T @ X) @ X.T @ y"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "L'annulation du gradient matriciel $\\nabla_\\beta SCR(\\beta) = -2X'y + 2X'X\\beta = 0$ conduit aux équations normales et à la solution analytique $\\hat{\\beta} = (X'X)^{-1}X'y$. Chaque symbole mathématique se traduit mot à mot en NumPy : `.values` extrait les matrices pures `X` $(16, 2)$ et `y` $(16,)$, `.T` effectue la transposition $X'$, `@` exécute le produit matriciel, et `np.linalg.inv(...)` inverse $X'X$ pour produire le vecteur `beta_numpy` (`len(beta_numpy) == 2`).",
+          stepByStepPlan: [
+            "Importer `numpy as np` et `statsmodels.api as sm`.",
+            "Convertir `sm.add_constant(df[['euribor_3m']])` en tableau NumPy 2D avec `.values` dans `X`, et `df['oat_10y'].values` en vecteur 1D dans `y`.",
+            "Implémenter exactement $(X'X)^{-1}X'y$ via `np.linalg.inv(X.T @ X) @ X.T @ y` et stocker le résultat dans la variable exacte `beta_numpy`.",
+            "Afficher `beta_numpy` pour vérifier qu'on retrouve `[0.698217, 0.770731]` à la main.",
+          ],
+          concepts: [
+            {
+              symbol: ".values",
+              kind: "Syntaxe",
+              roleInExercise: "Attribut Pandas (sans parenthèses) qui convertit un `DataFrame` ou une `Series` en tableau NumPy pur (`np.ndarray`) débarrassé de l'index et des noms de colonnes, prêt pour le calcul matriciel.",
+            },
+            {
+              symbol: ".T",
+              kind: "Syntaxe",
+              roleInExercise: "Attribut NumPy (sans parenthèses) renvoyant la transposée $X'$ : transforme la matrice `X` de dimension `(16, 2)` en `(2, 16)`.",
+            },
+            {
+              symbol: "@",
+              kind: "Syntaxe",
+              roleInExercise: "Opérateur Python de **produit matriciel** (équivalent à `np.matmul`). Ne jamais le remplacer par `*` qui multiplie élément par élément ! `X.T @ X` donne une matrice `(2, 2)`.",
+            },
+            {
+              symbol: "np.linalg.inv(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction du sous-module d'algèbre linéaire `np.linalg` qui calcule l'inverse matricielle $(X'X)^{-1}$ (exige que $\\det(X'X) \\neq 0$, soit pas de colinéarité parfaite).",
+            },
+            {
+              symbol: "X / y",
+              kind: "Variable",
+              roleInExercise: "Tableaux NumPy de dimensions respectives `(16, 2)` et `(16,)` construits via `.values`.",
+            },
+            {
+              symbol: "beta_numpy",
+              kind: "Variable",
+              roleInExercise: "Vecteur NumPy 1D à $2$ composantes $[\\hat{\\beta}_0, \\hat{\\beta}_1]$, vérifié par `assert len(beta_numpy) == 2`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer NumPy et Statsmodels
+import numpy as np
+import statsmodels.api as sm
+
+# Étape 2 : Convertir X (2D) et y (1D) en tableaux NumPy purs via .values
+X = sm.add_constant(df[['___']]).___
+y = df['___'].___
+
+# Étape 3 : Traduire (X^T X)^(-1) X^T y avec .T, @ et np.linalg.inv
+beta_numpy = np.linalg.___(X.___ @ X) @ X.___ @ ___
+
+# Étape 4 : Afficher le vecteur des coefficients calculés manuellement
+print('Coefficients calculés à la main :', beta_numpy)`,
+        },
       },
       {
         id: "py-14",
@@ -1076,7 +1659,56 @@ Ajustez le modèle simple \`oat_10y ~ const + euribor_3m\`, extrayez \`residus =
         solutionCode: "import statsmodels.api as sm\nX = sm.add_constant(df[['euribor_3m']])\nmodel = sm.OLS(df['oat_10y'], X).fit()\nresidus = model.resid\nmoyenne_residus = residus.mean()\nprint(f'Moyenne des résidus : {moyenne_residus:.6e}')",
         testPythonCode: "assert 'residus' in globals()\nassert abs(moyenne_residus) < 1e-4",
         hints: ["residus = model.resid puis residus.mean()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Lorsque `X` contient la constante $\\mathbf{1}$, les équations normales $X'e = 0$ garantissent algébriquement que les résidus empiriques $e_t = y_t - \\hat{y}_t$ vérifient $\\sum_{t=1}^T e_t = 0$, donc $\\bar{e} = 0$. En Python, `residus = model.resid` extrait le vecteur des $16$ résidus, et `moyenne_residus = residus.mean()` vaut $-3.47 \\times 10^{-16}$ (zéro à la précision machine IEEE-754 près), passant le test `abs(moyenne_residus) < 1e-4`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et ajuster le modèle simple avec constante : `model = sm.OLS(df['oat_10y'], X).fit()`.",
+            "Extraire le vecteur des résidus empiriques via l'attribut sans parenthèses `residus = model.resid`.",
+            "Calculer sa moyenne arithmétique avec `.mean()` dans la variable exacte `moyenne_residus`.",
+            "Afficher `moyenne_residus` en format scientifique `:.6e` pour observer l'ordre de grandeur $10^{-16}$.",
+          ],
+          concepts: [
+            {
+              symbol: "model.resid",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses) du modèle estimé qui retourne la Série Pandas des $16$ résidus empiriques $e_t = y_t - X_t\\hat{\\beta}$.",
+            },
+            {
+              symbol: "residus",
+              kind: "Variable",
+              roleInExercise: "Nom exact de la variable globale contenant la Série des résidus, vérifiée par `assert 'residus' in globals()`.",
+            },
+            {
+              symbol: ".mean()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode Pandas appelée sur la Série `residus` pour calculer $\\bar{e} = \\frac{1}{T}\\sum_{t=1}^T e_t$.",
+            },
+            {
+              symbol: "moyenne_residus",
+              kind: "Variable",
+              roleInExercise: "Scalaire flottant théoriquement nul (numériquement $\\approx -3.47 \\times 10^{-16}$), vérifié par `assert abs(moyenne_residus) < 1e-4`.",
+            },
+            {
+              symbol: ":.6e",
+              kind: "Syntaxe",
+              roleInExercise: "Formatage scientifique à $6$ décimales indispensable pour distinguer un vrai zéro machine (`-3.469447e-16`) d'un zéro approximatif.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Ajuster le modèle OLS simple avec constante
+import statsmodels.api as sm
+X = sm.add_constant(df[['___']])
+model = sm.OLS(df['___'], X).fit()
+
+# Étape 2 : Lire le vecteur des résidus via l'attribut .resid
+residus = model.___
+
+# Étape 3 : Calculer la moyenne empirique des résidus
+moyenne_residus = residus.___()
+
+# Étape 4 : Afficher en notation scientifique
+print(f'Moyenne des résidus : {moyenne_residus:.6e}')`,
+        },
       },
       {
         id: "py-15",
@@ -1172,7 +1804,53 @@ Créez \`X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\` et \`
         solutionCode: "import statsmodels.api as sm\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\ny = df['oat_10y']\nmodel_multi = sm.OLS(y, X_multi).fit()\nprint(model_multi.summary())",
         testPythonCode: "assert 'model_multi' in globals()\nassert len(model_multi.params) == 3\nassert model_multi.rsquared > 0.85",
         hints: ["model_multi = sm.OLS(y, X_multi).fit()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "L'équation de Fisher multivariée $y_t = \\beta_0 + \\beta_1 x_{1t} + \\beta_2 x_{2t} + \\varepsilon_t$ et le théorème de Frisch-Waugh-Lovell isolent l'effet *ceteris paribus* de chaque facteur tout en éliminant le biais de variable omise sur l'Euribor. En passant la liste de $2$ colonnes `df[['euribor_3m', 'inflation_hicp']]` à `sm.add_constant`, on obtient la matrice `(16, 3)` `X_multi` et le modèle `model_multi` (`len(model_multi.params) == 3`, `rsquared = 0.984 > 0.85`).",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et créer la matrice 2D à $3$ colonnes `X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])`.",
+            "Extraire la cible 1D `y = df['oat_10y']`.",
+            "Estimer le modèle multiple dans la variable exacte `model_multi = sm.OLS(y, X_multi).fit()`.",
+            "Afficher `print(model_multi.summary())` pour comparer $\\bar{R}^2 = 0.982$ et la baisse de $\\hat{\\beta}_{\\text{euribor}}$ à `0.6458`.",
+          ],
+          concepts: [
+            {
+              symbol: "df[['euribor_3m', 'inflation_hicp']]",
+              kind: "Syntaxe",
+              roleInExercise: "**Doubles crochets** sélectionnant une liste de $2$ variables explicatives pour construire un `DataFrame` 2D `(16, 2)`.",
+            },
+            {
+              symbol: "sm.add_constant(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Ajoute la colonne `'const'` en 1re position, transformant `X_multi` en une matrice `(16, 3)` (`const`, `euribor_3m`, `inflation_hicp`).",
+            },
+            {
+              symbol: "X_multi / y",
+              kind: "Variable",
+              roleInExercise: "Respectivement la matrice des $2$ facteurs macro + constante et la Série 1D `df['oat_10y']` passées dans `sm.OLS(y, X_multi)`.",
+            },
+            {
+              symbol: "model_multi",
+              kind: "Variable",
+              roleInExercise: "Nom exact de l'objet modèle multivarié vérifié par `testPythonCode` (`len(model_multi.params) == 3` et `model_multi.rsquared > 0.85`).",
+            },
+            {
+              symbol: ".summary()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Affiche le tableau complet des $3$ coefficients, les critères `AIC`/`BIC`, la statistique `F` et le test de `Durbin-Watson`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Construire X_multi (constante + 2 variables) et la cible y
+import statsmodels.api as sm
+X_multi = sm.add_constant(df[['___', '___']])
+y = df['___']
+
+# Étape 2 : Estimer le modèle multiple dans model_multi
+model_multi = sm.OLS(___, ___).___()
+
+# Étape 3 : Afficher le rapport économétrique complet
+print(model_multi.___())`,
+        },
       },
       {
         id: "py-16",
@@ -1250,7 +1928,54 @@ Avec $F = 401.4251$ et $\\text{Prob}(F) = 2.0662 \\times 10^{-12}$, la significa
         solutionCode: "import statsmodels.api as sm\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\nmodel_multi = sm.OLS(df['oat_10y'], X_multi).fit()\nf_stat = model_multi.fvalue\nf_pval = model_multi.f_pvalue\nprint(f'Statistique F : {f_stat:.2f} | Prob(F) : {f_pval:.4e}')",
         testPythonCode: "assert 'f_stat' in globals() and 'f_pval' in globals()\nassert f_pval < 0.01",
         hints: ["model_multi.fvalue et model_multi.f_pvalue"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le test de significativité globale de Fisher vérifie $H_0: \\beta_1 = \\beta_2 = 0$ via $F = \\frac{R^2 / K}{(1 - R^2) / (T - K - 1)} \\sim \\mathcal{F}(K, T - K - 1)$ avec $K = 2$ et $T - K - 1 = 13$. Sur `model_multi`, les deux attributs sans parenthèses `model_multi.fvalue` ($401.43$) et `model_multi.f_pvalue` ($2.07 \\times 10^{-12}$) alimentent exactement les variables `f_stat` et `f_pval` vérifiées par `assert f_pval < 0.01`.",
+          stepByStepPlan: [
+            "Estimer le modèle multivarié `model_multi = sm.OLS(df['oat_10y'], sm.add_constant(df[['euribor_3m', 'inflation_hicp']])).fit()`.",
+            "Lire l'attribut sans parenthèses `model_multi.fvalue` dans la variable exacte `f_stat`.",
+            "Lire l'attribut sans parenthèses `model_multi.f_pvalue` dans la variable exacte `f_pval`.",
+            "Afficher `f_stat` (`:.2f`) et `f_pval` (`:.4e`) pour constater le rejet massif de $H_0$.",
+          ],
+          concepts: [
+            {
+              symbol: "model_multi.fvalue",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** flottant (sans parenthèses) qui expose la statistique $F$ du modèle global ($401.4251$ ici).",
+            },
+            {
+              symbol: "model_multi.f_pvalue",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** flottant (sans parenthèses, avec un underscore `_`) qui donne $\\text{Prob}(F\\text{-statistic})$ sous $H_0: \\beta_1 = \\beta_2 = 0$.",
+            },
+            {
+              symbol: "f_stat / f_pval",
+              kind: "Variable",
+              roleInExercise: "Variables globales exactes vérifiées par `testPythonCode` (`assert f_pval < 0.01`).",
+            },
+            {
+              symbol: "df[['euribor_3m', 'inflation_hicp']]",
+              kind: "Colonne / Table",
+              roleInExercise: "Les $K = 2$ régresseurs testés conjointement, laissant $T - K - 1 = 13$ degrés de liberté au dénominateur de la loi $\\mathcal{F}(2, 13)$.",
+            },
+            {
+              symbol: ":.2f / :.4e",
+              kind: "Syntaxe",
+              roleInExercise: "Formatage décimal à $2$ chiffres pour `f_stat` et format scientifique pour la très faible p-valeur `f_pval` (`2.0662e-12`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Estimer le modèle multivarié OAT ~ const + Euribor + Inflation
+import statsmodels.api as sm
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+model_multi = sm.OLS(df['oat_10y'], X_multi).fit()
+
+# Étape 2 : Lire la statistique F et sa p-valeur (attributs sans parenthèses)
+f_stat = model_multi.___
+f_pval = model_multi.___
+
+# Étape 3 : Afficher les deux valeurs du test de Fisher
+print(f'Statistique F : {f_stat:.2f} | Prob(F) : {f_pval:.4e}')`,
+        },
       },
       {
         id: "py-17",
@@ -1322,7 +2047,55 @@ Importez \`variance_inflation_factor\` depuis \`statsmodels.stats.outliers_influ
         solutionCode: "import statsmodels.api as sm\nfrom statsmodels.stats.outliers_influence import variance_inflation_factor\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\nvif_euribor = variance_inflation_factor(X_multi.values, 1)\nprint(f'VIF Euribor : {vif_euribor:.3f}')",
         testPythonCode: "assert 'vif_euribor' in globals()\nassert vif_euribor < 10.0",
         hints: ["variance_inflation_factor(X_multi.values, 1)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "L'équation de variance $\\operatorname{Var}(\\hat{\\beta}_j) = \\frac{\\sigma^2}{SCT_j} \\cdot VIF_j$ avec $VIF_j = \\frac{1}{1 - R_j^2}$ quantifie l'inflation d'incertitude due à la multicolinéarité. La fonction `variance_inflation_factor(X_multi.values, 1)` régresse la colonne d'indice `1` (`'euribor_3m'`) sur la constante (indice `0`, obligatoire pour que $R_1^2$ soit centré) et `'inflation_hicp'` (indice `2`), produisant `vif_euribor` ($1.126 < 10.0$) vérifié par `testPythonCode`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et `variance_inflation_factor` depuis `statsmodels.stats.outliers_influence`.",
+            "Construire la matrice avec constante `X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])` (où `'const'` occupe l'indice `0`).",
+            "Convertir `X_multi` en tableau NumPy avec `.values` et appeler `variance_inflation_factor(X_multi.values, 1)` dans la variable exacte `vif_euribor`.",
+            "Afficher `vif_euribor` pour confirmer l'absence de multicolinéarité ($VIF \\approx 1.126 \\ll 5$).",
+          ],
+          concepts: [
+            {
+              symbol: "variance_inflation_factor(exog, exog_idx)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction de `statsmodels.stats.outliers_influence` qui calcule $1 / (1 - R_j^2)$ en régressant la colonne `exog_idx` sur toutes les autres colonnes de la matrice `exog`.",
+            },
+            {
+              symbol: "X_multi.values",
+              kind: "Syntaxe",
+              roleInExercise: "Attribut convertissant le DataFrame `X_multi` en **tableau NumPy 2D** `(16, 3)` : `variance_inflation_factor` exige un `ndarray` NumPy brut et échoue si on lui passe directement un `DataFrame` Pandas.",
+            },
+            {
+              symbol: "1",
+              kind: "Paramètre",
+              roleInExercise: "Indice entier (en base $0$ en Python) pointant vers la **2e colonne** de `X_multi`, c'est-à-dire `'euribor_3m'` (`0` = `'const'`, `1` = `'euribor_3m'`, `2` = `'inflation_hicp'`).",
+            },
+            {
+              symbol: "sm.add_constant(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Présence impérative de `'const'` à l'indice `0` : sans colonne constante dans `X_multi`, la régression auxiliaire ne serait pas centrée et le VIF calculé serait faux.",
+            },
+            {
+              symbol: "vif_euribor",
+              kind: "Variable",
+              roleInExercise: "Flottant scalaire exact ($1.1261$) vérifié par `assert vif_euribor < 10.0`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer statsmodels et la fonction variance_inflation_factor
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import ___
+
+# Étape 2 : Construire X_multi (constante en colonne 0, euribor_3m en colonne 1)
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+
+# Étape 3 : Convertir en tableau NumPy (.values) et passer l'indice 1
+vif_euribor = ___(X_multi.___, ___)
+
+# Étape 4 : Afficher le VIF de l'Euribor
+print(f'VIF Euribor : {vif_euribor:.3f}')`,
+        },
       },
       {
         id: "py-18",
@@ -1400,7 +2173,56 @@ Importez \`het_breuschpagan\` depuis \`statsmodels.stats.diagnostic\`, estimez \
         solutionCode: "import statsmodels.api as sm\nfrom statsmodels.stats.diagnostic import het_breuschpagan\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\nmodel_multi = sm.OLS(df['oat_10y'], X_multi).fit()\nlm_stat, p_val_bp, f_stat, f_pval = het_breuschpagan(model_multi.resid, X_multi)\nprint(f'P-valeur Breusch-Pagan : {p_val_bp:.4e}')",
         testPythonCode: "assert 'p_val_bp' in globals()",
         hints: ["het_breuschpagan(model_multi.resid, X_multi)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le test de Breusch-Pagan estime la régression auxiliaire $e_t^2 = \\gamma_0 + \\gamma_1 X_{1t} + \\gamma_2 X_{2t} + u_t$ et forme $LM = T \\cdot R^2_{\\text{aux}} \\xrightarrow{d} \\chi^2(K)$ sous $H_0: \\sigma_t^2 = \\sigma^2$. L'appel `het_breuschpagan(model_multi.resid, X_multi)` réalise cette régression auxiliaire et renvoie $4$ valeurs dont la 2e, décompactée dans `p_val_bp` ($0.0434 < 0.05$), est vérifiée par `assert 'p_val_bp' in globals()`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et `het_breuschpagan` depuis `statsmodels.stats.diagnostic`.",
+            "Estimer `model_multi = sm.OLS(df['oat_10y'], X_multi).fit()` avec `X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])`.",
+            "Appeler `het_breuschpagan(model_multi.resid, X_multi)` et décompacter les $4$ sorties dans `lm_stat, p_val_bp, f_stat, f_pval`.",
+            "Afficher `p_val_bp` (`:.4e`) et constater le rejet de l'homoscédasticité au seuil de $5\\%$ ($p = 0.0434$).",
+          ],
+          concepts: [
+            {
+              symbol: "het_breuschpagan(resid, exog_het)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction de `statsmodels.stats.diagnostic` qui élève `resid` au carré, le régresse sur `exog_het` et retourne le tuple `(lm_stat, lm_pvalue, f_stat, f_pvalue)`.",
+            },
+            {
+              symbol: "model_multi.resid",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses) fournissant le vecteur des résidus $e_t$ en 1er argument de `het_breuschpagan`.",
+            },
+            {
+              symbol: "X_multi",
+              kind: "Paramètre",
+              roleInExercise: "Matrice `(16, 3)` passée en 2e argument (`exog_het`) : elle **doit** contenir `'const'` pour représenter l'ordonnée à l'origine $\\gamma_0$ de la régression auxiliaire.",
+            },
+            {
+              symbol: "lm_stat, p_val_bp, f_stat, f_pval = ...",
+              kind: "Syntaxe",
+              roleInExercise: "**Décompactage de tuple** (*tuple unpacking*) permettant de ranger simultanément les $4$ valeurs retournées dans $4$ variables ; `p_val_bp` occupe obligatoirement la 2e position.",
+            },
+            {
+              symbol: "p_val_bp",
+              kind: "Variable",
+              roleInExercise: "P-valeur du test $LM = T \\cdot R^2_{\\text{aux}}$ exigée par `testPythonCode` (`0.0434 < 0.05` ici).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer statsmodels et het_breuschpagan
+import statsmodels.api as sm
+from statsmodels.stats.diagnostic import ___
+
+# Étape 2 : Ajuster model_multi sur OAT ~ const + Euribor + Inflation
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+model_multi = sm.OLS(df['oat_10y'], X_multi).fit()
+
+# Étape 3 : Lancer le test sur model_multi.resid et X_multi, puis décompacter les 4 retours
+lm_stat, p_val_bp, f_stat, f_pval = ___(model_multi.___, ___)
+
+# Étape 4 : Afficher la p-valeur LM
+print(f'P-valeur Breusch-Pagan : {p_val_bp:.4e}')`,
+        },
       },
       {
         id: "py-19",
@@ -1476,7 +2298,52 @@ Estimez \`model_robuste = sm.OLS(y, X_multi).fit(cov_type='HC1')\` avec \`y = df
         solutionCode: "import statsmodels.api as sm\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\ny = df['oat_10y']\nmodel_robuste = sm.OLS(y, X_multi).fit(cov_type='HC1')\nprint('Écarts-types robustes HC1 :\\n', model_robuste.bse)",
         testPythonCode: "assert 'model_robuste' in globals()\nassert hasattr(model_robuste, 'bse')",
         hints: ["fit(cov_type='HC1')"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La formule sandwich de White (HC1) corrige la matrice de variance sous hétéroscédasticité via $\\widehat{\\operatorname{Var}}_{\\text{HC1}}(\\hat{\\beta}) = \\frac{T}{T-K-1}(X'X)^{-1}\\left(\\sum_{t=1}^T e_t^2 x_t x_t'\\right)(X'X)^{-1}$, tout en gardant $\\hat{\\beta}_{\\text{HC1}} = \\hat{\\beta}_{\\text{OLS}}$ inchangé. Dans Statsmodels, passer `cov_type='HC1'` à `.fit(...)` active cette matrice sandwich et met à jour les écarts-types robustes dans `model_robuste.bse` (vérifié par `hasattr(model_robuste, 'bse')`).",
+          stepByStepPlan: [
+            "Construire `X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])` et `y = df['oat_10y']`.",
+            "Appeler `.fit(cov_type='HC1')` sur `sm.OLS(y, X_multi)` et stocker l'objet obtenu dans la variable exacte `model_robuste`.",
+            "Afficher les écarts-types robustes via l'attribut sans parenthèses `model_robuste.bse`.",
+          ],
+          concepts: [
+            {
+              symbol: ".fit(cov_type='HC1')",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode d'estimation avec argument nommé qui substitue la matrice sandwich de White à la formule homoscédastique classique $\\hat{\\sigma}^2(X'X)^{-1}$.",
+            },
+            {
+              symbol: "cov_type='HC1'",
+              kind: "Paramètre",
+              roleInExercise: "Chaîne de caractères sélectionnant l'estimateur *Heteroscedasticity-Consistent* de type 1 (avec correction des degrés de liberté $\\frac{T}{T-K-1}$, standard en économétrie).",
+            },
+            {
+              symbol: "model_robuste",
+              kind: "Variable",
+              roleInExercise: "Nom exact de l'objet modèle robuste vérifié par `testPythonCode` (`assert hasattr(model_robuste, 'bse')`).",
+            },
+            {
+              symbol: "model_robuste.bse",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses, pour *Beta Standard Errors*) renvoyant la Série des $3$ écarts-types robustes $\\widehat{SE}_{\\text{HC1}}(\\hat{\\beta}_j)$.",
+            },
+            {
+              symbol: "X_multi / y",
+              kind: "Variable",
+              roleInExercise: "Matrice `(16, 3)` avec constante et vecteur `(16,)` identiques au modèle MCO standard (les coefficients `.params` restent rigoureusement inchangés).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Préparer X_multi (avec constante) et la série cible y
+import statsmodels.api as sm
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+y = df['oat_10y']
+
+# Étape 2 : Estimer le modèle en activant cov_type='HC1' dans .fit()
+model_robuste = sm.OLS(y, X_multi).fit(cov_type='___')
+
+# Étape 3 : Afficher les écarts-types robustes via l'attribut .bse
+print('Écarts-types robustes HC1 :\\n', model_robuste.___)`,
+        },
       },
       {
         id: "py-20",
@@ -1552,7 +2419,56 @@ Importez \`jarque_bera\` depuis \`statsmodels.stats.stattools\`, estimez \`model
         solutionCode: "import statsmodels.api as sm\nfrom statsmodels.stats.stattools import jarque_bera\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\nmodel_multi = sm.OLS(df['oat_10y'], X_multi).fit()\njb_stat, p_val_jb, skew, kurt = jarque_bera(model_multi.resid)\nprint(f'Statistique JB : {jb_stat:.2f} | P-valeur : {p_val_jb:.4f}')",
         testPythonCode: "assert 'p_val_jb' in globals()",
         hints: ["jarque_bera(model_multi.resid)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La statistique de Jarque-Bera combine Skewness $S$ et Kurtosis $K$ selon $JB = \\frac{T}{6}\\left(S^2 + \\frac{(K - 3)^2}{4}\\right) \\xrightarrow{d} \\chi^2(2)$ pour tester la normalité des perturbations. L'appel `jarque_bera(model_multi.resid)` calcule ces $4$ quantités sur les résidus multivariés et décompacte la p-valeur ($0.9389 > 0.05$) en 2e position dans `p_val_jb`, la variable vérifiée par `assert 'p_val_jb' in globals()`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et `jarque_bera` depuis `statsmodels.stats.stattools`.",
+            "Estimer `model_multi = sm.OLS(df['oat_10y'], sm.add_constant(df[['euribor_3m', 'inflation_hicp']])).fit()`.",
+            "Appeler `jarque_bera(model_multi.resid)` et décompacter les $4$ sorties dans `jb_stat, p_val_jb, skew, kurt`.",
+            "Afficher `jb_stat` et `p_val_jb` pour valider la normalité ($p = 0.9389 \\gg 0.05$).",
+          ],
+          concepts: [
+            {
+              symbol: "jarque_bera(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction de `statsmodels.stats.stattools` qui calcule le test d'asymétrie et d'aplatissement et renvoie un quadruplet `(jb_stat, p_val_jb, skew, kurt)`.",
+            },
+            {
+              symbol: "model_multi.resid",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** vecteur des $16$ résidus $e_t$ passé en unique argument à `jarque_bera`.",
+            },
+            {
+              symbol: "jb_stat, p_val_jb, skew, kurt = ...",
+              kind: "Syntaxe",
+              roleInExercise: "Décompactage exact du tuple de $4$ flottants retourné : la statistique $JB$ ($0.13$) en 1er, la p-valeur en 2e (`p_val_jb`), le Skewness $S$ en 3e et le Kurtosis total $K$ ($\\approx 3$ sous normalité) en 4e.",
+            },
+            {
+              symbol: "p_val_jb",
+              kind: "Variable",
+              roleInExercise: "P-valeur $\\chi^2(2)$ vérifiée par `testPythonCode` (`assert 'p_val_jb' in globals()`).",
+            },
+            {
+              symbol: "skew / kurt",
+              kind: "Variable",
+              roleInExercise: "Respectivement les moments d'ordre $3$ ($S = -0.199$) et d'ordre $4$ ($K = 2.825$ ; attention, Statsmodels renvoie le kurtosis total et non l'excès $K - 3$).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer sm et la fonction jarque_bera
+import statsmodels.api as sm
+from statsmodels.stats.stattools import ___
+
+# Étape 2 : Estimer le modèle multivarié
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+model_multi = sm.OLS(df['oat_10y'], X_multi).fit()
+
+# Étape 3 : Tester les résidus et décompacter les 4 valeurs retournées
+jb_stat, p_val_jb, skew, kurt = ___(model_multi.___)
+
+# Étape 4 : Afficher jb_stat et p_val_jb
+print(f'Statistique JB : {jb_stat:.2f} | P-valeur : {p_val_jb:.4f}')`,
+        },
       },
       {
         id: "py-21",
@@ -1635,7 +2551,56 @@ Importez \`durbin_watson\` depuis \`statsmodels.stats.stattools\`, ajustez \`mod
         solutionCode: "import statsmodels.api as sm\nfrom statsmodels.stats.stattools import durbin_watson\nX_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\nmodel_multi = sm.OLS(df['oat_10y'], X_multi).fit()\ndw_stat = durbin_watson(model_multi.resid)\nprint(f'Statistique Durbin-Watson : {dw_stat:.4f}')",
         testPythonCode: "assert 'dw_stat' in globals()\nassert dw_stat > 0",
         hints: ["durbin_watson(model_multi.resid)"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La statistique de Durbin-Watson mesure l'autocorrélation sérielle d'ordre $1$ des résidus par $DW = \\frac{\\sum_{t=2}^T (e_t - e_{t-1})^2}{\\sum_{t=1}^T e_t^2} \\approx 2(1 - \\hat{\\rho}_1) \\in [0, 4]$, et la règle de Granger-Newbold alerte dès que $R^2 > DW$. Sur le vecteur chronologique `model_multi.resid`, `durbin_watson(model_multi.resid)` calcule ce ratio dans la variable exacte `dw_stat` ($1.4031 > 0$) vérifiée par `testPythonCode`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et `durbin_watson` depuis `statsmodels.stats.stattools`.",
+            "Estimer `model_multi = sm.OLS(df['oat_10y'], sm.add_constant(df[['euribor_3m', 'inflation_hicp']])).fit()` sur les trimestres ordonnés de `df`.",
+            "Calculer `dw_stat = durbin_watson(model_multi.resid)`.",
+            "Afficher `dw_stat` à $4$ décimales et le comparer à $2.0$ ainsi qu'au $R^2$ (`0.9841`).",
+          ],
+          concepts: [
+            {
+              symbol: "durbin_watson(resids)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction de `statsmodels.stats.stattools` qui calcule le ratio des différences au carré sur la somme des carrés des résidus et retourne un scalaire dans $[0, 4]$.",
+            },
+            {
+              symbol: "model_multi.resid",
+              kind: "Syntaxe",
+              roleInExercise: "Série chronologique des $16$ résidus de `2020-Q1` à `2023-Q4`. L'ordre des lignes dans `df` est essentiel car la fonction compare $e_t$ à $e_{t-1}$.",
+            },
+            {
+              symbol: "dw_stat",
+              kind: "Variable",
+              roleInExercise: "Scalaire exact vérifié par `testPythonCode` (`assert dw_stat > 0`) : vaut `1.4031` dans le modèle multiple contre `0.3403` dans le modèle simple.",
+            },
+            {
+              symbol: "X_multi",
+              kind: "Variable",
+              roleInExercise: "Matrice `(16, 3)` intégrant constante, `euribor_3m` et `inflation_hicp`.",
+            },
+            {
+              symbol: ":.4f",
+              kind: "Syntaxe",
+              roleInExercise: "Affiche `dw_stat` avec $4$ décimales pour évaluer finement sa distance à la cible idéale $2.0000$ ($\\hat{\\rho}_1 = 0$).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer sm et durbin_watson
+import statsmodels.api as sm
+from statsmodels.stats.stattools import ___
+
+# Étape 2 : Estimer le modèle multivarié
+X_multi = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+model_multi = sm.OLS(df['oat_10y'], X_multi).fit()
+
+# Étape 3 : Calculer la statistique DW sur les résidus
+dw_stat = ___(model_multi.___)
+
+# Étape 4 : Afficher dw_stat
+print(f'Statistique Durbin-Watson : {dw_stat:.4f}')`,
+        },
       },
       {
         id: "py-22",
@@ -1703,7 +2668,60 @@ Importez \`adfuller\` depuis \`statsmodels.tsa.stattools\`, calculez \`serie_dif
         solutionCode: "from statsmodels.tsa.stattools import adfuller\nserie_diff = df['oat_10y'].diff().dropna()\nresult_adf = adfuller(serie_diff)\np_val_adf = result_adf[1]\nprint(f'P-valeur ADF sur OAT différenciée : {p_val_adf:.4e}')",
         testPythonCode: "assert 'p_val_adf' in globals() and 'result_adf' in globals()\nassert 0.0 <= p_val_adf <= 1.0, 'La p-valeur ADF doit être comprise entre 0 et 1.'",
         hints: ["result_adf[1] correspond à la p-valeur."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le test de racine unitaire ADF estime $\\Delta y_t = \\mu + \\gamma y_{t-1} + \\sum_{i=1}^p \\phi_i \\Delta y_{t-i} + u_t$ sous l'hypothèse nulle de non-stationnarité $H_0: \\gamma = 0$. En Python, `serie_diff = df['oat_10y'].diff().dropna()` construit la variation première $\\Delta \\text{OAT}_t$ sans valeur manquante, `result_adf = adfuller(serie_diff)` exécute la régression ADF, et `p_val_adf = result_adf[1]` extrait la p-valeur de MacKinnon (toutes deux vérifiées par `testPythonCode`).",
+          stepByStepPlan: [
+            "Importer `adfuller` depuis `statsmodels.tsa.stattools`.",
+            "Calculer la série différenciée nettoyée `serie_diff = df['oat_10y'].diff().dropna()` (passage de $16$ à $15$ trimestres).",
+            "Exécuter le test de racine unitaire : `result_adf = adfuller(serie_diff)`.",
+            "Extraire la p-valeur située à l'indice `1` (`p_val_adf = result_adf[1]`) et l'afficher en notation scientifique.",
+          ],
+          concepts: [
+            {
+              symbol: "adfuller(...)",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Fonction du module séries temporelles `statsmodels.tsa.stattools` qui sélectionne les retards optimaux par AIC et retourne un tuple de $6$ éléments : `(adf_stat, p_value, usedlag, nobs, crit_values, icbest)`.",
+            },
+            {
+              symbol: ".diff()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode Pandas calculant la variation première $y_t - y_{t-1}$ : la première ligne (`2020-Q1`), qui n'a pas de trimestre précédent, devient automatiquement `NaN`.",
+            },
+            {
+              symbol: ".dropna()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Méthode Pandas enchaînée immédiatement après `.diff()` pour supprimer le `NaN` initial ; sans elle, `adfuller` plante sur la valeur manquante.",
+            },
+            {
+              symbol: "serie_diff",
+              kind: "Variable",
+              roleInExercise: "Série Pandas de $15$ variations trimestrielles $\\Delta \\text{OAT}_t$ prête pour le test ADF.",
+            },
+            {
+              symbol: "result_adf[1]",
+              kind: "Syntaxe",
+              roleInExercise: "Indexation par position sur le tuple `result_adf` : l'indice `0` contient la statistique $t_{\\text{ADF}}$, et l'indice **`1`** contient la p-valeur de MacKinnon.",
+            },
+            {
+              symbol: "result_adf / p_val_adf",
+              kind: "Variable",
+              roleInExercise: "Variables exactes exigées par `testPythonCode` (`assert 0.0 <= p_val_adf <= 1.0`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer adfuller depuis statsmodels.tsa.stattools
+from statsmodels.tsa.stattools import ___
+
+# Étape 2 : Calculer la différence première de 'oat_10y' et supprimer le NaN initial
+serie_diff = df['___'].___().___()
+
+# Étape 3 : Exécuter le test ADF dans result_adf
+result_adf = ___(serie_diff)
+
+# Étape 4 : Extraire la p-valeur (indice 1 du tuple) dans p_val_adf et afficher
+p_val_adf = result_adf[___]
+print(f'P-valeur ADF sur OAT différenciée : {p_val_adf:.4e}')`,
+        },
       },
       {
         id: "py-23",
@@ -1795,7 +2813,54 @@ Créez \`df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna
         solutionCode: "import statsmodels.api as sm\ndf_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()\nX_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])\ny_dyn = df_diff['oat_10y']\nmodel_dyn = sm.OLS(y_dyn, X_dyn).fit()\nprint(model_dyn.summary())",
         testPythonCode: "assert 'model_dyn' in globals()\nassert len(model_dyn.params) == 3",
         hints: ["model_dyn = sm.OLS(y_dyn, X_dyn).fit()"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "La transformation $\\Delta y_t = (1-L)y_t = y_t - y_{t-1}$ stationnarise les marches aléatoires pour estimer la dynamique de court terme $\\Delta \\text{OAT}_t = \\alpha + \\beta_1 \\Delta \\text{Euribor}_t + \\beta_2 \\Delta \\text{Inflation}_t + u_t$. L'appel conjoint `df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()` synchronise les $15$ variations trimestrielles, puis `model_dyn = sm.OLS(y_dyn, X_dyn).fit()` estime les $3$ paramètres vérifiés par `len(model_dyn.params) == 3`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et différencier les $3$ séries simultanément via `df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()`.",
+            "Construire la matrice 2D avec constante `X_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])` et le vecteur 1D `y_dyn = df_diff['oat_10y']`.",
+            "Estimer le modèle dynamique stationnaire dans la variable exacte `model_dyn = sm.OLS(y_dyn, X_dyn).fit()`.",
+            "Afficher `model_dyn.summary()` et vérifier que la statistique Durbin-Watson vaut désormais `1.962`.",
+          ],
+          concepts: [
+            {
+              symbol: "df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()",
+              kind: "Syntaxe",
+              roleInExercise: "Enchaînement sur un sous-DataFrame à $3$ colonnes : `.diff()` calcule la variation $\\Delta_t$ de chaque série et `.dropna()` supprime la première ligne (`2020-Q1`) pour garder exactement les $15$ mêmes dates alignées.",
+            },
+            {
+              symbol: "df_diff",
+              kind: "Variable",
+              roleInExercise: "DataFrame `(15, 3)` contenant les variations trimestrielles stationnaires $\\Delta \\text{OAT}$, $\\Delta \\text{Euribor}$ et $\\Delta \\text{Inflation}$.",
+            },
+            {
+              symbol: "df_diff[['euribor_3m', 'inflation_hicp']] vs df_diff['oat_10y']",
+              kind: "Syntaxe",
+              roleInExercise: "Doubles crochets (`DataFrame` 2D) pour les régresseurs passés à `sm.add_constant`, simple crochet (`Series` 1D) pour `y_dyn`.",
+            },
+            {
+              symbol: "X_dyn / y_dyn",
+              kind: "Variable",
+              roleInExercise: "Matrice explicative `(15, 3)` avec constante et vecteur cible `(15,)` du modèle en différences premières.",
+            },
+            {
+              symbol: "model_dyn",
+              kind: "Variable",
+              roleInExercise: "Nom exact de l'objet modèle dynamique exigé par `testPythonCode` (`assert len(model_dyn.params) == 3`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Différencier les 3 séries ensemble et supprimer la ligne NaN
+import statsmodels.api as sm
+df_diff = df[['___', '___', '___']].___().___()
+
+# Étape 2 : Préparer X_dyn (2D avec constante) et y_dyn (1D) depuis df_diff
+X_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])
+y_dyn = df_diff['___']
+
+# Étape 3 : Estimer model_dyn et afficher son summary()
+model_dyn = sm.OLS(___, ___).fit()
+print(model_dyn.summary())`,
+        },
       },
       {
         id: "py-24",
@@ -1871,7 +2936,53 @@ Sur \`df_diff\` (modèle dynamique en différences premières), estimez \`model_
         solutionCode: "import statsmodels.api as sm\ndf_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()\nX_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])\ny_dyn = df_diff['oat_10y']\nmodel_hac = sm.OLS(y_dyn, X_dyn).fit(cov_type='HAC', cov_kwds={'maxlags': 2})\nprint(model_hac.summary())",
         testPythonCode: "assert 'model_hac' in globals()\nassert hasattr(model_hac, 'bse')",
         hints: ["cov_type='HAC', cov_kwds={'maxlags': 2}"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "L'estimateur HAC de Newey-West forme $\\hat{\\Omega}_{\\text{HAC}} = \\hat{\\Gamma}_0 + \\sum_{l=1}^L \\left(1 - \\frac{l}{L+1}\\right)(\\hat{\\Gamma}_l + \\hat{\\Gamma}_l')$ avec les poids triangulaires de Bartlett garantissant une matrice semi-définie positive. Dans Statsmodels, passer `cov_type='HAC'` et `cov_kwds={'maxlags': 2}` à `.fit(...)` fixe le retard maximal $L = 2$ trimestres et construit `model_hac` (vérifié par `hasattr(model_hac, 'bse')`).",
+          stepByStepPlan: [
+            "Reconstruire le DataFrame stationnaire `df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()`, puis `X_dyn` et `y_dyn`.",
+            "Estimer `model_hac = sm.OLS(y_dyn, X_dyn).fit(cov_type='HAC', cov_kwds={'maxlags': 2})`.",
+            "Afficher `print(model_hac.summary())` pour observer l'indication `Covariance Type: HAC` et les $z$-statistiques robustes.",
+          ],
+          concepts: [
+            {
+              symbol: "cov_type='HAC'",
+              kind: "Paramètre",
+              roleInExercise: "Argument nommé passé à `.fit(...)` qui active la correction de Newey-West robuste à la fois à l'hétéroscédasticité et à l'autocorrélation (*Heteroscedasticity and Autocorrelation Consistent*).",
+            },
+            {
+              symbol: "cov_kwds={'maxlags': 2}",
+              kind: "Paramètre",
+              roleInExercise: "Dictionnaire Python (`dict`) transmettant les options de l'estimateur de covariance : `'maxlags': 2` fixe la fenêtre de troncature $L = 2$ dans le noyau de Bartlett $w_l = 1 - \\frac{l}{L+1}$.",
+            },
+            {
+              symbol: "2",
+              kind: "Paramètre",
+              roleInExercise: "Nombre maximal de trimestres de retard $L$ retenus dans la somme des autocovariances $\\hat{\\Gamma}_l$, calibré pour $T = 15$ selon $\\lfloor 4(T/100)^{2/9}\\rfloor$.",
+            },
+            {
+              symbol: "model_hac",
+              kind: "Variable",
+              roleInExercise: "Nom exact de l'objet modèle corrigé HAC vérifié par `testPythonCode` (`assert hasattr(model_hac, 'bse')`).",
+            },
+            {
+              symbol: "df_diff",
+              kind: "Variable",
+              roleInExercise: "DataFrame des variations trimestrielles stationnaires `(15, 3)` assurant la convergence des autocovariances $\\hat{\\Gamma}_l$.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Reconstruire le modèle dynamique stationnaire sur df_diff
+import statsmodels.api as sm
+df_diff = df[['oat_10y', 'euribor_3m', 'inflation_hicp']].diff().dropna()
+X_dyn = sm.add_constant(df_diff[['euribor_3m', 'inflation_hicp']])
+y_dyn = df_diff['oat_10y']
+
+# Étape 2 : Appeler .fit() avec cov_type='HAC' et cov_kwds={'maxlags': 2}
+model_hac = sm.OLS(y_dyn, X_dyn).fit(cov_type='___', cov_kwds={'___': ___})
+
+# Étape 3 : Afficher le summary() HAC
+print(model_hac.summary())`,
+        },
       },
       {
         id: "py-25",
@@ -1953,7 +3064,71 @@ Estimez \`model = sm.OLS(y, X).fit()\` avec \`X = sm.add_constant(df[['euribor_3
         solutionCode: "import statsmodels.api as sm\nimport matplotlib.pyplot as plt\nX = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])\ny = df['oat_10y']\nmodel = sm.OLS(y, X).fit()\nplt.figure(figsize=(9, 4))\nplt.plot(df['periode'], y, label='OAT 10Y Observée', marker='o', color='#0284c7')\nplt.plot(df['periode'], model.fittedvalues, label='OAT 10Y Prédite', linestyle='--', color='#059669')\nplt.title('Modèle Économétrique ALM : OAT 10Y vs Euribor & Inflation')\nplt.legend()\nplt.tight_layout()\nplt.show()",
         testPythonCode: "assert 'model' in globals()\nassert len(plt.get_fignums()) >= 0",
         hints: ["Remplacez '...' par 'model.fittedvalues'."],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Tracer simultanément la série observée $y_t$ et sa projection orthogonale $\\hat{y}_t = X\\hat{\\beta}$ permet de diagnostiquer visuellement les points d'inflexion et la persistance des résidus $e_t = y_t - \\hat{y}_t$ au-delà du seul $R^2$. Dans Matplotlib, `y` fournit les valeurs observées, l'attribut `model.fittedvalues` fournit directement la Série des $\\hat{y}_t$ alignée sur `df['periode']`, et `model` est contrôlé par `assert 'model' in globals()`.",
+          stepByStepPlan: [
+            "Importer `statsmodels.api as sm` et `matplotlib.pyplot as plt`, puis estimer `model = sm.OLS(y, X).fit()` avec `X = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])` et `y = df['oat_10y']`.",
+            "Initialiser la figure graphique avec `plt.figure(figsize=(9, 4))`.",
+            "Tracer successivement `y` puis `model.fittedvalues` en fonction de `df['periode']` avec leurs styles (`label`, `marker`, `linestyle`, `color`).",
+            "Ajouter le titre (`plt.title(...)`) et la légende (`plt.legend()`).",
+            "Ajuster les marges avec `plt.tight_layout()` puis rendre l'image avec `plt.show()`.",
+          ],
+          concepts: [
+            {
+              symbol: "import matplotlib.pyplot as plt",
+              kind: "Syntaxe",
+              roleInExercise: "Importe l'interface graphique `pyplot` de Matplotlib sous son alias standard `plt`.",
+            },
+            {
+              symbol: "model.fittedvalues",
+              kind: "Syntaxe",
+              roleInExercise: "**Attribut** (sans parenthèses) du modèle estimé `model` contenant la Série Pandas des valeurs prédites $\\hat{y}_t = X\\hat{\\beta}$ alignée sur les $16$ trimestres.",
+            },
+            {
+              symbol: "df['periode']",
+              kind: "Colonne / Table",
+              roleInExercise: "Colonne des étiquettes temporelles (`'2020-Q1'` à `'2023-Q4'`) passée en 1er argument (abscisses $x$) de chaque appel `plt.plot(x, y)`.",
+            },
+            {
+              symbol: "plt.figure(figsize=(9, 4))",
+              kind: "Fonction / Méthode",
+              roleInExercise: "Crée le canevas `Figure` aux dimensions `(9, 4)` pouces pour assurer une lecture claire de l'axe des trimestres.",
+            },
+            {
+              symbol: "label / marker / linestyle / color",
+              kind: "Paramètre",
+              roleInExercise: "Paramètres nommés de `plt.plot(...)` : `label` nomme chaque courbe dans `plt.legend()`, `marker='o'` dessine les points observés, `linestyle='--'` trace les prédictions en pointillés et `color` fixe la couleur hexadécimale.",
+            },
+            {
+              symbol: "plt.tight_layout() / plt.show()",
+              kind: "Fonction / Méthode",
+              roleInExercise: "`tight_layout()` évite le rognage des étiquettes sur les bords et `show()` déclenche le rendu du graphique dans l'interface.",
+            },
+            {
+              symbol: "model",
+              kind: "Variable",
+              roleInExercise: "Objet OLS multivarié vérifié par `assert 'model' in globals()`.",
+            },
+          ],
+          guidedCode: `# Étape 1 : Importer statsmodels et matplotlib.pyplot, puis estimer model
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+X = sm.add_constant(df[['euribor_3m', 'inflation_hicp']])
+y = df['oat_10y']
+model = sm.OLS(y, X).fit()
+
+# Étape 2 : Créer le canevas et tracer Observé (y) vs Prédit (model.fittedvalues)
+plt.figure(figsize=(9, 4))
+plt.plot(df['___'], y, label='OAT 10Y Observée', marker='o', color='#0284c7')
+plt.plot(df['___'], model.___, label='OAT 10Y Prédite', linestyle='--', color='#059669')
+
+# Étape 3 : Titrer, afficher la légende, optimiser les marges et afficher
+plt.title('Modèle Économétrique ALM : OAT 10Y vs Euribor & Inflation')
+plt.legend()
+plt.___()
+plt.___()`,
+        },
       },
       {
         id: "py-26",
@@ -2047,7 +3222,52 @@ Définissez \`valeur_portefeuille = 100_000_000\`, \`duration_modifiee = 7.0\` e
         solutionCode: "valeur_portefeuille = 100_000_000\nduration_modifiee = 7.0\nchoc_taux = 0.02\nperte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille\nprint(f'Perte en capital estimée : {perte_estimee:,.2f} €')",
         testPythonCode: "assert 'perte_estimee' in globals()\nassert abs(perte_estimee - (-14_000_000.0)) < 1e-4",
         hints: ["perte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille"],
-        datasets: []
+        datasets: [],
+        guide: {
+          theoryToPracticeLink: "Le développement de Taylor à l'ordre 1 de la valeur obligataire donne $\\Delta V \\approx -D^* \\cdot \\Delta y \\cdot V_0$, qui relie linéairement la duration modifiée $D^* = 7.0$, le choc parallèle de $+200\\text{ bps}$ ($\\Delta y = +0.02$, proche de la VaR $99.5\\%$ bicentenaire Solvabilité II) et l'encours $V_0 = 100\\text{ M EUR}$. En Python, cette formule devient exactement `perte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille` ($-14\\,000\\,000.00\\text{ EUR}$), vérifiée à $10^{-4}$ près par `testPythonCode`.",
+          stepByStepPlan: [
+            "Déclarer les $3$ variables scalaires d'entrée : `valeur_portefeuille = 100_000_000`, `duration_modifiee = 7.0` et `choc_taux = 0.02` (en décimal).",
+            "Calculer la perte au premier ordre dans la variable exacte `perte_estimee = -duration_modifiee * choc_taux * valeur_portefeuille` (sans oublier le signe moins `-`).",
+            "Afficher le résultat formaté avec séparateur de milliers et $2$ décimales via `{perte_estimee:,.2f}`.",
+          ],
+          concepts: [
+            {
+              symbol: "100_000_000",
+              kind: "Syntaxe",
+              roleInExercise: "Littéral entier Python utilisant le séparateur visuel underscore (`_`) pour lire facilement `100 millions` sans changer sa valeur numérique (`100000000`).",
+            },
+            {
+              symbol: "0.02",
+              kind: "Paramètre",
+              roleInExercise: "Choc de taux de $+200\\text{ bps}$ ($+2.0\\%$) converti en **décimal** ($200 / 10\\,000 = 0.02$) pour être homogène avec la duration exprimée en années.",
+            },
+            {
+              symbol: "valeur_portefeuille / duration_modifiee / choc_taux",
+              kind: "Variable",
+              roleInExercise: "Trois variables scalaires représentant $V_0$ ($100\\text{ M EUR}$), $D^*$ ($7.0$) et $\\Delta y$ ($+0.02$).",
+            },
+            {
+              symbol: "perte_estimee",
+              kind: "Variable",
+              roleInExercise: "Variable exacte vérifiée par `testPythonCode` (`abs(perte_estimee - (-14_000_000.0)) < 1e-4`) ; le signe négatif traduit la perte en capital lorsque les taux montent.",
+            },
+            {
+              symbol: ":,.2f",
+              kind: "Syntaxe",
+              roleInExercise: "Spécificateur de format f-string : la virgule `,` insère un séparateur de milliers et `.2f` affiche $2$ décimales (`-14,000,000.00`).",
+            },
+          ],
+          guidedCode: `# Étape 1 : Définir les paramètres financiers du portefeuille (montant, duration, choc en décimal)
+valeur_portefeuille = 100_000_000
+duration_modifiee = ___
+choc_taux = ___
+
+# Étape 2 : Appliquer la formule Taylor Ordre 1 : -D* * dy * V0
+perte_estimee = -___ * ___ * ___
+
+# Étape 3 : Afficher la perte en capital formatée
+print(f'Perte en capital estimée : {perte_estimee:,.2f} €')`,
+        },
       }
     ]
   };
