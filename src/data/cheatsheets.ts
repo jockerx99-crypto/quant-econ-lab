@@ -18,7 +18,7 @@ export interface CheatSheetSection {
 
 export interface ModuleCheatSheet {
   moduleId: string;
-  version: "V1" | "V2" | "V3";
+  version: "V1" | "V2" | "V3" | "V4";
   moduleNumber: number;
   title: string;
   language: "sql" | "python";
@@ -40,16 +40,16 @@ export function resolveCheatSheetModuleId(moduleId: string): string {
 
 export const MODULE_CHEAT_SHEETS: ModuleCheatSheet[] = [
   // =========================================================================
-  // V1 — MODULE 1 & MODULE 3 : SQL POUR L'ACTUARIAT & LA DATA PREP
+  // V1 — MODULE 1 & MODULE 2 : SQL POUR L'ACTUARIAT & LA DATA PREP
   // =========================================================================
   {
     moduleId: "sql-actuariat",
     version: "V1",
     moduleNumber: 1,
-    title: "SQL pour l'Actuariat & la Data Prep (M1 & M3)",
+    title: "SQL pour l'Actuariat & la Data Prep (M1 & M2)",
     language: "sql",
     overview:
-      "Toutes les clauses SQL (SQLite) des Modules 1 et 3 (Suite) pour extraire, nettoyer, joindre des polices d'assurance, calculer des ratios S/P et appliquer des fonctions de fenêtrage.",
+      "Toutes les clauses SQL (SQLite) des Modules 1 et 2 (Suite) pour extraire, nettoyer, joindre des polices d'assurance, calculer des ratios S/P et appliquer des fonctions de fenêtrage.",
     datasetsSummary: [
       "assures : police_id, assure_id, age, sexe, region, type_contrat, bonus_malus, anciennete_permis, type_vehicule, puissance_fiscale, usage, prime_annuelle",
       "sinistres : sinistre_id, police_id, date_survenance, date_declaration, nature_sinistre, cout_dommages_materiels, cout_corporel, cout_total, responsabilite_pct, statut_dossier",
@@ -89,7 +89,7 @@ WHERE region = 'IDF'
           {
             id: "sql-v1-in-between",
             title: "Liste (IN), Intervalle (BETWEEN), Motifs (LIKE) & NULL",
-            exerciseRef: "M1 Ex. 7–8 · M3 Ex. 8–11",
+            exerciseRef: "M1 Ex. 7–8 · M2 Ex. 8–11",
             syntax: "WHERE col IN ('A', 'B') | BETWEEN a AND b | LIKE '2022-%' | IS NOT NULL",
             description:
               "`IN` remplace une suite de `OR`. `BETWEEN a AND b` inclut les deux bornes. `LIKE '2022-%'` filtre par motif textuel (`%` = 0+ caractères). Testez toujours les champs vides via `IS NULL` ou `IS NOT NULL` (jamais `= NULL`).",
@@ -153,7 +153,7 @@ ORDER BY prime_moyenne DESC;`,
           {
             id: "sql-v1-case-when",
             title: "Discrétisation & Comptage Conditionnel (CASE WHEN)",
-            exerciseRef: "M1 Ex. 17 · M3 Ex. 18–19",
+            exerciseRef: "M1 Ex. 17 · M2 Ex. 18–19",
             syntax: "SUM(CASE WHEN cond THEN 1 ELSE 0 END) AS nb_cas",
             description:
               "Crée des classes tarifaires ou compte en une seule passe la fréquence d'un événement cible (`1` si la condition est vraie, `0` sinon).",
@@ -186,7 +186,7 @@ FROM sinistres;`,
           {
             id: "sql-v1-inner-vs-left",
             title: "INNER JOIN, LEFT JOIN, COUNT(col) & Anti-Jointure (IS NULL)",
-            exerciseRef: "M1 Ex. 19–21 · M3 Ex. 21–23",
+            exerciseRef: "M1 Ex. 19–21 · M2 Ex. 21–23",
             syntax: "LEFT JOIN sinistres s ON a.police_id = s.police_id | COUNT(s.sinistre_id)",
             description:
               "`INNER JOIN` ne garde que les assurés sinistrés. `LEFT JOIN` préserve **100 % de l'exposition** : utilisez `COUNT(s.sinistre_id)` (et non `COUNT(*)`) pour obtenir `0` sans sinistre, ou `WHERE s.sinistre_id IS NULL` pour isoler les contrats indemnes (anti-jointure).",
@@ -273,16 +273,264 @@ ORDER BY rang_cout ASC;`,
   },
 
   // =========================================================================
-  // V1 — MODULE 2 & MODULE 4 : PYTHON POUR L'ÉCONOMÉTRIE, RISQUE & PRICING
+  // V1 — MODULE 3 : PYTHON PROGRAMMATION POUR LA FINANCE (BASES -> ALM)
+  // =========================================================================
+  {
+    moduleId: "python-bases-finance",
+    version: "V1",
+    moduleNumber: 3,
+    title: "Python Programmation : Fonctions, Boucles & Finance (M3)",
+    language: "python",
+    overview:
+      "Toutes les briques de programmation Python pure du Module 3 (24 exercices) : variables typées et f-strings, branchements if/elif/else, listes/slicing, dictionnaires, boucles for/enumerate et while (bissection), fonctions réutilisables def/return, compréhensions, algèbre matricielle sans NumPy et simulation Monte Carlo.",
+    datasetsSummary: [
+      "Bibliothèque standard : math (sqrt, exp, log), random (seed, gauss), time (perf_counter)",
+      "Structures natives Python (list, dict, tuple) appliquées aux flux de trésorerie, portefeuilles et sinistres",
+      "Benchmarks & ALM : comparaison boucle pure Python vs NumPy (Ex. 23) et stress-test de bilan multi-fonctions (Ex. 24)",
+    ],
+    sections: [
+      {
+        id: "py-v1-m5-bases",
+        title: "1. Variables, Conditions & Structures de Données",
+        subtitle: "Typage financier, barèmes conditionnels, listes et dictionnaires",
+        entries: [
+          {
+            id: "py-v1-m5-vars-fstring",
+            title: "Variables typées, capitalisation & formatage f-string",
+            exerciseRef: "M3 Ex. 1–2",
+            syntax: 'C_n = C_0 * (1 + r) ** n ; f"{valeur:,.2f}"',
+            formula: r`$$C_n = C_0 (1 + r_{\text{ann}})^n \qquad ; \qquad r_{\text{mens}} = (1 + r_{\text{ann}})^{1/12} - 1$$`,
+            description:
+              "En Python, utilisez des flottants (`float`) ou entiers (`int`, avec séparateur `_` comme `25_000`) et privilégiez l'opérateur puissance `**` pour la capitalisation composée. Les f-strings formatent proprement montants (`:,.2f`) et taux (`:.4%`).",
+            exampleCode: r`C0, r_ann, n = 25_000, 0.035, 4
+C_n = C0 * (1 + r_ann) ** n
+r_mens = (1 + r_ann) ** (1 / 12) - 1
+print(f"Valeur future : {C_n:,.2f} EUR | Taux mensuel eq. : {r_mens:.4%}")`,
+            tags: ["variables", "float", "f-string", "capitalisation", "taux équivalent"],
+          },
+          {
+            id: "py-v1-m5-if-elif",
+            title: "Branchements conditionnels if / elif / else (Barèmes & Triggers)",
+            exerciseRef: "M3 Ex. 3–4",
+            syntax: "if cond1: ... elif cond2: ... else: ...",
+            formula: r`$$\text{SCR Ratio} = \frac{\text{Fonds Propres}}{\text{SCR}} \qquad ; \qquad \text{Bonus}_{t+1} = \max(0.50,\; \text{clip})$$`,
+            description:
+              "`if / elif / else` évalue des paliers mutuellement exclusifs de haut en bas (barème de frais, classification Solvabilité II, règle de bonus-malus). Écrivez les bornes dans un ordre strictement monotone (croissant ou décroissant).",
+            exampleCode: r`ratio_scr = 1.42
+if ratio_scr >= 1.50:
+    statut = "CONFORTABLE"
+elif ratio_scr >= 1.00:
+    statut = "VIGILANCE"
+else:
+    statut = "ALERTE_SCR"
+print(statut)`,
+            tags: ["if", "elif", "else", "Solvabilité II", "barème"],
+          },
+          {
+            id: "py-v1-m5-lists-slicing",
+            title: "Listes, slicing [start:stop] & moyenne mobile glissante",
+            exerciseRef: "M3 Ex. 5–6",
+            syntax: "liste[i - w + 1 : i + 1] | zip(prix[:-1], prix[1:])",
+            formula: r`$$R_t = \frac{P_t - P_{t-1}}{P_{t-1}} \qquad ; \qquad \text{MM}_k(t) = \frac{1}{k}\sum_{j=t-k+1}^{t} P_j$$`,
+            description:
+              "Le slicing `[a:b]` extrait une sous-liste semi-ouverte (inclut `a`, exclut `b`). En finance de marché, `zip(prix[:-1], prix[1:])` aligne instantanément $P_{t-1}$ et $P_t$ sans erreur d'indice.",
+            exampleCode: r`prix = [100.0, 102.0, 99.96, 103.5, 105.0]
+rendements = [(p1 - p0) / p0 for p0, p1 in zip(prix[:-1], prix[1:])]
+mm3 = [sum(prix[i-2:i+1]) / 3 for i in range(2, len(prix))]
+print(rendements, mm3)`,
+            tags: ["list", "slicing", "zip", "rendement", "moyenne mobile"],
+          },
+          {
+            id: "py-v1-m5-dicts",
+            title: "Dictionnaires clé-valeur, .get() & agrégation par secteur",
+            exerciseRef: "M3 Ex. 7–8",
+            syntax: "d.get(cle, 0.0) | for k, v in d.items(): ...",
+            formula: r`$$V_{\text{ptf}} = \sum_{a \in \mathcal{A}} q_a P_a \qquad ; \qquad w_s = \frac{\sum_{a \in s} V_a}{V_{\text{ptf}}}$$`,
+            description:
+              "Un dictionnaire associe un actif ou secteur à sa valorisation ou son poids en $O(1)$. Utilisez `d.get(cle, 0.0)` lors de l'accumulation par catégorie pour éviter `KeyError`, et `.items()` pour itérer sur paires `(cle, valeur)`.",
+            exampleCode: r`positions = [("AAPL", "Tech", 12000), ("MSFT", "Tech", 8000), ("TTE", "Energie", 10000)]
+par_secteur = {}
+for _, secteur, val in positions:
+    par_secteur[secteur] = par_secteur.get(secteur, 0.0) + val
+total = sum(par_secteur.values())
+poids = {s: v / total for s, v in par_secteur.items()}`,
+            tags: ["dict", "get", "items", "allocation", "portefeuille"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-m5-loops",
+        title: "2. Boucles for, while & Algorithmes Numériques",
+        subtitle: "Actualisation DCF, bissection de TRI, drawdown et matrices",
+        entries: [
+          {
+            id: "py-v1-m5-for-enumerate",
+            title: "Boucles for & enumerate(flux, start=1) — Actualisation VAN",
+            exerciseRef: "M3 Ex. 9–10 · Ex. 18",
+            syntax: "for t, cf in enumerate(flux, start=1): van += cf / (1 + y) ** t",
+            formula: r`$$\operatorname{VAN}(y) = -I_0 + \sum_{t=1}^{T} \frac{CF_t}{(1 + y)^t}$$`,
+            description:
+              "`enumerate(flux, start=1)` fournit simultanément l'indice temporel $t \\ge 1$ et le cash-flow $CF_t$, idéal pour sommer des flux actualisés ou bâtir un tableau d'amortissement d'emprunt ligne par ligne.",
+            exampleCode: r`def van(flux, taux, investissement=0.0):
+    total = -investissement
+    for t, cf in enumerate(flux, start=1):
+        total += cf / ((1 + taux) ** t)
+    return total
+
+print(round(van([5, 5, 105], 0.04, 100.0), 4))`,
+            tags: ["for", "enumerate", "VAN", "actualisation", "cash-flows"],
+          },
+          {
+            id: "py-v1-m5-while-bissection",
+            title: "Boucle while — Recherche de TRI / YTM par bissection (dichotomie)",
+            exerciseRef: "M3 Ex. 17 · Ex. 20",
+            syntax: "while (hi - lo) > tol and it < max_iter: mid = 0.5 * (lo + hi)",
+            formula: r`$$\operatorname{VAN}(y^*) = 0 \implies y_{k+1} = \frac{y_{\text{lo}} + y_{\text{hi}}}{2}$$`,
+            description:
+              "Quand une boucle n'a pas un nombre connu d'itérations (convergence d'un taux actuariel TRI ou durée de réinvestissement), `while` réduit l'intervalle `[lo, hi]` de moitié tant que la tolérance `1e-7` n'est pas atteinte, avec un garde-fou `max_iter`.",
+            exampleCode: r`def tri_bissection(flux, invest, lo=-0.99, hi=2.0, tol=1e-7):
+    f_lo = -invest + sum(cf / (1 + lo) ** t for t, cf in enumerate(flux, 1))
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        f_mid = -invest + sum(cf / (1 + mid) ** t for t, cf in enumerate(flux, 1))
+        if abs(f_mid) < tol or (hi - lo) / 2 < tol:
+            return mid
+        if f_lo * f_mid <= 0:
+            hi = mid
+        else:
+            lo, f_lo = mid, f_mid
+    return 0.5 * (lo + hi)`,
+            tags: ["while", "bissection", "dichotomie", "TRI", "YTM"],
+          },
+          {
+            id: "py-v1-m5-drawdown",
+            title: "Tracking séquentiel en O(N) — Pic historique & Max Drawdown",
+            exerciseRef: "M3 Ex. 11 · Ex. 21",
+            syntax: "if v > pic: pic = v ; dd = (v - pic) / pic",
+            formula: r`$$M_t = \max_{0 \le s \le t} V_s \qquad ; \qquad DD_t = \frac{V_t - M_t}{M_t} \le 0$$`,
+            description:
+              "En conservant le sommet courant `pic` et le pire creux `mdd` en mémoire dans une seule passe `for`, on calcule le Max Drawdown en temps $O(N)$ et mémoire $O(1)$.",
+            exampleCode: r`nav = [100, 108, 95, 92, 104, 112]
+pic, mdd = nav[0], 0.0
+for v in nav:
+    if v > pic:
+        pic = v
+    dd = (v - pic) / pic
+    if dd < mdd:
+        mdd = dd
+print(f"Max Drawdown : {mdd:.2%}")`,
+            tags: ["drawdown", "algorithme", "O(N)", "risque", "boucle for"],
+          },
+          {
+            id: "py-v1-m5-nested-matrix",
+            title: "Double boucle imbriquée & produit quadratique w' Sigma w",
+            exerciseRef: "M3 Ex. 16 · Ex. 22",
+            syntax: "for i in range(n): for j in range(n): var += w[i] * cov[i][j] * w[j]",
+            formula: r`$$\sigma_p^2 = \mathbf{w}^\top \Sigma \mathbf{w} = \sum_{i=1}^{n} \sum_{j=1}^{n} w_i \, w_j \, \Sigma_{ij}$$`,
+            description:
+              "Avant de vectoriser sous NumPy, comprendre la double boucle imbriquée (`i` lignes, `j` colonnes) rend explicite la complexité $O(n^2)$ de la variance de portefeuille ou d'une grille d'options 2D `(S, sigma)`.",
+            exampleCode: r`import math
+w = [0.6, 0.4]
+cov = [[0.04, 0.006], [0.006, 0.01]]
+var_p = 0.0
+for i in range(len(w)):
+    for j in range(len(w)):
+        var_p += w[i] * cov[i][j] * w[j]
+vol_p = math.sqrt(var_p)`,
+            tags: ["boucles imbriquées", "matrice", "Markowitz", "covariance", "grille 2D"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-m5-funcs",
+        title: "3. Fonctions def / return, Compréhensions & Projets Finance",
+        subtitle: "Architecture modulaire, programmation défensive et Monte Carlo pur Python",
+        entries: [
+          {
+            id: "py-v1-m5-def-return",
+            title: "Fonctions def, paramètres par défaut & retour multiple (tuple)",
+            exerciseRef: "M3 Ex. 12–13",
+            syntax: "def prix_et_duration(nominal, taux_c, mat, ytm=0.03): return prix, d_mod",
+            formula: r`$$P = \sum_{t=1}^{T} \frac{C}{(1+y)^t} + \frac{N}{(1+y)^T} \qquad ; \qquad D^* = \frac{1}{1+y} \sum_{t=1}^{T} t \cdot \frac{PV(CF_t)}{P}$$`,
+            description:
+              "`def` encapsule une formule métier testable et réutilisable ; privilégiez toujours `return` (renvoyer une valeur ou un tuple `(prix, d_mod)`) plutôt qu'un simple `print()` qui ne peut pas être réutilisé en aval.",
+            exampleCode: r`def obligation(nominal, coupon_rate, T, ytm=0.03):
+    coupon = nominal * coupon_rate
+    flux = [coupon] * (T - 1) + [coupon + nominal]
+    pvs = [cf / (1 + ytm) ** t for t, cf in enumerate(flux, 1)]
+    prix = sum(pvs)
+    mac = sum(t * pv for t, pv in enumerate(pvs, 1)) / prix
+    return prix, mac / (1 + ytm)
+
+p, d_mod = obligation(1000, 0.04, 5, ytm=0.035)`,
+            tags: ["def", "return", "tuple", "unpacking", "duration"],
+          },
+          {
+            id: "py-v1-m5-guardrails",
+            title: "Programmation défensive : garde-fous & retour structuré (dict)",
+            exerciseRef: "M3 Ex. 14",
+            syntax: 'if vol <= 0: raise ValueError("...") | return {"sharpe": ..., "alerte": ...}',
+            formula: r`$$\operatorname{Sharpe} = \frac{R_p - R_f}{\sigma_p}, \quad \sigma_p > 0 \qquad ; \qquad \operatorname{Sortino} = \frac{R_p - R_f}{\sigma_{\text{down}}}$$`,
+            description:
+              "En production quantitative, validez les bornes d'entrée dès les premières lignes de la fonction (`guard clauses`) pour éviter des divisions par zéro ou des résultats silencieux aberrants, puis renvoyez un dictionnaire nommé facile à inspecter.",
+            exampleCode: r`def ratio_sharpe(rendements, rf=0.0):
+    if len(rendements) < 2:
+        raise ValueError("Il faut au moins 2 observations")
+    mu = sum(rendements) / len(rendements)
+    var = sum((r - mu) ** 2 for r in rendements) / (len(rendements) - 1)
+    if var == 0.0:
+        raise ValueError("Volatilite nulle")
+    return {"moyenne": mu, "vol": var ** 0.5, "sharpe": (mu - rf) / (var ** 0.5)}`,
+            tags: ["raise", "ValueError", "guardrails", "dict return", "Sharpe"],
+          },
+          {
+            id: "py-v1-m5-comprehensions",
+            title: "List & Dict Comprehensions (Filtrage & Transformation concise)",
+            exerciseRef: "M3 Ex. 15 · Ex. 19",
+            syntax: "[f(x) for x in seq if cond(x)] | {k: g(v) for k, v in d.items()}",
+            formula: r`$$S_{\text{graves}} = \{ s \in \mathcal{S} \mid C_s > 5000 \}$$`,
+            description:
+              "Les compréhensions remplacent une boucle `for` + `.append()` en une expression lisible pour filtrer des sinistres graves, normaliser des expositions ou réindexer des dictionnaires.",
+            exampleCode: r`sinistres = [800, 6200, 1400, 12500, 4900]
+graves = [c for c in sinistres if c > 5000]
+ratios = {f"S{i}": c / 5000 for i, c in enumerate(graves, 1)}`,
+            tags: ["list comprehension", "dict comprehension", "filtrage", "pythonique"],
+          },
+          {
+            id: "py-v1-m5-mc-alm",
+            title: "Simulation Monte Carlo pure Python & pipeline ALM multi-fonctions",
+            exerciseRef: "M3 Ex. 23–24",
+            syntax: "random.seed(42); Z = random.gauss(0, 1) ; math.exp((r - 0.5*sig**2)*T + sig*sqrt(T)*Z)",
+            formula: r`$$S_T^{(i)} = S_0 \exp\!\left(\left(r - \frac{1}{2}\sigma^2\right)T + \sigma\sqrt{T}\,Z^{(i)}\right), \quad Z^{(i)} \sim \mathcal{N}(0, 1)$$`,
+            description:
+              "En pur Python (`random.gauss` + `math.exp`), une boucle génère $N$ trajectoires indépendantes. L'exercice 23 montre ensuite comment NumPy vectorisé accélère d'un facteur $> 10\\times$ ce même algorithme sur grand portefeuille, et l'exercice 24 assemble plusieurs fonctions `def` en un stress-test ALM complet.",
+            exampleCode: r`import math, random
+random.seed(42)
+S0, K, r, sig, T, N = 100.0, 100.0, 0.03, 0.20, 1.0, 5000
+payoffs = []
+for _ in range(N):
+    z = random.gauss(0.0, 1.0)
+    ST = S0 * math.exp((r - 0.5 * sig**2) * T + sig * math.sqrt(T) * z)
+    payoffs.append(max(ST - K, 0.0))
+call_mc = math.exp(-r * T) * sum(payoffs) / N`,
+            tags: ["Monte Carlo", "random.gauss", "math.exp", "Black-Scholes", "ALM"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V1 — MODULE 4 & MODULE 5 : PYTHON POUR L'ÉCONOMÉTRIE, RISQUE & PRICING
   // =========================================================================
   {
     moduleId: "python-econometrie",
     version: "V1",
-    moduleNumber: 2,
-    title: "Python pour l'Économétrie, Risque & Pricing (M2 & M4)",
+    moduleNumber: 4,
+    title: "Python pour l'Économétrie, Risque & Pricing (M4 & M5)",
     language: "python",
     overview:
-      "Mémento complet des Modules 2 et 4 (Suite) : Pandas, estimation MCO / OLS (Statsmodels & NumPy), prévision, diagnostics de Gauss-Markov, séries temporelles (ADF, HAC) et VaR / Duration ALM.",
+      "Mémento complet des Modules 4 et 5 (Suite) : Pandas, estimation MCO / OLS (Statsmodels & NumPy), prévision, diagnostics de Gauss-Markov, séries temporelles (ADF, HAC) et VaR / Duration ALM.",
     datasetsSummary: [
       "df (macro_taux préchargé) : periode, euribor_3m, oat_10y, spread_credit_bbb, inflation_hicp, pib_croissance, cac40_rendement",
       "df_actifs (portefeuilles_actifs préchargé) : ticker, nom, secteur, classe_actif, rendement_espere, volatilite, beta_marche, score_esg, ratio_sharpe",
@@ -297,7 +545,7 @@ ORDER BY rang_cout ASC;`,
           {
             id: "py-v1-tvm",
             title: "Valeur Temps de l'Argent (Actualisation & Capitalisation)",
-            exerciseRef: "M2 Ex. 1 · M4 Ex. 1",
+            exerciseRef: "M4 Ex. 1 · M5 Ex. 1",
             syntax: "V0 = CF / ((1 + r) ** T) | VT = V0 * ((1 + r) ** T)",
             formula: r`$$V_T = V_0 (1 + r)^T \qquad ; \qquad V_0 = \frac{CF_T}{(1 + r)^T} \quad (\text{continu : } CF_T e^{-rT})$$`,
             description:
@@ -310,7 +558,7 @@ print(f"Valeur actuelle : {va:,.2f} EUR")`,
           {
             id: "py-v1-inspect",
             title: "Exploration, Filtrage Booléen & GroupBy (.head, .describe, &)",
-            exerciseRef: "M2 Ex. 1–2, 5 · M4 Ex. 1–3, 6, 9",
+            exerciseRef: "M4 Ex. 1–2, 5 · M5 Ex. 1–3, 6, 9",
             syntax: "df.describe() | df[(cond1) & (cond2)] | df_actifs.groupby('col').mean()",
             description:
               "`df.shape` donne `(N, K)` et `df.describe()` résume quartiles, moyenne et écart-type. Pour filtrer en Pandas, entourez chaque condition de parenthèses et combinez avec `&` (ET) ou `|` (OU).",
@@ -377,7 +625,7 @@ print(model.summary())`,
           {
             id: "py-v1-student",
             title: "Paramètres, Student, Intervalles (.conf_int) & Prévision (.predict)",
-            exerciseRef: "M2 Ex. 10–11 · M4 Ex. 11–13, 16",
+            exerciseRef: "M4 Ex. 10–11 · M5 Ex. 11–13, 16",
             syntax: "model.params, model.pvalues, model.conf_int(alpha=0.05), model.predict([1.0, x1])",
             formula: r`$$t_j = \frac{\hat{\beta}_j}{\operatorname{SE}(\hat{\beta}_j)}, \qquad \hat{Y}^* = \hat{\beta}_0 \cdot 1 + \hat{\beta}_1 x_1^* + \dots + \hat{\beta}_K x_K^*$$`,
             description:
@@ -443,7 +691,7 @@ print(f"VIF Euribor : {vif_euribor:.3f}")`,
           {
             id: "py-v1-bp-white",
             title: "Hétéroscédasticité : Breusch-Pagan & Robustesse White (HC1 / HC3)",
-            exerciseRef: "M2 Ex. 18–19 · M4 Ex. 19–20",
+            exerciseRef: "M4 Ex. 18–19 · M5 Ex. 19–20",
             syntax: "het_breuschpagan(resid, X) | .fit(cov_type='HC1') | .fit(cov_type='HC3')",
             formula: r`$$LM = N \cdot R^2_{\text{aux}} \sim \chi^2(K)$$`,
             description:
@@ -515,7 +763,7 @@ print(model_hac.summary())`,
           {
             id: "py-v1-plot-alm",
             title: "Graphiques, Duration, Convexité (Taylor Ordre 2) & VaR ALM",
-            exerciseRef: "M2 Ex. 25–26 · M4 Ex. 25–26",
+            exerciseRef: "M4 Ex. 25–26 · M5 Ex. 25–26",
             syntax: "plt.scatter(...) / model.fittedvalues | -D_mod * dy * V0 + 0.5 * C * (dy**2) * V0",
             formula: r`$$\frac{\Delta V}{V_0} \approx -D^* \Delta y + \frac{1}{2} C (\Delta y)^2 \qquad ; \qquad \operatorname{VaR}_{95\%} = -(\mu - 1.645\,\sigma)$$` +
               "\n\n" +
@@ -533,254 +781,6 @@ mu, sigma = df['cac40_rendement'].mean(), df['cac40_rendement'].std()
 var_95 = -(mu - 1.645 * sigma)
 print(f"VaR 95% CAC 40 : {var_95:.2f}%")`,
             tags: ["matplotlib", "scatter", "fittedvalues", "duration", "convexité", "Taylor", "ALM", "VaR", "Solvabilité II"],
-          },
-        ],
-      },
-    ],
-  },
-
-  // =========================================================================
-  // V1 — MODULE 5 : PYTHON PROGRAMMATION POUR LA FINANCE (BASES -> ALM)
-  // =========================================================================
-  {
-    moduleId: "python-bases-finance",
-    version: "V1",
-    moduleNumber: 5,
-    title: "Python Programmation : Fonctions, Boucles & Finance (M5)",
-    language: "python",
-    overview:
-      "Toutes les briques de programmation Python pure du Module 5 (24 exercices) : variables typées et f-strings, branchements if/elif/else, listes/slicing, dictionnaires, boucles for/enumerate et while (bissection), fonctions réutilisables def/return, compréhensions, algèbre matricielle sans NumPy et simulation Monte Carlo.",
-    datasetsSummary: [
-      "Bibliothèque standard : math (sqrt, exp, log), random (seed, gauss), time (perf_counter)",
-      "Structures natives Python (list, dict, tuple) appliquées aux flux de trésorerie, portefeuilles et sinistres",
-      "Benchmarks & ALM : comparaison boucle pure Python vs NumPy (Ex. 23) et stress-test de bilan multi-fonctions (Ex. 24)",
-    ],
-    sections: [
-      {
-        id: "py-v1-m5-bases",
-        title: "1. Variables, Conditions & Structures de Données",
-        subtitle: "Typage financier, barèmes conditionnels, listes et dictionnaires",
-        entries: [
-          {
-            id: "py-v1-m5-vars-fstring",
-            title: "Variables typées, capitalisation & formatage f-string",
-            exerciseRef: "M5 Ex. 1–2",
-            syntax: 'C_n = C_0 * (1 + r) ** n ; f"{valeur:,.2f}"',
-            formula: r`$$C_n = C_0 (1 + r_{\text{ann}})^n \qquad ; \qquad r_{\text{mens}} = (1 + r_{\text{ann}})^{1/12} - 1$$`,
-            description:
-              "En Python, utilisez des flottants (`float`) ou entiers (`int`, avec séparateur `_` comme `25_000`) et privilégiez l'opérateur puissance `**` pour la capitalisation composée. Les f-strings formatent proprement montants (`:,.2f`) et taux (`:.4%`).",
-            exampleCode: r`C0, r_ann, n = 25_000, 0.035, 4
-C_n = C0 * (1 + r_ann) ** n
-r_mens = (1 + r_ann) ** (1 / 12) - 1
-print(f"Valeur future : {C_n:,.2f} EUR | Taux mensuel eq. : {r_mens:.4%}")`,
-            tags: ["variables", "float", "f-string", "capitalisation", "taux équivalent"],
-          },
-          {
-            id: "py-v1-m5-if-elif",
-            title: "Branchements conditionnels if / elif / else (Barèmes & Triggers)",
-            exerciseRef: "M5 Ex. 3–4",
-            syntax: "if cond1: ... elif cond2: ... else: ...",
-            formula: r`$$\text{SCR Ratio} = \frac{\text{Fonds Propres}}{\text{SCR}} \qquad ; \qquad \text{Bonus}_{t+1} = \max(0.50,\; \text{clip})$$`,
-            description:
-              "`if / elif / else` évalue des paliers mutuellement exclusifs de haut en bas (barème de frais, classification Solvabilité II, règle de bonus-malus). Écrivez les bornes dans un ordre strictement monotone (croissant ou décroissant).",
-            exampleCode: r`ratio_scr = 1.42
-if ratio_scr >= 1.50:
-    statut = "CONFORTABLE"
-elif ratio_scr >= 1.00:
-    statut = "VIGILANCE"
-else:
-    statut = "ALERTE_SCR"
-print(statut)`,
-            tags: ["if", "elif", "else", "Solvabilité II", "barème"],
-          },
-          {
-            id: "py-v1-m5-lists-slicing",
-            title: "Listes, slicing [start:stop] & moyenne mobile glissante",
-            exerciseRef: "M5 Ex. 5–6",
-            syntax: "liste[i - w + 1 : i + 1] | zip(prix[:-1], prix[1:])",
-            formula: r`$$R_t = \frac{P_t - P_{t-1}}{P_{t-1}} \qquad ; \qquad \text{MM}_k(t) = \frac{1}{k}\sum_{j=t-k+1}^{t} P_j$$`,
-            description:
-              "Le slicing `[a:b]` extrait une sous-liste semi-ouverte (inclut `a`, exclut `b`). En finance de marché, `zip(prix[:-1], prix[1:])` aligne instantanément $P_{t-1}$ et $P_t$ sans erreur d'indice.",
-            exampleCode: r`prix = [100.0, 102.0, 99.96, 103.5, 105.0]
-rendements = [(p1 - p0) / p0 for p0, p1 in zip(prix[:-1], prix[1:])]
-mm3 = [sum(prix[i-2:i+1]) / 3 for i in range(2, len(prix))]
-print(rendements, mm3)`,
-            tags: ["list", "slicing", "zip", "rendement", "moyenne mobile"],
-          },
-          {
-            id: "py-v1-m5-dicts",
-            title: "Dictionnaires clé-valeur, .get() & agrégation par secteur",
-            exerciseRef: "M5 Ex. 7–8",
-            syntax: "d.get(cle, 0.0) | for k, v in d.items(): ...",
-            formula: r`$$V_{\text{ptf}} = \sum_{a \in \mathcal{A}} q_a P_a \qquad ; \qquad w_s = \frac{\sum_{a \in s} V_a}{V_{\text{ptf}}}$$`,
-            description:
-              "Un dictionnaire associe un actif ou secteur à sa valorisation ou son poids en $O(1)$. Utilisez `d.get(cle, 0.0)` lors de l'accumulation par catégorie pour éviter `KeyError`, et `.items()` pour itérer sur paires `(cle, valeur)`.",
-            exampleCode: r`positions = [("AAPL", "Tech", 12000), ("MSFT", "Tech", 8000), ("TTE", "Energie", 10000)]
-par_secteur = {}
-for _, secteur, val in positions:
-    par_secteur[secteur] = par_secteur.get(secteur, 0.0) + val
-total = sum(par_secteur.values())
-poids = {s: v / total for s, v in par_secteur.items()}`,
-            tags: ["dict", "get", "items", "allocation", "portefeuille"],
-          },
-        ],
-      },
-      {
-        id: "py-v1-m5-loops",
-        title: "2. Boucles for, while & Algorithmes Numériques",
-        subtitle: "Actualisation DCF, bissection de TRI, drawdown et matrices",
-        entries: [
-          {
-            id: "py-v1-m5-for-enumerate",
-            title: "Boucles for & enumerate(flux, start=1) — Actualisation VAN",
-            exerciseRef: "M5 Ex. 9–10 · Ex. 18",
-            syntax: "for t, cf in enumerate(flux, start=1): van += cf / (1 + y) ** t",
-            formula: r`$$\operatorname{VAN}(y) = -I_0 + \sum_{t=1}^{T} \frac{CF_t}{(1 + y)^t}$$`,
-            description:
-              "`enumerate(flux, start=1)` fournit simultanément l'indice temporel $t \\ge 1$ et le cash-flow $CF_t$, idéal pour sommer des flux actualisés ou bâtir un tableau d'amortissement d'emprunt ligne par ligne.",
-            exampleCode: r`def van(flux, taux, investissement=0.0):
-    total = -investissement
-    for t, cf in enumerate(flux, start=1):
-        total += cf / ((1 + taux) ** t)
-    return total
-
-print(round(van([5, 5, 105], 0.04, 100.0), 4))`,
-            tags: ["for", "enumerate", "VAN", "actualisation", "cash-flows"],
-          },
-          {
-            id: "py-v1-m5-while-bissection",
-            title: "Boucle while — Recherche de TRI / YTM par bissection (dichotomie)",
-            exerciseRef: "M5 Ex. 17 · Ex. 20",
-            syntax: "while (hi - lo) > tol and it < max_iter: mid = 0.5 * (lo + hi)",
-            formula: r`$$\operatorname{VAN}(y^*) = 0 \implies y_{k+1} = \frac{y_{\text{lo}} + y_{\text{hi}}}{2}$$`,
-            description:
-              "Quand une boucle n'a pas un nombre connu d'itérations (convergence d'un taux actuariel TRI ou durée de réinvestissement), `while` réduit l'intervalle `[lo, hi]` de moitié tant que la tolérance `1e-7` n'est pas atteinte, avec un garde-fou `max_iter`.",
-            exampleCode: r`def tri_bissection(flux, invest, lo=-0.99, hi=2.0, tol=1e-7):
-    f_lo = -invest + sum(cf / (1 + lo) ** t for t, cf in enumerate(flux, 1))
-    for _ in range(100):
-        mid = 0.5 * (lo + hi)
-        f_mid = -invest + sum(cf / (1 + mid) ** t for t, cf in enumerate(flux, 1))
-        if abs(f_mid) < tol or (hi - lo) / 2 < tol:
-            return mid
-        if f_lo * f_mid <= 0:
-            hi = mid
-        else:
-            lo, f_lo = mid, f_mid
-    return 0.5 * (lo + hi)`,
-            tags: ["while", "bissection", "dichotomie", "TRI", "YTM"],
-          },
-          {
-            id: "py-v1-m5-drawdown",
-            title: "Tracking séquentiel en O(N) — Pic historique & Max Drawdown",
-            exerciseRef: "M5 Ex. 11 · Ex. 21",
-            syntax: "if v > pic: pic = v ; dd = (v - pic) / pic",
-            formula: r`$$M_t = \max_{0 \le s \le t} V_s \qquad ; \qquad DD_t = \frac{V_t - M_t}{M_t} \le 0$$`,
-            description:
-              "En conservant le sommet courant `pic` et le pire creux `mdd` en mémoire dans une seule passe `for`, on calcule le Max Drawdown en temps $O(N)$ et mémoire $O(1)$.",
-            exampleCode: r`nav = [100, 108, 95, 92, 104, 112]
-pic, mdd = nav[0], 0.0
-for v in nav:
-    if v > pic:
-        pic = v
-    dd = (v - pic) / pic
-    if dd < mdd:
-        mdd = dd
-print(f"Max Drawdown : {mdd:.2%}")`,
-            tags: ["drawdown", "algorithme", "O(N)", "risque", "boucle for"],
-          },
-          {
-            id: "py-v1-m5-nested-matrix",
-            title: "Double boucle imbriquée & produit quadratique w' Sigma w",
-            exerciseRef: "M5 Ex. 16 · Ex. 22",
-            syntax: "for i in range(n): for j in range(n): var += w[i] * cov[i][j] * w[j]",
-            formula: r`$$\sigma_p^2 = \mathbf{w}^\top \Sigma \mathbf{w} = \sum_{i=1}^{n} \sum_{j=1}^{n} w_i \, w_j \, \Sigma_{ij}$$`,
-            description:
-              "Avant de vectoriser sous NumPy, comprendre la double boucle imbriquée (`i` lignes, `j` colonnes) rend explicite la complexité $O(n^2)$ de la variance de portefeuille ou d'une grille d'options 2D `(S, sigma)`.",
-            exampleCode: r`import math
-w = [0.6, 0.4]
-cov = [[0.04, 0.006], [0.006, 0.01]]
-var_p = 0.0
-for i in range(len(w)):
-    for j in range(len(w)):
-        var_p += w[i] * cov[i][j] * w[j]
-vol_p = math.sqrt(var_p)`,
-            tags: ["boucles imbriquées", "matrice", "Markowitz", "covariance", "grille 2D"],
-          },
-        ],
-      },
-      {
-        id: "py-v1-m5-funcs",
-        title: "3. Fonctions def / return, Compréhensions & Projets Finance",
-        subtitle: "Architecture modulaire, programmation défensive et Monte Carlo pur Python",
-        entries: [
-          {
-            id: "py-v1-m5-def-return",
-            title: "Fonctions def, paramètres par défaut & retour multiple (tuple)",
-            exerciseRef: "M5 Ex. 12–13",
-            syntax: "def prix_et_duration(nominal, taux_c, mat, ytm=0.03): return prix, d_mod",
-            formula: r`$$P = \sum_{t=1}^{T} \frac{C}{(1+y)^t} + \frac{N}{(1+y)^T} \qquad ; \qquad D^* = \frac{1}{1+y} \sum_{t=1}^{T} t \cdot \frac{PV(CF_t)}{P}$$`,
-            description:
-              "`def` encapsule une formule métier testable et réutilisable ; privilégiez toujours `return` (renvoyer une valeur ou un tuple `(prix, d_mod)`) plutôt qu'un simple `print()` qui ne peut pas être réutilisé en aval.",
-            exampleCode: r`def obligation(nominal, coupon_rate, T, ytm=0.03):
-    coupon = nominal * coupon_rate
-    flux = [coupon] * (T - 1) + [coupon + nominal]
-    pvs = [cf / (1 + ytm) ** t for t, cf in enumerate(flux, 1)]
-    prix = sum(pvs)
-    mac = sum(t * pv for t, pv in enumerate(pvs, 1)) / prix
-    return prix, mac / (1 + ytm)
-
-p, d_mod = obligation(1000, 0.04, 5, ytm=0.035)`,
-            tags: ["def", "return", "tuple", "unpacking", "duration"],
-          },
-          {
-            id: "py-v1-m5-guardrails",
-            title: "Programmation défensive : garde-fous & retour structuré (dict)",
-            exerciseRef: "M5 Ex. 14",
-            syntax: 'if vol <= 0: raise ValueError("...") | return {"sharpe": ..., "alerte": ...}',
-            formula: r`$$\operatorname{Sharpe} = \frac{R_p - R_f}{\sigma_p}, \quad \sigma_p > 0 \qquad ; \qquad \operatorname{Sortino} = \frac{R_p - R_f}{\sigma_{\text{down}}}$$`,
-            description:
-              "En production quantitative, validez les bornes d'entrée dès les premières lignes de la fonction (`guard clauses`) pour éviter des divisions par zéro ou des résultats silencieux aberrants, puis renvoyez un dictionnaire nommé facile à inspecter.",
-            exampleCode: r`def ratio_sharpe(rendements, rf=0.0):
-    if len(rendements) < 2:
-        raise ValueError("Il faut au moins 2 observations")
-    mu = sum(rendements) / len(rendements)
-    var = sum((r - mu) ** 2 for r in rendements) / (len(rendements) - 1)
-    if var == 0.0:
-        raise ValueError("Volatilite nulle")
-    return {"moyenne": mu, "vol": var ** 0.5, "sharpe": (mu - rf) / (var ** 0.5)}`,
-            tags: ["raise", "ValueError", "guardrails", "dict return", "Sharpe"],
-          },
-          {
-            id: "py-v1-m5-comprehensions",
-            title: "List & Dict Comprehensions (Filtrage & Transformation concise)",
-            exerciseRef: "M5 Ex. 15 · Ex. 19",
-            syntax: "[f(x) for x in seq if cond(x)] | {k: g(v) for k, v in d.items()}",
-            formula: r`$$S_{\text{graves}} = \{ s \in \mathcal{S} \mid C_s > 5000 \}$$`,
-            description:
-              "Les compréhensions remplacent une boucle `for` + `.append()` en une expression lisible pour filtrer des sinistres graves, normaliser des expositions ou réindexer des dictionnaires.",
-            exampleCode: r`sinistres = [800, 6200, 1400, 12500, 4900]
-graves = [c for c in sinistres if c > 5000]
-ratios = {f"S{i}": c / 5000 for i, c in enumerate(graves, 1)}`,
-            tags: ["list comprehension", "dict comprehension", "filtrage", "pythonique"],
-          },
-          {
-            id: "py-v1-m5-mc-alm",
-            title: "Simulation Monte Carlo pure Python & pipeline ALM multi-fonctions",
-            exerciseRef: "M5 Ex. 23–24",
-            syntax: "random.seed(42); Z = random.gauss(0, 1) ; math.exp((r - 0.5*sig**2)*T + sig*sqrt(T)*Z)",
-            formula: r`$$S_T^{(i)} = S_0 \exp\!\left(\left(r - \frac{1}{2}\sigma^2\right)T + \sigma\sqrt{T}\,Z^{(i)}\right), \quad Z^{(i)} \sim \mathcal{N}(0, 1)$$`,
-            description:
-              "En pur Python (`random.gauss` + `math.exp`), une boucle génère $N$ trajectoires indépendantes. L'exercice 23 montre ensuite comment NumPy vectorisé accélère d'un facteur $> 10\\times$ ce même algorithme sur grand portefeuille, et l'exercice 24 assemble plusieurs fonctions `def` en un stress-test ALM complet.",
-            exampleCode: r`import math, random
-random.seed(42)
-S0, K, r, sig, T, N = 100.0, 100.0, 0.03, 0.20, 1.0, 5000
-payoffs = []
-for _ in range(N):
-    z = random.gauss(0.0, 1.0)
-    ST = S0 * math.exp((r - 0.5 * sig**2) * T + sig * math.sqrt(T) * z)
-    payoffs.append(max(ST - K, 0.0))
-call_mc = math.exp(-r * T) * sum(payoffs) / N`,
-            tags: ["Monte Carlo", "random.gauss", "math.exp", "Black-Scholes", "ALM"],
           },
         ],
       },
@@ -1570,6 +1570,169 @@ pct_contrib = tcr / np.sqrt(w @ Sigma @ w) * 100.0`,
 charges_nettes = np.minimum(charges_brutes, retention)
 scr_net = float(np.percentile(charges_nettes, 99.5) - np.mean(charges_nettes))`,
             tags: ["Newton-Raphson", "volatilité implicite", "Grecs", "Stop-Loss", "SCR", "Solvabilité II"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V4 — MODULE 1 : PORTFOLIO SQL (DATA WAREHOUSE ACTUARIEL & QUANT)
+  // =========================================================================
+  {
+    moduleId: "v4-sql-portfolio",
+    version: "V4",
+    moduleNumber: 1,
+    title: "Portfolio SQL : Data Warehouse Actuariel & Quant (V4 M1)",
+    language: "sql",
+    overview:
+      "Patterns d'architecture Data Warehouse des 4 projets Portfolio V4 : audit d'intégrité comptable, fenêtres de volatilité & Max Drawdown, observatoire de courbe OAT avec choc de Taylor ordre 2, et simulateur ALM récursif multi-tranches.",
+    datasetsSummary: [
+      "assures & sinistres : audit qualité IARD, délais JULIANDAY et déduplication 1-N avant jointure",
+      "marche_actions, matrice_correlations & portefeuilles_actifs : screener multi-facteurs et ESG",
+      "courbe_taux_oat & macro_taux : pente 2Y-10Y, butterfly et stress obligataire ALM",
+      "WITH RECURSIVE : simulation complète d'échéancier obligataire + passif sans table source",
+    ],
+    sections: [
+      {
+        id: "v4-sql-dw-patterns",
+        title: "1. Entrepôt Actuariel, Fenêtres Glissantes & Taux",
+        subtitle: "Multi-CTEs déterministes, intégrité des données et risque de marché",
+        entries: [
+          {
+            id: "v4-sql-audit-iard",
+            title: "Audit comptable multi-CTE & déduplication anti-fan-out IARD",
+            exerciseRef: "V4 SQL Projet 1",
+            syntax: "WITH audit AS (...), par_police AS (...) SELECT ... SUM(...) OVER ()",
+            formula: r`$$\text{S/P}_g = 100 \times \frac{\sum_{i \in g} C_i}{\sum_{i \in g} P_i} \qquad ; \qquad \text{Écart} = C_{\text{mat}} + C_{\text{corp}} - C_{\text{total}}$$`,
+            description:
+              "Chaînez une CTE d'audit (`JULIANDAY(date_declaration) - JULIANDAY(date_survenance)` et contrôle d'écart comptable), puis agrégez les sinistres au grain `police_id` avant le `LEFT JOIN` sur `assures`. `SUM(...) OVER ()` calcule la part de charge globale sans sous-requête.",
+            exampleCode: r`WITH sinistres_par_police AS (
+    SELECT police_id, COUNT(*) AS nb_sin, SUM(cout_total) AS charge,
+           AVG(JULIANDAY(date_declaration) - JULIANDAY(date_survenance)) AS delai_moy
+    FROM sinistres GROUP BY police_id
+)
+SELECT a.region, a.type_contrat,
+       ROUND(100.0 * COALESCE(SUM(s.charge), 0.0) / SUM(a.prime_annuelle), 2) AS sp_pct
+FROM assures a LEFT JOIN sinistres_par_police s ON a.police_id = s.police_id
+GROUP BY a.region, a.type_contrat;`,
+            tags: ["CTE", "anti-fan-out", "JULIANDAY", "audit", "S/P", "DENSE_RANK"],
+          },
+          {
+            id: "v4-sql-vol-drawdown",
+            title: "Volatilité glissante (sans STDDEV) & Max Drawdown causal",
+            exerciseRef: "V4 SQL Projet 2",
+            syntax: "SQRT(MAX(0.0, AVG(r*r) - AVG(r)*AVG(r)) * 252.0 * n/(n-1))",
+            formula: r`$$\hat{\sigma}_{\text{ann}} = \sqrt{252 \cdot \frac{n}{n - 1}\left(\overline{r^2} - \bar{r}^2\right)} \qquad ; \qquad MDD_t = \frac{P_t - \max_{s \le t} P_s}{\max_{s \le t} P_s}$$`,
+            description:
+              "SQLite ne fournit pas `STDDEV()` natif : calculez la variance corrigée de Bessel avec `AVG(r*r) - AVG(r)*AVG(r)` et la fenêtre glissante `ROWS BETWEEN 4 PRECEDING AND CURRENT ROW`. Pour le pic historique causal, utilisez `UNBOUNDED PRECEDING AND CURRENT ROW`.",
+            exampleCode: r`SELECT ticker, date,
+       prix_cloture / MAX(prix_cloture) OVER (
+           PARTITION BY ticker ORDER BY date
+           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) - 1.0 AS drawdown
+FROM marche_actions;`,
+            tags: ["volatilité", "Bessel", "Max Drawdown", "fenêtre", "SQLite"],
+          },
+          {
+            id: "v4-sql-taylor-recursive",
+            title: "Stress Taylor OAT & échéancier récursif ALM (WITH RECURSIVE)",
+            exerciseRef: "V4 SQL Projets 3–4",
+            syntax: "WITH RECURSIVE grille(t) AS (SELECT 1 UNION ALL SELECT t + 1 FROM grille WHERE t < 10)",
+            formula: r`$$D_{\text{Mac}} = \frac{\sum_{t=1}^T t \cdot PV(CF_t)}{\sum_{t=1}^T PV(CF_t)} \qquad ; \qquad \text{Couverture} = \frac{PV_{\text{Actif}}}{PV_{\text{Passif}}}$$`,
+            description:
+              "Combinez `LAG()` + `POWER(dy, 2)` pour estimer les chocs obligataires sur courbe OAT, puis utilisez une CTE récursive `WITH RECURSIVE` pour projeter chaque flux d'actif et de passif, les actualiser et calculer l'écart de duration ALM.",
+            exampleCode: r`WITH RECURSIVE grille(t) AS (
+    SELECT 1 UNION ALL SELECT t + 1 FROM grille WHERE t < 10
+)
+SELECT t,
+       CASE WHEN t <= 5 THEN 50.0 * 0.032 + (CASE WHEN t = 5 THEN 50.0 ELSE 0.0 END) ELSE 0.0 END AS cf_tranche_a
+FROM grille;`,
+            tags: ["WITH RECURSIVE", "ALM", "Duration", "Taylor", "OAT", "LAG"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V4 — MODULE 2 : PORTFOLIO PYTHON (ALM, MARKOWITZ, PRICING & ACTUARIAT)
+  // =========================================================================
+  {
+    moduleId: "v4-py-portfolio",
+    version: "V4",
+    moduleNumber: 2,
+    title: "Portfolio Python : ALM, Markowitz, Pricing & Actuariat (V4 M2)",
+    language: "python",
+    overview:
+      "Briques d'architecture Python professionnelle des 4 projets Portfolio V4 : dataclasses ALM & Solvabilité II, optimisation sous contraintes SciPy SLSQP avec shrinkage Ledoit-Wolf, pricer BSM + Monte Carlo antithétique, et tarification IARD + Chain-Ladder IBNR.",
+    datasetsSummary: [
+      "Projet 1 ALM : @dataclass Obligation / BilanALM sur df_taux & df_actifs + Monte Carlo Cholesky 1000 scénarios",
+      "Projet 2 Quant : SLSQP long-only + shrinkage matrice de covariance + backtest Sharpe/Sortino/ES sur df_marche",
+      "Projet 3 Pricing : OptionSpec + BlackScholesPricer + réduction de variance antithétique + solveur hybride Vol Implicite",
+      "Projet 4 IARD : déduplication polices/sinistres + triangle de liquidation Chain-Ladder (IBNR)",
+    ],
+    sections: [
+      {
+        id: "v4-py-arch-quant",
+        title: "1. Dataclasses ALM, Optimisation Contrainte & Pricing Quant",
+        subtitle: "Architecture orientée objet/fonctions modulaires pour repo GitHub",
+        entries: [
+          {
+            id: "v4-py-alm-dataclass",
+            title: "Dataclasses Obligation / BilanALM & Chocs Corrélés Cholesky",
+            exerciseRef: "V4 Python Projet 1",
+            syntax: "@dataclass class Obligation: ... ; L = np.linalg.cholesky(corr_matrix)",
+            formula: r`$$\operatorname{SCR}_{\text{Std}} = \sqrt{\operatorname{SCR}_{\text{taux}}^2 + \operatorname{SCR}_{\text{act}}^2 + 2\,\rho\,\operatorname{SCR}_{\text{taux}}\,\operatorname{SCR}_{\text{act}}}$$`,
+            description:
+              "Encapsulez vos instruments financiers dans des `@dataclass` typées. En simulation Monte Carlo ALM, utilisez la décomposition de Cholesky `np.linalg.cholesky` sur des tirages normaux standards pour corréler chocs de taux et chocs actions.",
+            exampleCode: r`from dataclasses import dataclass
+import numpy as np
+
+@dataclass
+class Obligation:
+    nom: str
+    nominal: float
+    coupon_rate: float
+    maturite: int
+    ytm: float`,
+            tags: ["dataclass", "ALM", "Solvabilité II", "Cholesky", "SCR"],
+          },
+          {
+            id: "v4-py-slsqp-shrinkage",
+            title: "Markowitz Long-Only (SciPy SLSQP) & Shrinkage de Covariance",
+            exerciseRef: "V4 Python Projet 2",
+            syntax: "minimize(obj, w0, bounds=[(0, 1)]*n, constraints=[{'type': 'eq', 'fun': lambda w: w.sum() - 1}])",
+            formula: r`$$\hat{\Sigma}_{\text{shrink}} = (1 - \delta)\,\hat{\Sigma}_{\text{ech}} + \delta\,\operatorname{diag}(\hat{\Sigma}_{\text{ech}})$$`,
+            description:
+              "Lorsque $T < K$ (fenêtre courte), la matrice de covariance empirique devient singulière : un shrinkage linéaire vers sa diagonale restaure la définie-positivité. Résolvez ensuite la tangence et le GMVP sous contraintes $w_i \\in [0, 1]$ via `scipy.optimize.minimize(..., method='SLSQP')`.",
+            exampleCode: r`from scipy.optimize import minimize
+import numpy as np
+
+def optimiser_min_var(cov: np.ndarray) -> np.ndarray:
+    n = cov.shape[0]
+    res = minimize(lambda w: w @ cov @ w, np.ones(n) / n, method="SLSQP",
+                   bounds=[(0.0, 1.0)] * n,
+                   constraints={"type": "eq", "fun": lambda w: np.sum(w) - 1.0})
+    return res.x`,
+            tags: ["SLSQP", "scipy.optimize", "Markowitz", "shrinkage", "backtest"],
+          },
+          {
+            id: "v4-py-mc-antithetic-cl",
+            title: "Monte Carlo Antithétique (+Z / -Z) & Chain-Ladder IBNR",
+            exerciseRef: "V4 Python Projets 3–4",
+            syntax: "Z_anti = np.concatenate([Z, -Z]) | f_j = sum(C[:, j+1]) / sum(C[:-j-1, j])",
+            formula: r`$$\hat{f}_j = \frac{\sum_{i=0}^{n-j-2} C_{i,j+1}}{\sum_{i=0}^{n-j-2} C_{i,j}} \qquad ; \qquad \operatorname{IBNR}_i = \hat{C}_{i,J} - C_{i, n-1-i}$$`,
+            description:
+              "Apparier chaque tirage aléatoire $Z$ à $-Z$ annule le biais d'échantillonnage impair et réduit l'erreur standard Monte Carlo sans coût de tirage supplémentaire. En actuariat IARD, le triangle Chain-Ladder estime les engagements ultimes et provisions IBNR.",
+            exampleCode: r`import numpy as np
+
+rng = np.random.default_rng(42)
+Z = rng.standard_normal(10_000)
+Z_paired = np.concatenate([Z, -Z])
+# Facteur Chain-Ladder colonne j -> j+1
+# f_j = triangle[:n-1-j, j+1].sum() / triangle[:n-1-j, j].sum()`,
+            tags: ["antithétique", "Black-Scholes", "volatilité implicite", "Chain-Ladder", "IBNR"],
           },
         ],
       },

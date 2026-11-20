@@ -242,7 +242,9 @@ export function CheatSheetModal({
                         ? "bg-stone-200/80 text-stone-700"
                         : mod.version === "V2"
                         ? "bg-indigo-100 text-indigo-700"
-                        : "bg-emerald-100 text-emerald-800"
+                        : mod.version === "V3"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
                     }`}
                   >
                     {mod.version} M{mod.moduleNumber}

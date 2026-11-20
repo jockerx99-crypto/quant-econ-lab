@@ -16,6 +16,7 @@ import {
 import { COURSE_MODULES as COURSE_MODULES_V1 } from "@/data/courses";
 import { COURSE_MODULES_V2 } from "@/data/courses_v2";
 import { COURSE_MODULES_V3 } from "@/data/courses_v3";
+import { COURSE_MODULES_V4 } from "@/data/courses_v4";
 import { Exercise, CourseModule } from "@/types/course";
 import { usePython } from "@/hooks/usePython";
 import { useSQL } from "@/hooks/useSQL";
@@ -120,35 +121,43 @@ export function Workspace() {
   // Hydration guard so SSR and initial client render match 100% (avoids React #418/#423 on ?ex= or localStorage)
   const [hasMounted, setHasMounted] = useState<boolean>(false);
 
-  // Curriculum Version (V1 = Fondations Actuariat, V2 = Quant & Monte Carlo, V3 = Cas Réels)
-  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2" | "v3">("v1");
+  // Curriculum Version (V1 = Fondations Actuariat, V2 = Quant & Monte Carlo, V3 = Cas Réels, V4 = Portfolio GitHub)
+  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2" | "v3" | "v4">("v1");
 
-  // Track state independently for V1, V2 and V3
+  // Track state independently for V1, V2, V3 and V4
   const [moduleIndexV1, setModuleIndexV1] = useState<number>(0);
   const [exerciseIndexV1, setExerciseIndexV1] = useState<number>(13); // Retain Exercise 14 (GROUP BY region)
   const [moduleIndexV2, setModuleIndexV2] = useState<number>(0);
   const [exerciseIndexV2, setExerciseIndexV2] = useState<number>(0);
   const [moduleIndexV3, setModuleIndexV3] = useState<number>(0);
   const [exerciseIndexV3, setExerciseIndexV3] = useState<number>(0);
+  const [moduleIndexV4, setModuleIndexV4] = useState<number>(0);
+  const [exerciseIndexV4, setExerciseIndexV4] = useState<number>(0);
 
   const modules: CourseModule[] =
     curriculumVersion === "v1"
       ? COURSE_MODULES_V1
       : curriculumVersion === "v2"
       ? COURSE_MODULES_V2
-      : COURSE_MODULES_V3;
+      : curriculumVersion === "v3"
+      ? COURSE_MODULES_V3
+      : COURSE_MODULES_V4;
   const currentModuleIndex =
     curriculumVersion === "v1"
       ? moduleIndexV1
       : curriculumVersion === "v2"
       ? moduleIndexV2
-      : moduleIndexV3;
+      : curriculumVersion === "v3"
+      ? moduleIndexV3
+      : moduleIndexV4;
   const currentExerciseIndex =
     curriculumVersion === "v1"
       ? exerciseIndexV1
       : curriculumVersion === "v2"
       ? exerciseIndexV2
-      : exerciseIndexV3;
+      : curriculumVersion === "v3"
+      ? exerciseIndexV3
+      : exerciseIndexV4;
 
   const setCurrentModuleIndex = (idx: number) => {
     if (curriculumVersion === "v1") {
@@ -157,9 +166,12 @@ export function Workspace() {
     } else if (curriculumVersion === "v2") {
       setModuleIndexV2(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v2_module_idx", String(idx));
-    } else {
+    } else if (curriculumVersion === "v3") {
       setModuleIndexV3(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v3_module_idx", String(idx));
+    } else {
+      setModuleIndexV4(idx);
+      if (typeof window !== "undefined") localStorage.setItem("quantecon_v4_module_idx", String(idx));
     }
   };
 
@@ -170,13 +182,16 @@ export function Workspace() {
     } else if (curriculumVersion === "v2") {
       setExerciseIndexV2(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v2_exercise_idx", String(idx));
-    } else {
+    } else if (curriculumVersion === "v3") {
       setExerciseIndexV3(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v3_exercise_idx", String(idx));
+    } else {
+      setExerciseIndexV4(idx);
+      if (typeof window !== "undefined") localStorage.setItem("quantecon_v4_exercise_idx", String(idx));
     }
   };
 
-  const handleSwitchVersion = (v: "v1" | "v2" | "v3") => {
+  const handleSwitchVersion = (v: "v1" | "v2" | "v3" | "v4") => {
     setCurriculumVersion(v);
     if (typeof window !== "undefined") {
       localStorage.setItem("quantecon_version", v);
@@ -251,9 +266,12 @@ export function Workspace() {
     } else if (curriculumVersion === "v2") {
       localStorage.setItem("quantecon_v2_exercise_idx", String(currentExerciseIndex));
       localStorage.setItem("quantecon_v2_module_idx", String(currentModuleIndex));
-    } else {
+    } else if (curriculumVersion === "v3") {
       localStorage.setItem("quantecon_v3_exercise_idx", String(currentExerciseIndex));
       localStorage.setItem("quantecon_v3_module_idx", String(currentModuleIndex));
+    } else {
+      localStorage.setItem("quantecon_v4_exercise_idx", String(currentExerciseIndex));
+      localStorage.setItem("quantecon_v4_module_idx", String(currentModuleIndex));
     }
   }, [hasMounted, currentExerciseIndex, currentModuleIndex, curriculumVersion]);
 
@@ -269,7 +287,9 @@ export function Workspace() {
     }
 
     const savedVer = localStorage.getItem("quantecon_version");
-    if (savedVer === "v1" || savedVer === "v2" || savedVer === "v3") setCurriculumVersion(savedVer);
+    if (savedVer === "v1" || savedVer === "v2" || savedVer === "v3" || savedVer === "v4") {
+      setCurriculumVersion(savedVer);
+    }
 
     const savedV1Mod = localStorage.getItem("quantecon_v1_module_idx") || localStorage.getItem("quantecon_module_idx");
     if (savedV1Mod !== null) {
@@ -301,6 +321,16 @@ export function Workspace() {
       const p = Number(savedV3Ex);
       if (!isNaN(p) && p >= 0) setExerciseIndexV3(p);
     }
+    const savedV4Mod = localStorage.getItem("quantecon_v4_module_idx");
+    if (savedV4Mod !== null) {
+      const p = Number(savedV4Mod);
+      if (!isNaN(p) && p >= 0 && p < COURSE_MODULES_V4.length) setModuleIndexV4(p);
+    }
+    const savedV4Ex = localStorage.getItem("quantecon_v4_exercise_idx");
+    if (savedV4Ex !== null) {
+      const p = Number(savedV4Ex);
+      if (!isNaN(p) && p >= 0) setExerciseIndexV4(p);
+    }
 
     const params = new URLSearchParams(window.location.search);
     const exId = params.get("ex");
@@ -331,6 +361,16 @@ export function Workspace() {
           setCurriculumVersion("v3");
           setModuleIndexV3(mIdx);
           setExerciseIndexV3(eIdx);
+          setHasMounted(true);
+          return;
+        }
+      }
+      for (let mIdx = 0; mIdx < COURSE_MODULES_V4.length; mIdx++) {
+        const eIdx = COURSE_MODULES_V4[mIdx].exercises.findIndex((e) => e.id === exId);
+        if (eIdx !== -1) {
+          setCurriculumVersion("v4");
+          setModuleIndexV4(mIdx);
+          setExerciseIndexV4(eIdx);
           setHasMounted(true);
           return;
         }
@@ -491,11 +531,11 @@ export function Workspace() {
 
           <div className="h-4 w-px bg-stone-200 hidden lg:block flex-shrink-0" />
 
-          {/* Curriculum Version Switcher (V1 vs V2 vs V3) */}
+          {/* Curriculum Version Switcher (V1 vs V2 vs V3 vs V4) */}
           <div className="flex items-center rounded-xl bg-stone-100 p-0.5 sm:p-1 border border-stone-200 shadow-2xs flex-shrink-0">
             <button
               onClick={() => handleSwitchVersion("v1")}
-              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-1.5 sm:px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                 curriculumVersion === "v1"
                   ? "bg-white text-stone-900 shadow-xs border border-stone-200/60"
                   : "text-stone-500 hover:text-stone-800"
@@ -503,22 +543,21 @@ export function Workspace() {
               title={`Version 1 : Micro-Apprentissage & Répétition (${totalV1Exercises} exercices)`}
             >
               <span className="hidden 2xl:inline">V1 : Actuariat</span>
-              <span className="hidden xl:inline 2xl:hidden">V1 : Bases</span>
-              <span className="xl:hidden">V1</span>
+              <span className="2xl:hidden">V1</span>
             </button>
             <button
               onClick={() => handleSwitchVersion("v2")}
-              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-1.5 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                 curriculumVersion === "v2"
                   ? "bg-sky-600 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-800"
               }`}
               title="Version 2 : Quantitative Finance, Économétrie & Monte Carlo (45 exercices)"
             >
-              <span className="hidden xl:inline">⚡ V2 : Quant</span>
-              <span className="xl:hidden">⚡ V2</span>
+              <span className="hidden 2xl:inline">⚡ V2 : Quant</span>
+              <span className="2xl:hidden">⚡ V2</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                className={`hidden sm:inline-block px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
                   curriculumVersion === "v2"
                     ? "bg-white text-sky-700"
                     : "bg-sky-100 text-sky-800"
@@ -529,23 +568,44 @@ export function Workspace() {
             </button>
             <button
               onClick={() => handleSwitchVersion("v3")}
-              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-1.5 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                 curriculumVersion === "v3"
                   ? "bg-emerald-600 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-800"
               }`}
-              title="Version 3 : Cas Réels SQL & Python en conditions réelles (20 projets complets)"
+              title="Version 3 : Cas Réels SQL & Python en conditions réelles (20 études de cas)"
             >
-              <span className="hidden xl:inline">🚀 V3 : Cas Réels</span>
-              <span className="xl:hidden">🚀 V3</span>
+              <span className="hidden 2xl:inline">🚀 V3 : Cas Réels</span>
+              <span className="2xl:hidden">🚀 V3</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                className={`hidden sm:inline-block px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
                   curriculumVersion === "v3"
                     ? "bg-white text-emerald-700"
                     : "bg-emerald-100 text-emerald-800"
                 }`}
               >
                 20
+              </span>
+            </button>
+            <button
+              onClick={() => handleSwitchVersion("v4")}
+              className={`px-1.5 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+                curriculumVersion === "v4"
+                  ? "bg-amber-600 text-white shadow-xs"
+                  : "text-stone-500 hover:text-stone-800"
+              }`}
+              title="Version 4 : Projets Portfolio GitHub (8 grands projets complets SQL & Python)"
+            >
+              <span className="hidden 2xl:inline">🏆 V4 : Portfolio</span>
+              <span className="2xl:hidden">🏆 V4</span>
+              <span
+                className={`hidden sm:inline-block px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  curriculumVersion === "v4"
+                    ? "bg-white text-amber-700"
+                    : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                8
               </span>
             </button>
           </div>
