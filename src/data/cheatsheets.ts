@@ -540,6 +540,254 @@ print(f"VaR 95% CAC 40 : {var_95:.2f}%")`,
   },
 
   // =========================================================================
+  // V1 — MODULE 5 : PYTHON PROGRAMMATION POUR LA FINANCE (BASES -> ALM)
+  // =========================================================================
+  {
+    moduleId: "python-bases-finance",
+    version: "V1",
+    moduleNumber: 5,
+    title: "Python Programmation : Fonctions, Boucles & Finance (M5)",
+    language: "python",
+    overview:
+      "Toutes les briques de programmation Python pure du Module 5 (24 exercices) : variables typées et f-strings, branchements if/elif/else, listes/slicing, dictionnaires, boucles for/enumerate et while (bissection), fonctions réutilisables def/return, compréhensions, algèbre matricielle sans NumPy et simulation Monte Carlo.",
+    datasetsSummary: [
+      "Bibliothèque standard : math (sqrt, exp, log), random (seed, gauss), time (perf_counter)",
+      "Structures natives Python (list, dict, tuple) appliquées aux flux de trésorerie, portefeuilles et sinistres",
+      "Benchmarks & ALM : comparaison boucle pure Python vs NumPy (Ex. 23) et stress-test de bilan multi-fonctions (Ex. 24)",
+    ],
+    sections: [
+      {
+        id: "py-v1-m5-bases",
+        title: "1. Variables, Conditions & Structures de Données",
+        subtitle: "Typage financier, barèmes conditionnels, listes et dictionnaires",
+        entries: [
+          {
+            id: "py-v1-m5-vars-fstring",
+            title: "Variables typées, capitalisation & formatage f-string",
+            exerciseRef: "M5 Ex. 1–2",
+            syntax: 'C_n = C_0 * (1 + r) ** n ; f"{valeur:,.2f}"',
+            formula: r`$$C_n = C_0 (1 + r_{\text{ann}})^n \qquad ; \qquad r_{\text{mens}} = (1 + r_{\text{ann}})^{1/12} - 1$$`,
+            description:
+              "En Python, utilisez des flottants (`float`) ou entiers (`int`, avec séparateur `_` comme `25_000`) et privilégiez l'opérateur puissance `**` pour la capitalisation composée. Les f-strings formatent proprement montants (`:,.2f`) et taux (`:.4%`).",
+            exampleCode: r`C0, r_ann, n = 25_000, 0.035, 4
+C_n = C0 * (1 + r_ann) ** n
+r_mens = (1 + r_ann) ** (1 / 12) - 1
+print(f"Valeur future : {C_n:,.2f} EUR | Taux mensuel eq. : {r_mens:.4%}")`,
+            tags: ["variables", "float", "f-string", "capitalisation", "taux équivalent"],
+          },
+          {
+            id: "py-v1-m5-if-elif",
+            title: "Branchements conditionnels if / elif / else (Barèmes & Triggers)",
+            exerciseRef: "M5 Ex. 3–4",
+            syntax: "if cond1: ... elif cond2: ... else: ...",
+            formula: r`$$\text{SCR Ratio} = \frac{\text{Fonds Propres}}{\text{SCR}} \qquad ; \qquad \text{Bonus}_{t+1} = \max(0.50,\; \text{clip})$$`,
+            description:
+              "`if / elif / else` évalue des paliers mutuellement exclusifs de haut en bas (barème de frais, classification Solvabilité II, règle de bonus-malus). Écrivez les bornes dans un ordre strictement monotone (croissant ou décroissant).",
+            exampleCode: r`ratio_scr = 1.42
+if ratio_scr >= 1.50:
+    statut = "CONFORTABLE"
+elif ratio_scr >= 1.00:
+    statut = "VIGILANCE"
+else:
+    statut = "ALERTE_SCR"
+print(statut)`,
+            tags: ["if", "elif", "else", "Solvabilité II", "barème"],
+          },
+          {
+            id: "py-v1-m5-lists-slicing",
+            title: "Listes, slicing [start:stop] & moyenne mobile glissante",
+            exerciseRef: "M5 Ex. 5–6",
+            syntax: "liste[i - w + 1 : i + 1] | zip(prix[:-1], prix[1:])",
+            formula: r`$$R_t = \frac{P_t - P_{t-1}}{P_{t-1}} \qquad ; \qquad \text{MM}_k(t) = \frac{1}{k}\sum_{j=t-k+1}^{t} P_j$$`,
+            description:
+              "Le slicing `[a:b]` extrait une sous-liste semi-ouverte (inclut `a`, exclut `b`). En finance de marché, `zip(prix[:-1], prix[1:])` aligne instantanément $P_{t-1}$ et $P_t$ sans erreur d'indice.",
+            exampleCode: r`prix = [100.0, 102.0, 99.96, 103.5, 105.0]
+rendements = [(p1 - p0) / p0 for p0, p1 in zip(prix[:-1], prix[1:])]
+mm3 = [sum(prix[i-2:i+1]) / 3 for i in range(2, len(prix))]
+print(rendements, mm3)`,
+            tags: ["list", "slicing", "zip", "rendement", "moyenne mobile"],
+          },
+          {
+            id: "py-v1-m5-dicts",
+            title: "Dictionnaires clé-valeur, .get() & agrégation par secteur",
+            exerciseRef: "M5 Ex. 7–8",
+            syntax: "d.get(cle, 0.0) | for k, v in d.items(): ...",
+            formula: r`$$V_{\text{ptf}} = \sum_{a \in \mathcal{A}} q_a P_a \qquad ; \qquad w_s = \frac{\sum_{a \in s} V_a}{V_{\text{ptf}}}$$`,
+            description:
+              "Un dictionnaire associe un actif ou secteur à sa valorisation ou son poids en $O(1)$. Utilisez `d.get(cle, 0.0)` lors de l'accumulation par catégorie pour éviter `KeyError`, et `.items()` pour itérer sur paires `(cle, valeur)`.",
+            exampleCode: r`positions = [("AAPL", "Tech", 12000), ("MSFT", "Tech", 8000), ("TTE", "Energie", 10000)]
+par_secteur = {}
+for _, secteur, val in positions:
+    par_secteur[secteur] = par_secteur.get(secteur, 0.0) + val
+total = sum(par_secteur.values())
+poids = {s: v / total for s, v in par_secteur.items()}`,
+            tags: ["dict", "get", "items", "allocation", "portefeuille"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-m5-loops",
+        title: "2. Boucles for, while & Algorithmes Numériques",
+        subtitle: "Actualisation DCF, bissection de TRI, drawdown et matrices",
+        entries: [
+          {
+            id: "py-v1-m5-for-enumerate",
+            title: "Boucles for & enumerate(flux, start=1) — Actualisation VAN",
+            exerciseRef: "M5 Ex. 9–10 · Ex. 18",
+            syntax: "for t, cf in enumerate(flux, start=1): van += cf / (1 + y) ** t",
+            formula: r`$$\operatorname{VAN}(y) = -I_0 + \sum_{t=1}^{T} \frac{CF_t}{(1 + y)^t}$$`,
+            description:
+              "`enumerate(flux, start=1)` fournit simultanément l'indice temporel $t \\ge 1$ et le cash-flow $CF_t$, idéal pour sommer des flux actualisés ou bâtir un tableau d'amortissement d'emprunt ligne par ligne.",
+            exampleCode: r`def van(flux, taux, investissement=0.0):
+    total = -investissement
+    for t, cf in enumerate(flux, start=1):
+        total += cf / ((1 + taux) ** t)
+    return total
+
+print(round(van([5, 5, 105], 0.04, 100.0), 4))`,
+            tags: ["for", "enumerate", "VAN", "actualisation", "cash-flows"],
+          },
+          {
+            id: "py-v1-m5-while-bissection",
+            title: "Boucle while — Recherche de TRI / YTM par bissection (dichotomie)",
+            exerciseRef: "M5 Ex. 17 · Ex. 20",
+            syntax: "while (hi - lo) > tol and it < max_iter: mid = 0.5 * (lo + hi)",
+            formula: r`$$\operatorname{VAN}(y^*) = 0 \implies y_{k+1} = \frac{y_{\text{lo}} + y_{\text{hi}}}{2}$$`,
+            description:
+              "Quand une boucle n'a pas un nombre connu d'itérations (convergence d'un taux actuariel TRI ou durée de réinvestissement), `while` réduit l'intervalle `[lo, hi]` de moitié tant que la tolérance `1e-7` n'est pas atteinte, avec un garde-fou `max_iter`.",
+            exampleCode: r`def tri_bissection(flux, invest, lo=-0.99, hi=2.0, tol=1e-7):
+    f_lo = -invest + sum(cf / (1 + lo) ** t for t, cf in enumerate(flux, 1))
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        f_mid = -invest + sum(cf / (1 + mid) ** t for t, cf in enumerate(flux, 1))
+        if abs(f_mid) < tol or (hi - lo) / 2 < tol:
+            return mid
+        if f_lo * f_mid <= 0:
+            hi = mid
+        else:
+            lo, f_lo = mid, f_mid
+    return 0.5 * (lo + hi)`,
+            tags: ["while", "bissection", "dichotomie", "TRI", "YTM"],
+          },
+          {
+            id: "py-v1-m5-drawdown",
+            title: "Tracking séquentiel en O(N) — Pic historique & Max Drawdown",
+            exerciseRef: "M5 Ex. 11 · Ex. 21",
+            syntax: "if v > pic: pic = v ; dd = (v - pic) / pic",
+            formula: r`$$M_t = \max_{0 \le s \le t} V_s \qquad ; \qquad DD_t = \frac{V_t - M_t}{M_t} \le 0$$`,
+            description:
+              "En conservant le sommet courant `pic` et le pire creux `mdd` en mémoire dans une seule passe `for`, on calcule le Max Drawdown en temps $O(N)$ et mémoire $O(1)$.",
+            exampleCode: r`nav = [100, 108, 95, 92, 104, 112]
+pic, mdd = nav[0], 0.0
+for v in nav:
+    if v > pic:
+        pic = v
+    dd = (v - pic) / pic
+    if dd < mdd:
+        mdd = dd
+print(f"Max Drawdown : {mdd:.2%}")`,
+            tags: ["drawdown", "algorithme", "O(N)", "risque", "boucle for"],
+          },
+          {
+            id: "py-v1-m5-nested-matrix",
+            title: "Double boucle imbriquée & produit quadratique w' Sigma w",
+            exerciseRef: "M5 Ex. 16 · Ex. 22",
+            syntax: "for i in range(n): for j in range(n): var += w[i] * cov[i][j] * w[j]",
+            formula: r`$$\sigma_p^2 = \mathbf{w}^\top \Sigma \mathbf{w} = \sum_{i=1}^{n} \sum_{j=1}^{n} w_i \, w_j \, \Sigma_{ij}$$`,
+            description:
+              "Avant de vectoriser sous NumPy, comprendre la double boucle imbriquée (`i` lignes, `j` colonnes) rend explicite la complexité $O(n^2)$ de la variance de portefeuille ou d'une grille d'options 2D `(S, sigma)`.",
+            exampleCode: r`import math
+w = [0.6, 0.4]
+cov = [[0.04, 0.006], [0.006, 0.01]]
+var_p = 0.0
+for i in range(len(w)):
+    for j in range(len(w)):
+        var_p += w[i] * cov[i][j] * w[j]
+vol_p = math.sqrt(var_p)`,
+            tags: ["boucles imbriquées", "matrice", "Markowitz", "covariance", "grille 2D"],
+          },
+        ],
+      },
+      {
+        id: "py-v1-m5-funcs",
+        title: "3. Fonctions def / return, Compréhensions & Projets Finance",
+        subtitle: "Architecture modulaire, programmation défensive et Monte Carlo pur Python",
+        entries: [
+          {
+            id: "py-v1-m5-def-return",
+            title: "Fonctions def, paramètres par défaut & retour multiple (tuple)",
+            exerciseRef: "M5 Ex. 12–13",
+            syntax: "def prix_et_duration(nominal, taux_c, mat, ytm=0.03): return prix, d_mod",
+            formula: r`$$P = \sum_{t=1}^{T} \frac{C}{(1+y)^t} + \frac{N}{(1+y)^T} \qquad ; \qquad D^* = \frac{1}{1+y} \sum_{t=1}^{T} t \cdot \frac{PV(CF_t)}{P}$$`,
+            description:
+              "`def` encapsule une formule métier testable et réutilisable ; privilégiez toujours `return` (renvoyer une valeur ou un tuple `(prix, d_mod)`) plutôt qu'un simple `print()` qui ne peut pas être réutilisé en aval.",
+            exampleCode: r`def obligation(nominal, coupon_rate, T, ytm=0.03):
+    coupon = nominal * coupon_rate
+    flux = [coupon] * (T - 1) + [coupon + nominal]
+    pvs = [cf / (1 + ytm) ** t for t, cf in enumerate(flux, 1)]
+    prix = sum(pvs)
+    mac = sum(t * pv for t, pv in enumerate(pvs, 1)) / prix
+    return prix, mac / (1 + ytm)
+
+p, d_mod = obligation(1000, 0.04, 5, ytm=0.035)`,
+            tags: ["def", "return", "tuple", "unpacking", "duration"],
+          },
+          {
+            id: "py-v1-m5-guardrails",
+            title: "Programmation défensive : garde-fous & retour structuré (dict)",
+            exerciseRef: "M5 Ex. 14",
+            syntax: 'if vol <= 0: raise ValueError("...") | return {"sharpe": ..., "alerte": ...}',
+            formula: r`$$\operatorname{Sharpe} = \frac{R_p - R_f}{\sigma_p}, \quad \sigma_p > 0 \qquad ; \qquad \operatorname{Sortino} = \frac{R_p - R_f}{\sigma_{\text{down}}}$$`,
+            description:
+              "En production quantitative, validez les bornes d'entrée dès les premières lignes de la fonction (`guard clauses`) pour éviter des divisions par zéro ou des résultats silencieux aberrants, puis renvoyez un dictionnaire nommé facile à inspecter.",
+            exampleCode: r`def ratio_sharpe(rendements, rf=0.0):
+    if len(rendements) < 2:
+        raise ValueError("Il faut au moins 2 observations")
+    mu = sum(rendements) / len(rendements)
+    var = sum((r - mu) ** 2 for r in rendements) / (len(rendements) - 1)
+    if var == 0.0:
+        raise ValueError("Volatilite nulle")
+    return {"moyenne": mu, "vol": var ** 0.5, "sharpe": (mu - rf) / (var ** 0.5)}`,
+            tags: ["raise", "ValueError", "guardrails", "dict return", "Sharpe"],
+          },
+          {
+            id: "py-v1-m5-comprehensions",
+            title: "List & Dict Comprehensions (Filtrage & Transformation concise)",
+            exerciseRef: "M5 Ex. 15 · Ex. 19",
+            syntax: "[f(x) for x in seq if cond(x)] | {k: g(v) for k, v in d.items()}",
+            formula: r`$$S_{\text{graves}} = \{ s \in \mathcal{S} \mid C_s > 5000 \}$$`,
+            description:
+              "Les compréhensions remplacent une boucle `for` + `.append()` en une expression lisible pour filtrer des sinistres graves, normaliser des expositions ou réindexer des dictionnaires.",
+            exampleCode: r`sinistres = [800, 6200, 1400, 12500, 4900]
+graves = [c for c in sinistres if c > 5000]
+ratios = {f"S{i}": c / 5000 for i, c in enumerate(graves, 1)}`,
+            tags: ["list comprehension", "dict comprehension", "filtrage", "pythonique"],
+          },
+          {
+            id: "py-v1-m5-mc-alm",
+            title: "Simulation Monte Carlo pure Python & pipeline ALM multi-fonctions",
+            exerciseRef: "M5 Ex. 23–24",
+            syntax: "random.seed(42); Z = random.gauss(0, 1) ; math.exp((r - 0.5*sig**2)*T + sig*sqrt(T)*Z)",
+            formula: r`$$S_T^{(i)} = S_0 \exp\!\left(\left(r - \frac{1}{2}\sigma^2\right)T + \sigma\sqrt{T}\,Z^{(i)}\right), \quad Z^{(i)} \sim \mathcal{N}(0, 1)$$`,
+            description:
+              "En pur Python (`random.gauss` + `math.exp`), une boucle génère $N$ trajectoires indépendantes. L'exercice 23 montre ensuite comment NumPy vectorisé accélère d'un facteur $> 10\\times$ ce même algorithme sur grand portefeuille, et l'exercice 24 assemble plusieurs fonctions `def` en un stress-test ALM complet.",
+            exampleCode: r`import math, random
+random.seed(42)
+S0, K, r, sig, T, N = 100.0, 100.0, 0.03, 0.20, 1.0, 5000
+payoffs = []
+for _ in range(N):
+    z = random.gauss(0.0, 1.0)
+    ST = S0 * math.exp((r - 0.5 * sig**2) * T + sig * math.sqrt(T) * z)
+    payoffs.append(max(ST - K, 0.0))
+call_mc = math.exp(-r * T) * sum(payoffs) / N`,
+            tags: ["Monte Carlo", "random.gauss", "math.exp", "Black-Scholes", "ALM"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
   // V2 — MODULE 1 : SQL AVANCÉ & DATA ENGINEERING FINANCIER
   // =========================================================================
   {
