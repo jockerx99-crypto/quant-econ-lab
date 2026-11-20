@@ -15,6 +15,7 @@ import {
 
 import { COURSE_MODULES as COURSE_MODULES_V1 } from "@/data/courses";
 import { COURSE_MODULES_V2 } from "@/data/courses_v2";
+import { COURSE_MODULES_V3 } from "@/data/courses_v3";
 import { Exercise, CourseModule } from "@/types/course";
 import { usePython } from "@/hooks/usePython";
 import { useSQL } from "@/hooks/useSQL";
@@ -91,30 +92,74 @@ const TAUX_CSV_DATA = `date,taux_1y,taux_2y,taux_5y,taux_10y,taux_20y,taux_30y
 2023-11-30,3.70,3.22,2.82,3.02,3.28,3.30
 2023-12-31,3.45,2.85,2.50,2.55,2.85,2.88`;
 
+const ASSURES_CSV_DATA = `police_id,assure_id,age,sexe,region,type_contrat,bonus_malus,anciennete_permis,type_vehicule,puissance_fiscale,usage,prime_annuelle,date_souscription
+1001,CLI-8021,28,M,IDF,Tous Risques,0.90,6,Citadine,5,Trajet Travail,850.50,2021-03-15
+1002,CLI-4412,45,F,Auvergne-Rhône-Alpes,Tiers Étendu,0.50,23,Berline,7,Privé,620.00,2019-06-10
+1003,CLI-9923,22,M,PACA,Tiers Simple,1.05,3,Citadine,4,Trajet Travail,1150.00,2022-01-20
+1004,CLI-1289,58,M,IDF,Tous Risques,0.50,38,SUV,9,Tous Déplacements,1340.20,2018-11-05
+1005,CLI-7331,34,F,Nouvelle-Aquitaine,Tous Risques,0.72,12,Berline,6,Privé,710.80,2020-08-14
+1006,CLI-5541,67,F,Bretagne,Tiers Étendu,0.50,47,Citadine,4,Privé,490.00,2017-04-22
+1007,CLI-2349,24,M,IDF,Tous Risques,1.15,4,Sportive,11,Trajet Travail,2100.00,2022-05-18
+1008,CLI-6102,41,M,Grand Est,Tous Risques,0.60,19,Monospace,7,Tous Déplacements,890.30,2019-10-30
+1009,CLI-3891,52,F,Occitanie,Tiers Étendu,0.54,30,Berline,6,Privé,645.00,2018-02-12
+1010,CLI-9014,31,M,Hauts-de-France,Tous Risques,0.85,9,Citadine,5,Trajet Travail,780.00,2021-07-01
+1011,CLI-4720,29,F,IDF,Tiers Simple,0.95,7,Citadine,4,Trajet Travail,920.00,2021-12-05
+1012,CLI-8451,63,M,Normandie,Tous Risques,0.50,42,Berline,8,Privé,810.00,2016-09-19`;
+
+const SINISTRES_CSV_DATA = `sinistre_id,police_id,date_survenance,date_declaration,nature_sinistre,cout_dommages_materiels,cout_corporel,cout_total,responsabilite_pct,statut_dossier
+501,1001,2021-08-14,2021-08-16,Collision,1450.00,,1450.00,100.0,Clos
+502,1003,2022-04-02,2022-04-03,Bris de Glace,420.00,,420.00,0.0,Clos
+503,1003,2022-11-19,2022-11-20,Collision,3800.00,1200.00,5000.00,100.0,Clos
+504,1004,2020-01-15,2020-01-16,Vol,18500.00,,18500.00,0.0,Clos
+505,1007,2022-09-08,2022-09-09,Collision,7200.00,4500.00,11700.00,80.0,En cours
+506,1008,2021-03-22,2021-03-25,Incendie,9400.00,,9400.00,0.0,Clos
+507,1010,2022-02-11,2022-02-12,Bris de Glace,380.00,,380.00,0.0,Clos
+508,1011,2022-06-30,2022-07-02,Collision,2100.00,,2100.00,50.0,Clos`;
+
 export function Workspace() {
   // Hydration guard so SSR and initial client render match 100% (avoids React #418/#423 on ?ex= or localStorage)
   const [hasMounted, setHasMounted] = useState<boolean>(false);
 
-  // Curriculum Version (V1 = Fondations Actuariat, V2 = Quantitative Finance & Monte Carlo)
-  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2">("v1");
+  // Curriculum Version (V1 = Fondations Actuariat, V2 = Quant & Monte Carlo, V3 = Cas Réels)
+  const [curriculumVersion, setCurriculumVersion] = useState<"v1" | "v2" | "v3">("v1");
 
-  // Track state independently for V1 and V2
+  // Track state independently for V1, V2 and V3
   const [moduleIndexV1, setModuleIndexV1] = useState<number>(0);
   const [exerciseIndexV1, setExerciseIndexV1] = useState<number>(13); // Retain Exercise 14 (GROUP BY region)
   const [moduleIndexV2, setModuleIndexV2] = useState<number>(0);
   const [exerciseIndexV2, setExerciseIndexV2] = useState<number>(0);
+  const [moduleIndexV3, setModuleIndexV3] = useState<number>(0);
+  const [exerciseIndexV3, setExerciseIndexV3] = useState<number>(0);
 
-  const modules: CourseModule[] = curriculumVersion === "v1" ? COURSE_MODULES_V1 : COURSE_MODULES_V2;
-  const currentModuleIndex = curriculumVersion === "v1" ? moduleIndexV1 : moduleIndexV2;
-  const currentExerciseIndex = curriculumVersion === "v1" ? exerciseIndexV1 : exerciseIndexV2;
+  const modules: CourseModule[] =
+    curriculumVersion === "v1"
+      ? COURSE_MODULES_V1
+      : curriculumVersion === "v2"
+      ? COURSE_MODULES_V2
+      : COURSE_MODULES_V3;
+  const currentModuleIndex =
+    curriculumVersion === "v1"
+      ? moduleIndexV1
+      : curriculumVersion === "v2"
+      ? moduleIndexV2
+      : moduleIndexV3;
+  const currentExerciseIndex =
+    curriculumVersion === "v1"
+      ? exerciseIndexV1
+      : curriculumVersion === "v2"
+      ? exerciseIndexV2
+      : exerciseIndexV3;
 
   const setCurrentModuleIndex = (idx: number) => {
     if (curriculumVersion === "v1") {
       setModuleIndexV1(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v1_module_idx", String(idx));
-    } else {
+    } else if (curriculumVersion === "v2") {
       setModuleIndexV2(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v2_module_idx", String(idx));
+    } else {
+      setModuleIndexV3(idx);
+      if (typeof window !== "undefined") localStorage.setItem("quantecon_v3_module_idx", String(idx));
     }
   };
 
@@ -122,13 +167,16 @@ export function Workspace() {
     if (curriculumVersion === "v1") {
       setExerciseIndexV1(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v1_exercise_idx", String(idx));
-    } else {
+    } else if (curriculumVersion === "v2") {
       setExerciseIndexV2(idx);
       if (typeof window !== "undefined") localStorage.setItem("quantecon_v2_exercise_idx", String(idx));
+    } else {
+      setExerciseIndexV3(idx);
+      if (typeof window !== "undefined") localStorage.setItem("quantecon_v3_exercise_idx", String(idx));
     }
   };
 
-  const handleSwitchVersion = (v: "v1" | "v2") => {
+  const handleSwitchVersion = (v: "v1" | "v2" | "v3") => {
     setCurriculumVersion(v);
     if (typeof window !== "undefined") {
       localStorage.setItem("quantecon_version", v);
@@ -200,9 +248,12 @@ export function Workspace() {
       localStorage.setItem("quantecon_v1_module_idx", String(currentModuleIndex));
       localStorage.setItem("quantecon_exercise_idx", String(currentExerciseIndex));
       localStorage.setItem("quantecon_module_idx", String(currentModuleIndex));
-    } else {
+    } else if (curriculumVersion === "v2") {
       localStorage.setItem("quantecon_v2_exercise_idx", String(currentExerciseIndex));
       localStorage.setItem("quantecon_v2_module_idx", String(currentModuleIndex));
+    } else {
+      localStorage.setItem("quantecon_v3_exercise_idx", String(currentExerciseIndex));
+      localStorage.setItem("quantecon_v3_module_idx", String(currentModuleIndex));
     }
   }, [hasMounted, currentExerciseIndex, currentModuleIndex, curriculumVersion]);
 
@@ -218,7 +269,7 @@ export function Workspace() {
     }
 
     const savedVer = localStorage.getItem("quantecon_version");
-    if (savedVer === "v1" || savedVer === "v2") setCurriculumVersion(savedVer);
+    if (savedVer === "v1" || savedVer === "v2" || savedVer === "v3") setCurriculumVersion(savedVer);
 
     const savedV1Mod = localStorage.getItem("quantecon_v1_module_idx") || localStorage.getItem("quantecon_module_idx");
     if (savedV1Mod !== null) {
@@ -239,6 +290,16 @@ export function Workspace() {
     if (savedV2Ex !== null) {
       const p = Number(savedV2Ex);
       if (!isNaN(p) && p >= 0) setExerciseIndexV2(p);
+    }
+    const savedV3Mod = localStorage.getItem("quantecon_v3_module_idx");
+    if (savedV3Mod !== null) {
+      const p = Number(savedV3Mod);
+      if (!isNaN(p) && p >= 0 && p < COURSE_MODULES_V3.length) setModuleIndexV3(p);
+    }
+    const savedV3Ex = localStorage.getItem("quantecon_v3_exercise_idx");
+    if (savedV3Ex !== null) {
+      const p = Number(savedV3Ex);
+      if (!isNaN(p) && p >= 0) setExerciseIndexV3(p);
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -264,6 +325,16 @@ export function Workspace() {
           return;
         }
       }
+      for (let mIdx = 0; mIdx < COURSE_MODULES_V3.length; mIdx++) {
+        const eIdx = COURSE_MODULES_V3[mIdx].exercises.findIndex((e) => e.id === exId);
+        if (eIdx !== -1) {
+          setCurriculumVersion("v3");
+          setModuleIndexV3(mIdx);
+          setExerciseIndexV3(eIdx);
+          setHasMounted(true);
+          return;
+        }
+      }
     }
     setHasMounted(true);
   }, []);
@@ -284,13 +355,15 @@ export function Workspace() {
     localStorage.setItem("quantecon_completed_ids", JSON.stringify(completedExerciseIds));
   }, [hasMounted, completedExerciseIds]);
 
-  // Pre-seed Python DataFrames ('df', 'df_marche', 'df_actifs', 'df_taux') whenever Pyodide is ready
+  // Pre-seed Python DataFrames ('df', 'df_marche', 'df_actifs', 'df_taux', 'df_assures', 'df_sinistres') whenever Pyodide is ready
   useEffect(() => {
     if (pythonEngine.isReady && currentExercise.language === "python") {
       pythonEngine.seedDataset("df", MACRO_CSV_DATA);
       pythonEngine.seedDataset("df_marche", MARCHE_CSV_DATA);
       pythonEngine.seedDataset("df_actifs", ACTIFS_CSV_DATA);
       pythonEngine.seedDataset("df_taux", TAUX_CSV_DATA);
+      pythonEngine.seedDataset("df_assures", ASSURES_CSV_DATA);
+      pythonEngine.seedDataset("df_sinistres", SINISTRES_CSV_DATA);
     }
   }, [pythonEngine.isReady, currentExercise.id, currentExercise.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -418,32 +491,32 @@ export function Workspace() {
 
           <div className="h-4 w-px bg-stone-200 hidden lg:block flex-shrink-0" />
 
-          {/* Curriculum Version Switcher (V1 vs V2) */}
+          {/* Curriculum Version Switcher (V1 vs V2 vs V3) */}
           <div className="flex items-center rounded-xl bg-stone-100 p-0.5 sm:p-1 border border-stone-200 shadow-2xs flex-shrink-0">
             <button
               onClick={() => handleSwitchVersion("v1")}
-              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                 curriculumVersion === "v1"
                   ? "bg-white text-stone-900 shadow-xs border border-stone-200/60"
                   : "text-stone-500 hover:text-stone-800"
               }`}
-              title={`Version 1 : Fondations Actuariat, Data Prep & Suites (${totalV1Exercises} exercices)`}
+              title={`Version 1 : Micro-Apprentissage & Répétition (${totalV1Exercises} exercices)`}
             >
-              <span className="hidden md:inline">V1 : Actuariat</span>
-              <span className="md:hidden">V1</span>
+              <span className="hidden 2xl:inline">V1 : Actuariat</span>
+              <span className="hidden xl:inline 2xl:hidden">V1 : Bases</span>
+              <span className="xl:hidden">V1</span>
             </button>
             <button
               onClick={() => handleSwitchVersion("v2")}
-              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
+              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
                 curriculumVersion === "v2"
                   ? "bg-sky-600 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-800"
               }`}
               title="Version 2 : Quantitative Finance, Économétrie & Monte Carlo (45 exercices)"
             >
-              <span className="hidden xl:inline">⚡ V2 : Quant & Monte Carlo</span>
-              <span className="hidden md:inline xl:hidden">⚡ V2 : Quant</span>
-              <span className="md:hidden">⚡ V2</span>
+              <span className="hidden xl:inline">⚡ V2 : Quant</span>
+              <span className="xl:hidden">⚡ V2</span>
               <span
                 className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
                   curriculumVersion === "v2"
@@ -451,7 +524,28 @@ export function Workspace() {
                     : "bg-sky-100 text-sky-800"
                 }`}
               >
-                45 ex
+                45
+              </span>
+            </button>
+            <button
+              onClick={() => handleSwitchVersion("v3")}
+              className={`px-2 sm:px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+                curriculumVersion === "v3"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-stone-500 hover:text-stone-800"
+              }`}
+              title="Version 3 : Cas Réels SQL & Python en conditions réelles (20 projets complets)"
+            >
+              <span className="hidden xl:inline">🚀 V3 : Cas Réels</span>
+              <span className="xl:hidden">🚀 V3</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                  curriculumVersion === "v3"
+                    ? "bg-white text-emerald-700"
+                    : "bg-emerald-100 text-emerald-800"
+                }`}
+              >
+                20
               </span>
             </button>
           </div>
@@ -466,7 +560,7 @@ export function Workspace() {
                 setCurrentModuleIndex(Number(e.target.value));
                 setCurrentExerciseIndex(0);
               }}
-              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[115px] 2xl:max-w-[200px] truncate cursor-pointer"
+              className="bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors max-w-[115px] 2xl:max-w-[145px] truncate cursor-pointer"
             >
               {modules.map((mod, idx) => (
                 <option key={mod.id} value={idx}>

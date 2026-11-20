@@ -240,7 +240,9 @@ export function CheatSheetModal({
                     className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                       mod.version === "V1"
                         ? "bg-stone-200/80 text-stone-700"
-                        : "bg-indigo-100 text-indigo-700"
+                        : mod.version === "V2"
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-emerald-100 text-emerald-800"
                     }`}
                   >
                     {mod.version} M{mod.moduleNumber}

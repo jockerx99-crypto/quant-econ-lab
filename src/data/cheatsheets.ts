@@ -18,7 +18,7 @@ export interface CheatSheetSection {
 
 export interface ModuleCheatSheet {
   moduleId: string;
-  version: "V1" | "V2";
+  version: "V1" | "V2" | "V3";
   moduleNumber: number;
   title: string;
   language: "sql" | "python";
@@ -1131,6 +1131,197 @@ charges = np.array([np.sum(np.random.exponential(cout_moyen, k)) if k > 0 else 0
 proba_ruine = float(np.mean((u + c - charges) < 0))
 print(f"Proba ruine : {proba_ruine:.4%} | Solvabilité II OK : {proba_ruine < 0.005}")`,
             tags: ["Vasicek", "Euler", "Cramér-Lundberg", "ruine", "Solvabilité II", "Poisson"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V3 — MODULE 1 : CAS RÉELS SQL (PRODUCTION ACTUARIELLE & QUANT)
+  // =========================================================================
+  {
+    moduleId: "v3-sql-cases",
+    version: "V3",
+    moduleNumber: 1,
+    title: "Cas Réels SQL : Production Actuarielle & Quant",
+    language: "sql",
+    overview:
+      "Architectures SQL multi-CTEs (`WITH`), prévention du fan-out 1-N, délais calendaires `JULIANDAY`, concentration Pareto 80/20, jointures ASOF multi-tables, backtests causaux et récursion financière.",
+    datasetsSummary: [
+      "Toutes les 7 tables SQLite sont disponibles : assures, sinistres, macro_taux, marche_actions, portefeuilles_actifs, matrice_correlations, courbe_taux_oat",
+      "Règle d'or en production : pré-agréger la table enfant (sinistres) dans une CTE avant tout LEFT JOIN sur les primes (assures)",
+    ],
+    sections: [
+      {
+        id: "v3-sql-prod",
+        title: "1. Pipelines Actuariels Anti-Fan-Out, Délais & Pareto",
+        subtitle: "CTEs chaînées, dates SQLite et cumul glissant de réassurance",
+        entries: [
+          {
+            id: "v3-sql-cte-sp",
+            title: "CTE Anti-Fan-Out 1-N pour Ratio S/P Exact",
+            exerciseRef: "V3 Cas 1, 3",
+            syntax: "WITH sin_pol AS (SELECT police_id, SUM(cout_total) AS charge FROM sinistres GROUP BY police_id)",
+            formula: r`$$S/P_{\text{exact}} = \frac{\sum_i \text{charge}_i}{\sum_i \text{prime}_i} \times 100 \quad (\text{sans duplication de prime})$$`,
+            description:
+              "Pré-agréger les sinistres au grain `police_id` garantit une relation `1:1` lors du `LEFT JOIN` avec `assures` : chaque prime n'est comptée qu'une seule fois.",
+            exampleCode: r`WITH sinistres_par_police AS (
+  SELECT police_id, COUNT(*) AS nb_sinistres, SUM(cout_total) AS charge_police
+  FROM sinistres
+  GROUP BY police_id
+)
+SELECT a.region,
+       ROUND(SUM(COALESCE(sp.charge_police, 0.0)) / SUM(a.prime_annuelle) * 100, 2) AS ratio_sp_exact
+FROM assures a
+LEFT JOIN sinistres_par_police sp ON a.police_id = sp.police_id
+GROUP BY a.region
+ORDER BY ratio_sp_exact DESC;`,
+            tags: ["CTE", "WITH", "fan-out", "S/P", "LEFT JOIN", "COALESCE"],
+          },
+          {
+            id: "v3-sql-julianday-pareto",
+            title: "Délais Calendaires (JULIANDAY) & Cumul Pareto (UNBOUNDED PRECEDING)",
+            exerciseRef: "V3 Cas 2, 4",
+            syntax: "CAST(JULIANDAY(d2) - JULIANDAY(d1) AS INTEGER) | SUM(x) OVER (ORDER BY x DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
+            description:
+              "`JULIANDAY(date)` convertit une date `YYYY-MM-DD` en jours juliens pour mesurer les délais de déclaration. Une fenêtre cumulative décroissante identifie les dossiers concentrant 80 % de la charge.",
+            exampleCode: r`SELECT sinistre_id,
+       cout_total,
+       ROUND(SUM(cout_total) OVER (ORDER BY cout_total DESC, sinistre_id ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+             / SUM(cout_total) OVER () * 100, 2) AS pct_cumule
+FROM sinistres
+ORDER BY cout_total DESC, sinistre_id ASC;`,
+            tags: ["JULIANDAY", "Pareto", "UNBOUNDED PRECEDING", "SUM OVER"],
+          },
+        ],
+      },
+      {
+        id: "v3-sql-quant",
+        title: "2. Screener Quantitatif, ASOF Multi-Tables, Backtest & Récursion",
+        subtitle: "Pipelines de desk financier sans biais du futur",
+        entries: [
+          {
+            id: "v3-sql-triangle-cov",
+            title: "Triangle Inférieur/Supérieur (actif_a < actif_b) & Covariance",
+            exerciseRef: "V3 Cas 7, 8",
+            syntax: "FROM matrice_correlations mc JOIN portefeuilles_actifs pa ON mc.actif_a = pa.ticker ... WHERE mc.actif_a < mc.actif_b",
+            formula: r`$$\operatorname{Cov}(A, B) = \rho_{A,B}\,\sigma_A\,\sigma_B$$`,
+            description:
+              "Filtrer `actif_a < actif_b` élimine automatiquement la diagonale (`1.00`) et les doublons symétriques `(TTE, BNP)` / `(BNP, TTE)` avant de joindre les volatilités des deux actifs.",
+            exampleCode: r`SELECT mc.actif_a, mc.actif_b, mc.correlation,
+       ROUND(mc.correlation * pa.volatilite * pb.volatilite, 6) AS cov_theorique
+FROM matrice_correlations mc
+JOIN portefeuilles_actifs pa ON mc.actif_a = pa.ticker
+JOIN portefeuilles_actifs pb ON mc.actif_b = pb.ticker
+WHERE mc.actif_a < mc.actif_b
+ORDER BY mc.correlation ASC;`,
+            tags: ["matrice_correlations", "covariance", "jointure multiple", "diversification"],
+          },
+          {
+            id: "v3-sql-backtest-rec",
+            title: "Backtest Causal Partitionné & Récursion Financière (WITH RECURSIVE)",
+            exerciseRef: "V3 Cas 5, 6, 9, 10",
+            syntax: "LAG(r, 1) OVER (PARTITION BY ticker ORDER BY date) | WITH RECURSIVE tab(n, k) AS (...)",
+            description:
+              "En multi-actifs, `PARTITION BY ticker` isole les séries de chaque titre lors du `LAG` ou du pic cumulé. `WITH RECURSIVE` permet de construire un échéancier d'emprunt amortissable ou d'actualisation sur $T$ périodes.",
+            exampleCode: r`WITH RECURSIVE echeancier(annee, cap_debut, interet, amort, cap_fin) AS (
+  SELECT 1, 120000.0, ROUND(120000.0 * 0.04, 2), 20000.0, 100000.0
+  UNION ALL
+  SELECT annee + 1, cap_fin, ROUND(cap_fin * 0.04, 2), 20000.0, cap_fin - 20000.0
+  FROM echeancier WHERE annee < 6
+)
+SELECT * FROM echeancier;`,
+            tags: ["PARTITION BY", "LAG", "backtest", "WITH RECURSIVE", "amortissement"],
+          },
+        ],
+      },
+    ],
+  },
+
+  // =========================================================================
+  // V3 — MODULE 2 : CAS RÉELS PYTHON (ACTUARIAT, ALM, QUANT & RISQUES)
+  // =========================================================================
+  {
+    moduleId: "v3-py-cases",
+    version: "V3",
+    moduleNumber: 2,
+    title: "Cas Réels Python : Actuariat, ALM, Quant & Risques",
+    language: "python",
+    overview:
+      "Pipelines complets multi-étapes (25–55 lignes) : fusion IARD `pd.merge`, tarification OLS, Duration/Convexité exacte, audit ALM, PCA sur `df_taux`, Markowitz sur `df_actifs`, contribution au risque d'Euler, VaR Cornish-Fisher, Grecs BSM + Newton-Raphson et SCR Solvabilité II Stop-Loss.",
+    datasetsSummary: [
+      "DataFrames préchargés : df (macro_taux), df_assures (12 polices), df_sinistres (8 sinistres), df_marche (25 cotations), df_actifs (5 actifs), df_taux (12 courbes OAT 1Y–30Y)",
+      "Librairies : numpy (np), pandas (pd), statsmodels.api (sm), scipy.stats (norm, skew, kurtosis), matplotlib.pyplot (plt)",
+    ],
+    sections: [
+      {
+        id: "v3-py-actuariat-alm",
+        title: "1. Actuariat IARD, Immunisation Obligataire & Audit Économétrique",
+        subtitle: "Pipelines DataFrames propres, fonctions def réutilisables et tests ALM",
+        entries: [
+          {
+            id: "v3-py-merge-iard",
+            title: "Fusion Anti-Fan-Out (groupby + pd.merge left) & Imputation",
+            exerciseRef: "V3 Cas 1–2",
+            syntax: "df_merged = df_assures.merge(sin_agg, on='police_id', how='left').fillna(0.0)",
+            description:
+              "Pré-agrégez d'abord `df_sinistres.groupby('police_id', as_index=False).agg(...)` avant le `.merge(..., how='left')` avec `df_assures`, puis remplacez les `NaN` des contrats sans sinistre par `0.0`.",
+            exampleCode: r`sin_pol = df_sinistres.groupby('police_id', as_index=False).agg(
+    nb_sinistres=('sinistre_id', 'count'),
+    charge_totale=('cout_total', 'sum')
+)
+df_port = df_assures.merge(sin_pol, on='police_id', how='left')
+df_port[['nb_sinistres', 'charge_totale']] = df_port[['nb_sinistres', 'charge_totale']].fillna(0.0)`,
+            tags: ["pd.merge", "groupby", "fillna", "df_assures", "df_sinistres", "S/P"],
+          },
+          {
+            id: "v3-py-bond-conv",
+            title: "Duration Modifiée, Convexité & Taylor Ordre 2",
+            exerciseRef: "V3 Cas 3–4",
+            syntax: "C = sum(t * (t + 1) * CF_t / (1 + y)**(t + 2)) / P",
+            formula: r`$$\frac{\Delta P}{P} \approx -D^* \Delta y + \frac{1}{2}\,C\,(\Delta y)^2$$`,
+            description:
+              "Sous un grand choc de taux ($\\Delta y = +300\\text{ bps}$), la Duration seule surestime la perte d'une obligation non-remboursable : le terme positif de convexité $\\frac{1}{2}C(\\Delta y)^2$ amortit la baisse de prix.",
+            exampleCode: r`flux = [4.0, 4.0, 4.0, 4.0, 104.0]
+t = np.arange(1, len(flux) + 1)
+P = float(np.sum(np.array(flux) / (1.03 ** t)))
+D_mod = float(np.sum(t * np.array(flux) / (1.03 ** (t + 1))) / P)
+C = float(np.sum(t * (t + 1) * np.array(flux) / (1.03 ** (t + 2))) / P)`,
+            tags: ["duration", "convexité", "Taylor", "obligation", "ALM"],
+          },
+        ],
+      },
+      {
+        id: "v3-py-quant-mc",
+        title: "2. PCA, Markowitz, Risque d'Euler, Black-Scholes & Solvabilité II",
+        subtitle: "Algèbre linéaire sur vraies données, solveurs numériques et réassurance",
+        entries: [
+          {
+            id: "v3-py-euler-cf",
+            title: "Contribution Marginale d'Euler & VaR Cornish-Fisher",
+            exerciseRef: "V3 Cas 5–8",
+            syntax: "pct_contrib = (w * (Sigma @ w)) / (w @ Sigma @ w) * 100",
+            formula: r`$$z_{\text{CF}}(\alpha) = z + \frac{z^2 - 1}{6}S + \frac{z^3 - 3z}{24}(K - 3) - \frac{2z^3 - 5z}{36}S^2$$`,
+            description:
+              "La décomposition d'Euler attribue exactement $100\\%$ de la volatilité totale aux poids $w_i$. L'approximation de Cornish-Fisher corrige le quantile gaussien $z$ par l'asymétrie $S$ et l'excès de kurtosis $(K-3)$.",
+            exampleCode: r`mcr = (Sigma @ w) / np.sqrt(w @ Sigma @ w)
+tcr = w * mcr
+pct_contrib = tcr / np.sqrt(w @ Sigma @ w) * 100.0`,
+            tags: ["Euler", "MRC", "Cornish-Fisher", "VaR", "PCA", "Markowitz"],
+          },
+          {
+            id: "v3-py-bsm-newton-scr",
+            title: "Newton-Raphson (Volatilité Implicite) & Stop-Loss Solvabilité II",
+            exerciseRef: "V3 Cas 9–10",
+            syntax: "sigma -= (prix_bs - prix_cote) / vega | net = np.minimum(brut, retention)",
+            formula: r`$$\sigma_{n+1} = \sigma_n - \frac{C_{\text{BSM}}(\sigma_n) - C_{\text{marché}}}{\mathcal{V}(\sigma_n)} \qquad ; \qquad S_{\text{net}} = \min(S_{\text{brut}}, R)$$`,
+            description:
+              "Le Véga analytique étant strictement positif et lisse, Newton-Raphson converge en 4–6 itérations vers $\\sigma_{\\text{imp}}$. En réassurance Stop-Loss, caper la charge agrégée à la rétention $R$ coupe la queue droite et réduit fortement le SCR $99.5\\%$.",
+            exampleCode: r`# Stop-Loss sur charges simulées (Poisson x Lognormale)
+charges_nettes = np.minimum(charges_brutes, retention)
+scr_net = float(np.percentile(charges_nettes, 99.5) - np.mean(charges_nettes))`,
+            tags: ["Newton-Raphson", "volatilité implicite", "Grecs", "Stop-Loss", "SCR", "Solvabilité II"],
           },
         ],
       },
